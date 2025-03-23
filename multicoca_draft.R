@@ -1,4 +1,7 @@
 ## MultiCOCA
+# Load packages 
+library(mclust)
+
 # Initialize a list for GMM results
 mclust1 <- vector("list", ncol(sim_data))
 
@@ -11,3 +14,4 @@ for (i in 1:ncol(sim_data)) {
   mclust1[[i]] <- Mclust(sim_data[, i])
   sim_data2[, i] <- mclust1[[i]]$data  # Store clustered data column-wise
 }
+
