@@ -3,6 +3,8 @@ library(tidyverse)
 library(GGally)
 library(mclust)
 
+# Write function to simulate data!
+
 # Set parameters
 set.seed(4881)
 n <- 419
@@ -11,9 +13,6 @@ p <- 10
 # Simulate participant cluster membership 
 indiv_clust <- sample(c(1, 2, 3), size = n, replace = TRUE)
 table(indiv_clust)
-
-# Simulate participant visit times 
-
 
 # Create matrix to store data
 sim_data <- matrix(NA, ncol = p, nrow = n)
@@ -59,6 +58,12 @@ sim_data_plot <- sim_data %>%
 
 ggpairs(sim_data_plot, aes(color = cluster))
 
-
+# Produce heatmap 
+simdata <- as.matrix(sim_data)
+annotationRow <- as.data.frame(cluster)
+names(annotationRow) <- "Clusters"
+rownames(simdata) <- rownames(annotationRow)
+annotationRow$Clusters <- as.factor(annotationRow$Clusters)
+pheatmap::pheatmap(simdata, annotation_row = annotationRow)
 
 
