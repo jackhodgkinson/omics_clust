@@ -3,8 +3,8 @@
 library(mclust)
 library(coca)
 
-# MultiCOCA function 
-multicoca <- function(data, clusters) {
+# COCA function 
+coca <- function(data, clusters) {
 
 # Initialize a list for GMM results
 mclust1 <- vector("list", ncol(data))
