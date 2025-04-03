@@ -30,7 +30,7 @@ clusterofclusters <- function(data,              # Input as data frame
   moc <- as.matrix(moc)
   
   # Fit Cluster of Cluster Analysis
-  outputCOCA <- coca(moc, B = MN, maxIterKM = max.iter)
+  outputCOCA <- coca(moc, B = N, maxIterKM = max.iter)
   
   return(outputCOCA)
 }
