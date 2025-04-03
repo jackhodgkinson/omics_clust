@@ -12,7 +12,7 @@ params1 <- list(
   cluster1 = list(mean = runif(N_col, -20, -10), sd = runif(N_col, 0.5, 1)),  
   cluster2 = list(mean = runif(N_col, 10, 20), sd = runif(N_col, 1, 5)), 
   cluster3 = list(mean = runif(N_col, 0, 0.5), sd = runif(N_col, 1, 10)))  
-sim_data <- simulateGMM(3, 2, params1, n_indiv = 419, n_col = N_col, random_seed = 4881, grouping = "hclust")
+sim_data <- simulateGMM(3, 1, params1, n_indiv = 419, n_col = N_col, random_seed = 4881, grouping = "random")
 clusters <- sim_data$cluster
 sim_data <- sim_data[, 1:N_col]
 

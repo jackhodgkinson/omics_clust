@@ -1,7 +1,7 @@
 ## clusterofclusters.R
 clusterofclusters <- function(data,              # Input as data frame
                               N = 2000,          # Number of iterations of Consensus Clustering step
-                              max.iter = 2000,   # Maximum number of iterations for k-means clustering
+                              max.iter = 2000    # Maximum number of iterations for k-means clustering
                               ) 
   {
   
