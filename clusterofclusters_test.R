@@ -3,6 +3,9 @@
 source("simulateGMM.R")
 source("clusterofclusters.R")
 
+# Load packages 
+library(mclust)
+
 # Create data
 N_col <- 10
 params1 <- list(
