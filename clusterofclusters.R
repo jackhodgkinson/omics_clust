@@ -1,7 +1,7 @@
 ## clusterofclusters.R
 clusterofclusters <- function(data,              # Input as data frame
-                              N = 20,            # Number of iterations of Consensus Clustering step
-                              max.iter = 20000   # Maximum number of iterations for k-means clustering
+                              N = 2000,          # Number of iterations of Consensus Clustering step
+                              max.iter = 2000,   # Maximum number of iterations for k-means clustering
                               ) 
   {
   
@@ -28,9 +28,10 @@ clusterofclusters <- function(data,              # Input as data frame
   # Create the MOC
   moc <- do.call(cbind, lapply(classification, function(x) model.matrix(~ x - 1)))
   moc <- as.matrix(moc)
+  colnames(moc) <- NULL
   
   # Fit Cluster of Cluster Analysis
-  outputCOCA <- coca(moc, B = N, maxIterKM = max.iter)
-  
+  outputCOCA <- coca::coca(moc, B = N, maxIterKM = max.iter)
+
   return(outputCOCA)
 }
