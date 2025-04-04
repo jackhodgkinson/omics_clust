@@ -17,7 +17,7 @@ clusters1 <- sim_data$cluster
 sim_data <- sim_data[, 1:N_col]
 
 # Test on data1
-outputCOCA <- clusterofclusters(sim_data)
+outputCOCA <- clusterofclusters(sim_data, k = 3, max.iter = 10000)
 clusters2 <- outputCOCA$clusterLabels
 adjustedRandIndex(clusters1, clusters2)
 

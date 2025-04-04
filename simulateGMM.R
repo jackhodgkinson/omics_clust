@@ -7,7 +7,7 @@ simulateGMM <- function(n_clust,                                                
                         n_col,                                                   # Number of columns in simulated data
                         random_seed,                                             # Input random seed for reproducibility
                         cluster_labels = NA,                                     # Input cluster labels, NA by default.
-                        grouping = "random"                                     # How proteins are grouped, default random, also accepts "hclust"
+                        grouping = "random"                                      # How proteins are grouped, default random, also accepts "hclust"
                         ){
   
   # Ensure numeric inputs
