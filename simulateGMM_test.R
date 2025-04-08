@@ -297,3 +297,44 @@ pheatmap::pheatmap(example3.1_new[order(clusters[["group3_clusterid"]]),
                    annotation_col = annotationCol[order(annotationCol$ProteinClusters), , drop = FALSE], 
                    cluster_rows = F,
                    cluster_cols = F)
+
+## Parameters - extreme examples
+N_col2 <- 100
+params2 <- list(
+  cluster1 = list(mean = runif(N_col2, -10, -5), sd = runif(N_col2, 0.5, 1)),  
+  cluster2 = list(mean = runif(N_col2, 10, 15), sd = runif(N_col2, 0.75, 3)), 
+  cluster3 = list(mean = runif(N_col2, -1, 1), sd = runif(N_col2, 0.75, 3)),
+  cluster4 = list(mean = runif(N_col2, 0, 1), sd = runif(N_col2, 0, 0.5))) 
+
+## Test: extreme example - five clustering structures with differet sized clusters and groups 
+example4 <- simulateGMM(4, 5, params2, n_indiv = 4881, n_col = N_col2, 
+                          random_seed = 4881, equal_clust = FALSE, equal_groups = FALSE)
+
+# Seperate data into data and clusters
+example4_data <- example4[[1]]
+clusters <- example4[[2]]
+
+# Assign column names
+colnames(example4_data) <- paste0("Protein", 1:N_col2)
+
+# Assign labels to the clusters
+clusters[] <- lapply(clusters, function(x) factor(x, labels = c("1","2","3","4")))
+
+# Produce heatmap - focused on group 1
+example4_new <- as.matrix(example4_data)
+annotationRow <- as.data.frame(clusters[1])
+names(annotationRow) <- "Clusters"
+
+annotationCol <- as.data.frame(as.factor(example4[[3]]))
+names(annotationCol) <- "ProteinClusters"
+rownames(annotationCol) <- colnames(example4_new)
+
+rownames(example4_new) <- rownames(annotationRow)
+annotationRow$Clusters <- as.factor(annotationRow$Clusters)
+annotationCol$ProteinClusters <- as.factor(annotationCol$ProteinClusters)
+pheatmap::pheatmap(example4_new[order(clusters[["group1_clusterid"]]),
+                                  order(annotationCol$ProteinClusters)], 
+                   annotation_row = annotationRow,
+                   annotation_col = annotationCol[order(annotationCol$ProteinClusters), , drop = FALSE], 
+                   cluster_rows = F,
+                   cluster_cols = F)
