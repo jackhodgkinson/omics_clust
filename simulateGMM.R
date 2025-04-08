@@ -7,7 +7,8 @@ simulateGMM <- function(n_clust,                                                
                         n_col,                                                   # Number of columns in simulated data
                         random_seed,                                             # Input random seed for reproducibility
                         cluster_labels = NA,                                     # Input cluster labels, NA by default.
-                        grouping = "random"                                      # How proteins are grouped, default random, also accepts "hclust"
+                        equal_clust = TRUE,                                      # If generating cluster labels, ensure each cluster has approx equal individuals
+                        equal_groups = TRUE                                      # If n_groups > 1, ensure each group contains approx equal number of cols
                         ){
   
   # Ensure numeric inputs
@@ -25,7 +26,13 @@ simulateGMM <- function(n_clust,                                                
     cluster_labs <- seq(1, n_clust)
     
     # Generate random clusters for each n_indiv
-    indiv_clust <- sample(cluster_labs, size = n_indiv, replace = TRUE)
+    if (equal_clust == FALSE){
+    indiv_clust <- sample(cluster_labs, size = n_indiv, replace = TRUE, 
+                          prob = {p <- runif(length(cluster_labs)); p / sum(p)})
+    }
+    else {
+      indiv_clust <- sample(cluster_labs, size = n_indiv, replace = TRUE)  
+    }
   }
   else {
     indiv_clust <- cluster_labels
@@ -57,42 +64,55 @@ simulateGMM <- function(n_clust,                                                
     sim_data[, i] <- col_data
   }
   
+  group <- NULL
+  
   # Permute data if different clustering structures required
   if (n_groups > 1) {
     
     # Randomly group 
-    if(grouping == "random") {
+    if (equal_groups == FALSE){
+      repeat {
+        p <- runif(n_groups)
+        p <- p / sum(p)  # normalize to sum to 1
+        group <- sample(1:n_groups, n_col, replace = TRUE, prob = p)
+        if (length(unique(group)) == n_groups) break
+      }
+    }
+    
+    else {
       group <- sample(1:n_groups, n_col, replace = TRUE)
     }
     
-    # Group based on hierarchical clustering 
-    else if (grouping == "hclust") {
-      dist_mat <- dist(t(sim_data))
-      hclust <- hclust(dist_mat)
-      group <- cutree(hclust, k = n_groups)
-      
-    }
-    
+    # Create empty data frame for the clusters for each group 
+    group_clusterID <- list()
+
     # Permute values and clusters within groups 
     for (g in 1:(n_groups - 1)) { 
       permute_cols <- which(group == g)
       order <- sample(n_indiv)
       sim_data[, permute_cols] <- sim_data[order, permute_cols]
-      indiv_clust <- indiv_clust[order]
+      col_name <- paste0("group", g, "_clusterid")
+      group_clusterID[[col_name]] <- indiv_clust[order]
     }
   
-  }
-  
-  # Add cluster labels to data if not provided 
-  if (is.na(cluster_labels)){
-    sim_data <- as.data.frame(sim_data)
-    sim_data$cluster <- indiv_clust
+  # Name the grouping for the final group 
+    col_name <- paste0("group", n_groups, "_clusterid")
+    group_clusterID[[col_name]] <- indiv_clust
+    group_clusterID <- as.data.frame(group_clusterID)
   }
 
   # Convert to data frame 
   sim_data <- as.data.frame(sim_data)
   
   # Return new dataset 
-  return(sim_data)
+  if (!is.null(group)){
+    return(list("Simulated Data" = sim_data, 
+                "Cluster ID per individual per group" = group_clusterID, 
+                "Data Group ID" = group))
+  }
+  else {
+    return(list("Simulated Data" = sim_data, 
+                "Cluster ID" = indiv_clust))
+  }
 
 }

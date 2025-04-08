@@ -34,7 +34,11 @@ multicoca <- function(data,              # Input as data frame or a list of data
   # Create dendrogram and split it 
   hier_clust <- hclust()
   
+  ## This is where we cluster the proteins and then feed each group into COCA. 
+  
   # Run COCA 
+  
+  # Output: list of n_groups dataframes with cluster labels. 
   
   
 }

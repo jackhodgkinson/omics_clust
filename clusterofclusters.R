@@ -1,6 +1,6 @@
 ## clusterofclusters.R
 clusterofclusters <- function(data,              # Input as data frame or list of data frames
-                              k = 1:9,          # Number of clusters
+                              k = 1:9,           # Number of clusters
                               N = 1000,          # Number of iterations of Consensus Clustering step
                               max.iter = 1000    # Maximum number of iterations for k-means clustering
                               ) 
@@ -38,8 +38,10 @@ clusterofclusters <- function(data,              # Input as data frame or list o
 
   # Convert to factor (to ensure proper binary encoding)
   classification <- as.data.frame(lapply(classification, as.factor))
+  
+  # Here I need to work out the clustering of the proteins. (LOOK AT PROTOCOL - HCLUST?)
 
-  # Create the MOC
+  # Create the MOC - this needs to be per protein group. single MOC function with an option!
   moc <- do.call(cbind, lapply(classification, function(x) model.matrix(~ x - 1)))
   moc <- as.matrix(moc)
   colnames(moc) <- NULL
