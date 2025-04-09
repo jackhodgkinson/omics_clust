@@ -32,7 +32,7 @@ clusterofclusters <- function(data,              # Input as data frame or list o
   # Loop through each list element and fit Mclust
   for (i in 1:length(data_l)) {
     colnames(data_l[[i]]) <- NULL
-    mclust1[[i]] <- Mclust(data_l[[i]], G = k)
+    mclust[[i]] <- Mclust(data_l[[i]], G = k)
     classification[, i] <- mclust1[[i]]$classification  # Store clustered data column-wise
   }
 
