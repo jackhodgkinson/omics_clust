@@ -9,47 +9,103 @@ source("constructMOC.R")
 source("clusterofclusters.R")
 source("multicoca.R")
 
-# # Simulated data 
-# seed <- 4881
-# set.seed(seed)
-# N_col <- 10
-# params1 <- list(
-#   cluster1 = list(mean = runif(N_col, -10, -5), sd = runif(N_col, 0.5, 1)),  
-#   cluster2 = list(mean = runif(N_col, 10, 15), sd = runif(N_col, 0.75, 3)), 
-#   cluster3 = list(mean = rep(0, N_col), sd = rep(5, N_col)))  
-# data <- simulateGMM(3, 2, params1, n_indiv = 419, n_col = N_col, 
-#                         random_seed = seed, equal_clust = FALSE, equal_groups = FALSE)
-# true_clusters <- data[[2]]
-# true_groups <- data[[3]]
-# data <- data[[1]]
+# Simulated data 
+seed <- 4881
+set.seed(seed)
+N_col <- 7
+params1 <- list(
+  cluster1 = list(mean = runif(N_col, -10, -5), sd = runif(N_col, 0.5, 1)),
+  cluster2 = list(mean = runif(N_col, 10, 15), sd = runif(N_col, 0.75, 3)),
+  cluster3 = list(mean = rep(0, N_col), sd = rep(5, N_col)))
+clusters <- sample(c(1,2,3), 450, replace = TRUE, prob = {p <- runif(length(c(1,2,3))); p / sum(p)})
+data1 <- simulateGMM(3, 1, params1, n_indiv = 419, n_col = N_col,
+                     random_seed = seed, cluster_labels = clusters,
+                     equal_clust = FALSE, equal_groups = FALSE)
+data1 <- data1[[1]]
+N_col <- 10
+params1 <- list(
+  cluster1 = list(mean = runif(N_col, -10, -5), sd = runif(N_col, 0.5, 1)),
+  cluster2 = list(mean = runif(N_col, 10, 15), sd = runif(N_col, 0.75, 3)),
+  cluster3 = list(mean = rep(0, N_col), sd = rep(5, N_col)))
+data2 <- simulateGMM(3, 1, params1, n_indiv = 450, n_col = N_col,
+                     random_seed = 9377, cluster_labels = clusters,
+                     equal_clust = FALSE, equal_groups = FALSE)
+data2 <- data2[[1]]
+data <- list(data1, data2)
+
 
 # Data from COCA package
-seed <- 4881
-data <- list()
-data[[1]] <- as.matrix(read.csv(system.file("extdata", "dataset1.csv",
-                                            package = "coca"), row.names = 1))
-data[[2]] <- as.matrix(read.csv(system.file("extdata", "dataset2.csv",
-                                            package = "coca"), row.names = 1))
-data[[3]] <- as.matrix(read.csv(system.file("extdata", "dataset3.csv",
-                                            package = "coca"), row.names = 1))
+# seed <- 4881
+# data <- list()
+# data[[1]] <- as.matrix(read.csv(system.file("extdata", "dataset1.csv",
+#                                             package = "coca"), row.names = 1))
+# data[[2]] <- as.matrix(read.csv(system.file("extdata", "dataset2.csv",
+#                                             package = "coca"), row.names = 1))
+# data[[3]] <- as.matrix(read.csv(system.file("extdata", "dataset3.csv",
+#                                             package = "coca"), row.names = 1))
+# 
+# true_labels <- as.matrix(read.csv(system.file("extdata", "cluster_labels.csv",
+#                                               package = "coca"), row.names = 1))
+# 
+# N_col <- ncol(data[[1]])
+# N_row <- nrow(data[[1]])
 
-true_labels <- as.matrix(read.csv(system.file("extdata", "cluster_labels.csv",
-                                              package = "coca"), row.names = 1))
+# Cluster each column if single dataset
+if (class(data) != "list") {
+  
+  # Create empty list for mclust and classification data frame 
+  mclust <- vector("list", ncol(data))
+  classification <- as.data.frame(matrix(NA, nrow = nrow(data), ncol = ncol(data)))
+                                  
+  # Convert data frame to a list of columns 
+  data2 <- as.list(data)
+  
+  # Fit Mclust to each protein to obtain classification
+  set.seed(seed)
+  
+  for (i in 1:length(data2)) {
+    colnames(data2[[i]]) <- NULL
+    mclust2[[i]] <- Mclust(data2[[i]])
+    classification[, i] <- mclust[[i]]$classification  # Store clustered data column-wise
+    }
 
-N_col <- ncol(data[[1]])
-N_row <- nrow(data[[1]])
-
-# Create empty list for mclust and classification data frame 
-mclust <- vector("list", N_col)
-classification <- as.data.frame(matrix(NA, nrow = N_row, ncol = N_col))
-
-# Fit Mclust to each protein to obtain classification 
-set.seed(seed)
-for (i in 1:length(data)) {
-  colnames(data[[i]]) <- NULL
-  mclust[[i]] <- Mclust(data[[i]])
-  classification[, i] <- mclust[[i]]$classification  # Store clustered data column-wise
+# Cluster each column if a list of datasets
+} else {
+    
+  # Initialize lists to store Mclust results and classification matrices for each data frame
+  mclust_results <- list()  
+  classification_results <- list() 
+  
+  for (i in 1:length(data)) {
+    
+    # Assign data to dataframe i 
+    data2 <- data[[i]]
+    
+    # Create empty list for mclust and classification data frame 
+    mclust <- vector("list", ncol(data2))
+    classification <- as.data.frame(matrix(NA, nrow = nrow(data2), ncol = ncol(data2)))
+                                    
+    # Convert data frame to a list of columns 
+    data3 <- as.list(data2)
+                                    
+    # Fit Mclust to each protein to obtain classification 
+    set.seed(seed)
+    for (j in 1:length(data3)) {
+      colnames(data3[[j]]) <- NULL
+      mclust[[j]] <- Mclust(data3[[j]])
+      classification[, j] <- mclust[[j]]$classification  # Store clustered data column-wise
+    }
+    mclust_results[[paste0("Dataset",i)]] <- mclust
+    classification_results[[paste0("Dataset",i)]] <- classification
+  }
 }
+                                  
+# I need to do if data has length 1, do the below, if it has length > 1 then do it for each element!
+
+# When do we combine the different sources of information? 
+
+
+
 
 # Construct similarity matrix 
 sim_matrix <- matrix(0, nrow = ncol(classification), ncol = ncol(classification),

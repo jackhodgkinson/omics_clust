@@ -6,7 +6,7 @@ simulateGMM <- function(n_clust,                                                
                         n_indiv,                                                 # Number of individuals  
                         n_col,                                                   # Number of columns in simulated data
                         random_seed,                                             # Input random seed for reproducibility
-                        cluster_labels = NA,                                     # Input cluster labels, NA by default.
+                        cluster_labels = NULL,                                   # Input cluster labels, NULL by default.
                         group_labels = NA,                                       # Input group labels, NA by default
                         equal_clust = TRUE,                                      # If generating cluster labels, ensure each cluster has approx equal individuals
                         equal_groups = TRUE                                      # If n_groups > 1, ensure each group contains approx equal number of cols
@@ -22,7 +22,7 @@ simulateGMM <- function(n_clust,                                                
   # Set seed
   set.seed(random_seed)
   
-  if (is.na(cluster_labels)){
+  if (is.null(cluster_labels)){
     # Generate cluster labels for each data point 
     cluster_labs <- seq(1, n_clust)
     
