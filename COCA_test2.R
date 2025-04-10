@@ -6,27 +6,48 @@ library(NbClust)
 # Load external functions
 source("simulateGMM.R")
 source("constructMOC.R")
+source("clusterofclusters.R")
+source("multicoca.R")
 
-# Simulate data 
-N_col <- 10
-params1 <- list(
-  cluster1 = list(mean = runif(N_col, -10, -5), sd = runif(N_col, 0.5, 1)),  
-  cluster2 = list(mean = runif(N_col, 10, 15), sd = runif(N_col, 0.75, 3)), 
-  cluster3 = list(mean = rep(0, N_col), sd = rep(5, N_col)))  
-sim_data <- simulateGMM(3, 2, params1, n_indiv = 419, n_col = N_col, 
-                        random_seed = 4881, equal_clust = FALSE, equal_groups = FALSE)
-true_clusters <- sim_data[[2]]
-true_groups <- sim_data[[3]]
-sim_data <- sim_data[[1]]
+# # Simulated data 
+# seed <- 4881
+# set.seed(seed)
+# N_col <- 10
+# params1 <- list(
+#   cluster1 = list(mean = runif(N_col, -10, -5), sd = runif(N_col, 0.5, 1)),  
+#   cluster2 = list(mean = runif(N_col, 10, 15), sd = runif(N_col, 0.75, 3)), 
+#   cluster3 = list(mean = rep(0, N_col), sd = rep(5, N_col)))  
+# data <- simulateGMM(3, 2, params1, n_indiv = 419, n_col = N_col, 
+#                         random_seed = seed, equal_clust = FALSE, equal_groups = FALSE)
+# true_clusters <- data[[2]]
+# true_groups <- data[[3]]
+# data <- data[[1]]
+
+# Data from COCA package
+seed <- 4881
+data <- list()
+data[[1]] <- as.matrix(read.csv(system.file("extdata", "dataset1.csv",
+                                            package = "coca"), row.names = 1))
+data[[2]] <- as.matrix(read.csv(system.file("extdata", "dataset2.csv",
+                                            package = "coca"), row.names = 1))
+data[[3]] <- as.matrix(read.csv(system.file("extdata", "dataset3.csv",
+                                            package = "coca"), row.names = 1))
+
+true_labels <- as.matrix(read.csv(system.file("extdata", "cluster_labels.csv",
+                                              package = "coca"), row.names = 1))
+
+N_col <- ncol(data[[1]])
+N_row <- nrow(data[[1]])
 
 # Create empty list for mclust and classification data frame 
 mclust <- vector("list", N_col)
-classification <- as.data.frame(matrix(NA, nrow = 419, ncol = N_col))
+classification <- as.data.frame(matrix(NA, nrow = N_row, ncol = N_col))
 
 # Fit Mclust to each protein to obtain classification 
-for (i in 1:length(sim_data)) {
-  colnames(sim_data[[i]]) <- NULL
-  mclust[[i]] <- Mclust(sim_data[[i]])
+set.seed(seed)
+for (i in 1:length(data)) {
+  colnames(data[[i]]) <- NULL
+  mclust[[i]] <- Mclust(data[[i]])
   classification[, i] <- mclust[[i]]$classification  # Store clustered data column-wise
 }
 
@@ -34,6 +55,7 @@ for (i in 1:length(sim_data)) {
 sim_matrix <- matrix(0, nrow = ncol(classification), ncol = ncol(classification),
                      dimnames = list(colnames(classification), colnames(classification)))
 
+set.seed(seed)
 for (i in 1:ncol(classification)){
   for(j in 1:ncol(classification)){
     sim_matrix[i,j] <- adjustedRandIndex(classification[[i]], classification[[j]])
@@ -49,13 +71,24 @@ dist_mat <- as.dist(dissim_matrix)
 # Apply hclust to dissim_matrix - complete gives same as intended input. 
 hclust <- hclust(dist_mat)
 
-# Figure out optimal number of clusters - "all" seem to be most accurate - "alllong" takes too long. 
-opt <- NbClust(classification, distance = "euclidean", method = "complete", 
-               min.nc = 2, max.nc = 10, index = "all")
-opt_nc <- as.numeric(names(which.max(table(opt$Best.nc[1, ]))))
+# Figure out optimal number of groups 
+set.seed(seed)
+opt <- NbClust(diss = dist_mat, distance = NULL, method = "complete", 
+               min.nc = 2, max.nc = ceiling(sqrt(ncol(dissim_matrix)/2)), index = "silhouette")
+# Need to figure out how to select maximum but penalise as number of clusters increases.
+
+if (is.vector(opt$Best.nc)) {
+  opt_ng <- as.numeric(opt$Best.nc[1])
+} else {
+  opt_ng <- as.numeric(names(which.max(table(opt$Best.nc[1, ]))))
+}
+
+# Here, it is difficult to know which index to use.
+# Need one that penalises large numbers of groups. 
+# Gap statistic seems to do this. 
 
 # Split dendogram
-groups <- cutree(hclust, k = opt_nc)
+groups <- cutree(hclust, k = opt_ng)
 
 # Test grouping 
 adjustedRandIndex(groups, true_groups)
@@ -72,13 +105,10 @@ for(i in 1:length(unique(groups))){
 moc <- constructMOC(data_group)
 
 # Feed into COCA for each data group 
-results <- list()
-for (i in 1:length(moc)) {
-  results[[i]] <- coca::coca(moc[[i]], B = 1000, maxIterKM = 1000, verbose = FALSE)
-  names(results)[[i]] <- paste0("Group",i)
-}
+results <- multicoca(moc, random_seed = 4881, N = 10000, max.iter = 10000)
 
-adjustedRandIndex(true_clusters$group1_clusterid, results$Group1$clusterLabels)
-adjustedRandIndex(true_clusters$group2_clusterid, results$Group2$clusterLabels)
+# Test against true values
+ari_g1 <- adjustedRandIndex(true_clusters$group1_clusterid, results$Group1$clusterLabels)
+ari_g2 <- adjustedRandIndex(true_clusters$group2_clusterid, results$Group2$clusterLabels)
 
 # Very high ARI - how do we ensure the ARIs are the same per group? Is that required?  

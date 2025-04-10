@@ -7,6 +7,7 @@ simulateGMM <- function(n_clust,                                                
                         n_col,                                                   # Number of columns in simulated data
                         random_seed,                                             # Input random seed for reproducibility
                         cluster_labels = NA,                                     # Input cluster labels, NA by default.
+                        group_labels = NA,                                       # Input group labels, NA by default
                         equal_clust = TRUE,                                      # If generating cluster labels, ensure each cluster has approx equal individuals
                         equal_groups = TRUE                                      # If n_groups > 1, ensure each group contains approx equal number of cols
                         ){
@@ -52,7 +53,7 @@ simulateGMM <- function(n_clust,                                                
     # Generate data for each individual based on cluster params
     for (j in 1:n_indiv) {
       
-      # Simulate random normals for each protein and cluster
+      # Simulate random normals for each column and cluster
       mu[j] <- cluster_params[[paste0("cluster", indiv_clust[j])]]$mean[i]
       sigma[j] <-  cluster_params[[paste0("cluster", indiv_clust[j])]]$sd[i]
       
@@ -70,7 +71,7 @@ simulateGMM <- function(n_clust,                                                
   if (n_groups > 1) {
     
     # Randomly group 
-    if (equal_groups == FALSE){
+    if (equal_groups == FALSE & !is.null(group)){
       repeat {
         p <- runif(n_groups)
         p <- p / sum(p)  # normalize to sum to 1
@@ -79,6 +80,9 @@ simulateGMM <- function(n_clust,                                                
       }
     }
     
+    else if (!is.null(group)) {
+      group <- group_labels
+    }
     else {
       group <- sample(1:n_groups, n_col, replace = TRUE)
     }
@@ -108,7 +112,7 @@ simulateGMM <- function(n_clust,                                                
   if (!is.null(group)){
     return(list("Simulated Data" = sim_data, 
                 "Cluster ID per individual per group" = group_clusterID, 
-                "Data Group ID" = group))
+                "Group ID" = group))
   }
   else {
     return(list("Simulated Data" = sim_data, 

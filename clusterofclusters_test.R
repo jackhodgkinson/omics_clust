@@ -30,4 +30,3 @@ sim_data2 <- sim_data2[, 1:N_col]
 outputCOCA_2 <- clusterofclusters(sim_data2)
 clusters2a <- outputCOCA_2$clusterLabels
 adjustedRandIndex(clusters1a, clusters2a)
-
