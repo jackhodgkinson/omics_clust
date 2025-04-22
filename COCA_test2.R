@@ -17,22 +17,28 @@ params1 <- list(
   cluster1 = list(mean = runif(N_col, -10, -5), sd = runif(N_col, 0.5, 1)),
   cluster2 = list(mean = runif(N_col, 10, 15), sd = runif(N_col, 0.75, 3)),
   cluster3 = list(mean = rep(0, N_col), sd = rep(5, N_col)))
-clusters <- sample(c(1,2,3), 450, replace = TRUE, prob = {p <- runif(length(c(1,2,3))); p / sum(p)})
-data1 <- simulateGMM(3, 1, params1, n_indiv = 419, n_col = N_col,
-                     random_seed = seed, cluster_labels = clusters,
+# clusters <- sample(c(1,2,3), 450, replace = TRUE, prob = {p <- runif(length(c(1,2,3))); p / sum(p)})
+# data1 <- simulateGMM(3, 2, params1, n_indiv = 419, n_col = N_col,
+#                      random_seed = seed, cluster_labels = clusters,
+#                      equal_clust = FALSE, equal_groups = FALSE)
+# data1 <- data1[[1]]
+data1 <- simulateGMM(3, 2, params1, n_indiv = 419, n_col = N_col,
+                     random_seed = seed,
                      equal_clust = FALSE, equal_groups = FALSE)
+true_clusters <- data1[[2]]
+true_groups <- data1[[3]]
 data1 <- data1[[1]]
-N_col <- 10
-params1 <- list(
-  cluster1 = list(mean = runif(N_col, -10, -5), sd = runif(N_col, 0.5, 1)),
-  cluster2 = list(mean = runif(N_col, 10, 15), sd = runif(N_col, 0.75, 3)),
-  cluster3 = list(mean = rep(0, N_col), sd = rep(5, N_col)))
-data2 <- simulateGMM(3, 1, params1, n_indiv = 450, n_col = N_col,
-                     random_seed = 9377, cluster_labels = clusters,
-                     equal_clust = FALSE, equal_groups = FALSE)
-data2 <- data2[[1]]
-data <- list(data1, data2)
-
+# N_col <- 10
+# params1 <- list(
+#   cluster1 = list(mean = runif(N_col, -10, -5), sd = runif(N_col, 0.5, 1)),
+#   cluster2 = list(mean = runif(N_col, 10, 15), sd = runif(N_col, 0.75, 3)),
+#   cluster3 = list(mean = rep(0, N_col), sd = rep(5, N_col)))
+# data2 <- simulateGMM(3, 1, params1, n_indiv = 450, n_col = N_col,
+#                      random_seed = 9377, cluster_labels = clusters,
+#                      equal_clust = FALSE, equal_groups = FALSE)
+# data2 <- data2[[1]]
+# data <- list(data1, data2)
+data <- data1
 
 # Data from COCA package
 # seed <- 4881
@@ -65,7 +71,7 @@ if (class(data) != "list") {
   
   for (i in 1:length(data2)) {
     colnames(data2[[i]]) <- NULL
-    mclust2[[i]] <- Mclust(data2[[i]])
+    mclust[[i]] <- Mclust(data2[[i]])
     classification[, i] <- mclust[[i]]$classification  # Store clustered data column-wise
     }
 
@@ -99,12 +105,12 @@ if (class(data) != "list") {
     classification_results[[paste0("Dataset",i)]] <- classification
   }
 }
-                                  
-# I need to do if data has length 1, do the below, if it has length > 1 then do it for each element!
+                              
+# When do we combine the different sources of information? When do we need to 
+# only keep the rows that share ID var? 
 
-# When do we combine the different sources of information? 
-
-
+# We need to think about how to handle missing data - could just remove if < 10% 
+# and stop the function if larger than this and advise user to investigate.
 
 
 # Construct similarity matrix 
@@ -131,6 +137,7 @@ hclust <- hclust(dist_mat)
 set.seed(seed)
 opt <- NbClust(diss = dist_mat, distance = NULL, method = "complete", 
                min.nc = 2, max.nc = ceiling(sqrt(ncol(dissim_matrix)/2)), index = "silhouette")
+
 # Need to figure out how to select maximum but penalise as number of clusters increases.
 
 if (is.vector(opt$Best.nc)) {
@@ -139,15 +146,15 @@ if (is.vector(opt$Best.nc)) {
   opt_ng <- as.numeric(names(which.max(table(opt$Best.nc[1, ]))))
 }
 
-# Here, it is difficult to know which index to use.
-# Need one that penalises large numbers of groups. 
-# Gap statistic seems to do this. 
+# Here, it is difficult to know which index to use. Need one that penalises large numbers of groups. 
 
 # Split dendogram
 groups <- cutree(hclust, k = opt_ng)
 
 # Test grouping 
-adjustedRandIndex(groups, true_groups)
+if (exists("true_groups")) {
+  adjustedRandIndex(groups, true_groups)
+}
 
 # Split the columns into datasets by group 
 data_group <- list()
@@ -160,11 +167,11 @@ for(i in 1:length(unique(groups))){
 # Create a MOC for each data group
 moc <- constructMOC(data_group)
 
+# For COCA function, how do we ensure that the max k is reasonable? Same as hclust problem.
+
 # Feed into COCA for each data group 
-results <- multicoca(moc, random_seed = 4881, N = 10000, max.iter = 10000)
+results <- multicoca(moc, random_seed = 4881, N = 1000, max.iter = 1000)
 
 # Test against true values
 ari_g1 <- adjustedRandIndex(true_clusters$group1_clusterid, results$Group1$clusterLabels)
 ari_g2 <- adjustedRandIndex(true_clusters$group2_clusterid, results$Group2$clusterLabels)
-
-# Very high ARI - how do we ensure the ARIs are the same per group? Is that required?  
