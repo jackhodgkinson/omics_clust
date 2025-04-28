@@ -12,7 +12,7 @@ source("multicoca.R")
 # Simulated data 
 seed <- 4881
 set.seed(seed)
-N_col <- 7
+N_col <- 10
 params1 <- list(
   cluster1 = list(mean = runif(N_col, -10, -5), sd = runif(N_col, 0.5, 1)),
   cluster2 = list(mean = runif(N_col, 10, 15), sd = runif(N_col, 0.75, 3)),
@@ -124,29 +124,35 @@ for (i in 1:ncol(classification)){
   }
 }
 
+## Pheatmap 
+pheatmap::pheatmap(sim_matrix)
+
 # Convert to dissimilarity matrix
 dissim_matrix <- 1 - sim_matrix
 dist_mat <- as.dist(dissim_matrix)
 
 # Here we should add a threshold whether the data needs splitting into groups or not! 
+# Need a criterion to decide whether there is more than one cluster or not. 
 
 # Apply hclust to dissim_matrix - complete gives same as intended input. 
-hclust <- hclust(dist_mat)
+hclust <- hclust(dist_mat) # Try different linkage options - single, complete, average, ward.D2
+
+# Plot hclust
+plot(hclust)
+
+# Assess impact in simulation study. 
 
 # Figure out optimal number of groups 
 set.seed(seed)
-opt <- NbClust(diss = dist_mat, distance = NULL, method = "complete", 
-               min.nc = 2, max.nc = ceiling(sqrt(ncol(dissim_matrix)/2)), index = "silhouette")
+opt <- NbClust(diss = dist_mat, distance = NULL, method = "single", 
+               min.nc = 2, max.nc = 9, index = "dunn")
 
-# Need to figure out how to select maximum but penalise as number of clusters increases.
-
+# Try different linkage functions with different indices and see which is most accurate. Report this in thesis. 
 if (is.vector(opt$Best.nc)) {
   opt_ng <- as.numeric(opt$Best.nc[1])
 } else {
   opt_ng <- as.numeric(names(which.max(table(opt$Best.nc[1, ]))))
 }
-
-# Here, it is difficult to know which index to use. Need one that penalises large numbers of groups. 
 
 # Split dendogram
 groups <- cutree(hclust, k = opt_ng)
@@ -167,6 +173,10 @@ for(i in 1:length(unique(groups))){
 # Create a MOC for each data group
 moc <- constructMOC(data_group)
 
+# Pheatmap 
+pheatmap::pheatmap(moc$`MOC - Group1`)
+pheatmap::pheatmap(moc$`MOC - Group2`)
+
 # For COCA function, how do we ensure that the max k is reasonable? Same as hclust problem.
 
 # Feed into COCA for each data group 
@@ -175,3 +185,5 @@ results <- multicoca(moc, random_seed = 4881, N = 1000, max.iter = 1000)
 # Test against true values
 ari_g1 <- adjustedRandIndex(true_clusters$group1_clusterid, results$Group1$clusterLabels)
 ari_g2 <- adjustedRandIndex(true_clusters$group2_clusterid, results$Group2$clusterLabels)
+
+# Figure out why this is not working!
