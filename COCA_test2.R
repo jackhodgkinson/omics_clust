@@ -2,6 +2,7 @@
 # Load packages
 library(mclust)
 library(NbClust)
+library(tidyverse)
 
 # Load external functions
 source("simulateGMM.R")
@@ -22,7 +23,8 @@ params1 <- list(
 #                      random_seed = seed, cluster_labels = clusters,
 #                      equal_clust = FALSE, equal_groups = FALSE)
 # data1 <- data1[[1]]
-data1 <- simulateGMM(3, 2, params1, n_indiv = 419, n_col = N_col,
+n_groups <- 2
+data1 <- simulateGMM(3, n_groups, params1, n_indiv = 419, n_col = N_col,
                      random_seed = seed,
                      equal_clust = FALSE, equal_groups = FALSE)
 true_clusters <- data1[[2]]
@@ -134,20 +136,81 @@ dist_mat <- as.dist(dissim_matrix)
 # Here we should add a threshold whether the data needs splitting into groups or not! 
 # Need a criterion to decide whether there is more than one cluster or not. 
 
-# Apply hclust to dissim_matrix - complete gives same as intended input. 
-hclust <- hclust(dist_mat) # Try different linkage options - single, complete, average, ward.D2
+# Apply hclust to dissim_matrix - try out different linkage functions 
+method <- list("single","complete","average","ward.D2","ward.D","mcquitty","median","centroid")
 
-# Plot hclust
-plot(hclust)
+# Set up plot layout 
+par(mfrow = c(3, 3), mar = c(3, 3, 3, 2))
 
-# Assess impact in simulation study. 
+# Loop over each method 
+for (m in method){
+  try({
+    hc <- hclust(dist_mat, method = m)
+    plot(hc, main = paste("Method:", m), xlab = "", sub = "")
+  }, silent = TRUE)
+}
+
+# Reset plotting layout
+par(mfrow = c(1, 1))
+
+# Do best hclust 
+hclust <- hclust(dist_mat)
 
 # Figure out optimal number of groups 
 set.seed(seed)
+index <- list("cindex","silhouette","dunn","mcclain")
+
+# Try different linkage functions with different indices and see which is most accurate. Report this in thesis.
+results <- data.frame(Method = character(), 
+                      Index = character(), 
+                      NGroups = integer(), 
+                      stringsAsFactors = FALSE)
+
+all_index_list <- list()
+
+for (m in method) {
+  for (i in index) {
+    try({
+      opt <- NbClust(diss = dist_mat, distance = NULL,
+                     method = m, min.nc = 2, max.nc = 9,
+                     index = i)
+      best_nc <- opt$Best.nc[[1]]
+      opt_results <- rbind(results, data.frame(Method = m,
+                                           Index = i,
+                                           BestNC = best_nc))
+      index_df <- data.frame(NClust = as.numeric(names(opt$All.index)),
+                             Value = as.numeric(opt$All.index),
+                             Method = m,
+                             Index = i)
+      all_index_list[[paste(m, i, sep = "_")]] <- index_df
+    }, silent = TRUE)
+  }
+}
+
+# Join with true number of groups 
+opt_results <- cbind(opt_results, n_groups)
+
+# Create data frame for plotting
+all_index_df <- bind_rows(all_index_list)
+
+# Plot graph 
+ggplot(all_index_df, aes(x = NClust, y = Value)) + 
+  geom_line() + 
+  facet_grid(Method ~ Index, scales = "free_y") + 
+  labs(title = "NbClust Index Scores for Each Method and Index",
+       x = "Number of Groups",
+       y = "Index Value")
+
+# Subset for dunn 
+dunn_vals <- all_index_df %>%
+  filter(Index == "dunn" & NClust == 2)
+
+# Based off results, calculate optimal number of groups of clusters
 opt <- NbClust(diss = dist_mat, distance = NULL, method = "single", 
                min.nc = 2, max.nc = 9, index = "dunn")
 
-# Try different linkage functions with different indices and see which is most accurate. Report this in thesis. 
+
+# Choose optimal 
 if (is.vector(opt$Best.nc)) {
   opt_ng <- as.numeric(opt$Best.nc[1])
 } else {
@@ -165,6 +228,7 @@ if (exists("true_groups")) {
 # Split the columns into datasets by group 
 data_group <- list()
 
+# Do I need to recluster in groups here again? Or use the existing clusters?
 for(i in 1:length(unique(groups))){
   data_group[[i]] <- classification[groups == i]
   names(data_group)[[i]] <- paste0("Group",i)
@@ -179,11 +243,49 @@ pheatmap::pheatmap(moc$`MOC - Group2`)
 
 # For COCA function, how do we ensure that the max k is reasonable? Same as hclust problem.
 
+
+
 # Feed into COCA for each data group 
-results <- multicoca(moc, random_seed = 4881, N = 1000, max.iter = 1000)
+results1 <- clusterofclusters(moc$`MOC - Group1`, ccClMethod = "hclust", hclustMethod = "complete", random_seed = 4881, N = 1000, max.iter = 1000)
+results2 <- clusterofclusters(moc$`MOC - Group1`, ccClMethod = "kmeans", random_seed = 4881, N = 10000, max.iter = 10000)
+
+# Test COCA against true 
+ari_g1a <- adjustedRandIndex(true_clusters$group1_clusterid, results1$clusterLabels)
+ari_g1b <- adjustedRandIndex(true_clusters$group1_clusterid, results2$clusterLabels) # Method and number of iterations makes no difference! 
+
+pheatmap::pheatmap(results1$consensusMatrix)
+pheatmap::pheatmap(results2$consensusMatrix)
+
+results_hc <- multicoca(moc, ccClMethod = "hclust", hclustMethod = "complete", 
+                        random_seed = 4881, N = 1000, max.iter = 1000, 
+                        parallel = FALSE) #This gives group 2 k = 2
+results_hc_p <- multicoca(moc, ccClMethod = "hclust", hclustMethod = "complete", 
+                        random_seed = 4881, N = 1000, max.iter = 1000, ccDistHC = "pearson",
+                        parallel = TRUE) #This gives group 2 k = 2
+results_hc_s <- multicoca(moc, ccClMethod = "hclust", hclustMethod = "complete", 
+                        random_seed = 4881, N = 1000, max.iter = 1000, ccDistHC = "spearman",
+                        parallel = TRUE) #This gives group 2 k = 2
+results_km <- multicoca(moc, ccClMethod = "kmeans", random_seed = 4881, 
+                        N = 2000, max.iter = 2000) # Gives group 2 k = 3
+
+pheatmap::pheatmap(results_hc$Group1$consensusMatrix)
+pheatmap::pheatmap(results_hc$Group2$consensusMatrix)
+pheatmap::pheatmap(results_km$Group1$consensusMatrix)
+pheatmap::pheatmap(results_km$Group2$consensusMatrix)
 
 # Test against true values
-ari_g1 <- adjustedRandIndex(true_clusters$group1_clusterid, results$Group1$clusterLabels)
-ari_g2 <- adjustedRandIndex(true_clusters$group2_clusterid, results$Group2$clusterLabels)
+ari_g1_hc <- adjustedRandIndex(true_clusters$group1_clusterid, results_hc$Group1$clusterLabels)
+ari_g2_hc <- adjustedRandIndex(true_clusters$group2_clusterid, results_hc$Group2$clusterLabels)
+
+ari_g1_hc_p <- adjustedRandIndex(true_clusters$group1_clusterid, results_hc_p$Group1$clusterLabels)
+ari_g2_hc_p <- adjustedRandIndex(true_clusters$group2_clusterid, results_hc_p$Group2$clusterLabels)
+
+ari_g1_hc_s <- adjustedRandIndex(true_clusters$group1_clusterid, results_hc_s$Group1$clusterLabels)
+ari_g2_hc_s <- adjustedRandIndex(true_clusters$group2_clusterid, results_hc_s$Group2$clusterLabels)
+
+ari_g1_km <- adjustedRandIndex(true_clusters$group1_clusterid, results_km$Group1$clusterLabels)
+ari_g2_km <- adjustedRandIndex(true_clusters$group2_clusterid, results_km$Group2$clusterLabels)
+
+# Spearman correlation and Euclidean distance are better than random guessing for group 2! 
 
 # Figure out why this is not working!

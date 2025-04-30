@@ -1,7 +1,6 @@
 # multicoca.R
 multicoca <- function(moc_list,                                         # List of Matrix of Clusters
-                      parallel = TRUE,                                  # Use parallel processing. Default is TRUE.
-                      k = 1:9,                                          # Number of clusters. Default is to loop through k = 1 to k = 9.
+                      k = 2:9,                                          # Number of clusters. Default is to loop through k = 1 to k = 9.
                       N = 1000,                                         # Number of iterations of Consensus Clustering step.
                       max.iter = 1000,                                  # Maximum number of iterations for k-means clustering
                       pItem = 0.8,                                      # Proportion of items sampled at each iteration. 
@@ -16,7 +15,8 @@ multicoca <- function(moc_list,                                         # List o
                       dunns = FALSE,                                    # Boolean. If TRUE, compute also Dunn's index to choose best number of clusters. Default is FALSE.
                       dunn2s = FALSE,                                   # Boolean. If TRUE, compute also alternative Dunn's index to choose best number of clusters. Default is FALSE.
                       returnAllMatrices = FALSE,                        # Boolean. If TRUE, return consensus matrices for all considered values of K. Default is FALSE.
-                      random_seed = NULL                                # Set random seed for reproducibility. Default is NULL
+                      random_seed = NULL,                               # Set random seed for reproducibility. Default is NULL
+                      parallel = TRUE                                   # Use parallel processing. Default is TRUE.
                       )  
 {
   
@@ -62,7 +62,8 @@ multicoca <- function(moc_list,                                         # List o
                                     dunns = dunns, 
                                     dunn2s = dunn2s, 
                                     returnAllMatrices = returnAllMatrices,
-                                    random_seed = random_seed)
+                                    random_seed = random_seed,
+                                    parallel = TRUE)
         
         # Name the results for each group
         return(result)
@@ -95,7 +96,8 @@ multicoca <- function(moc_list,                                         # List o
                                         dunns = dunns, 
                                         dunn2s = dunn2s, 
                                         returnAllMatrices = returnAllMatrices,
-                                        random_seed = random_seed)
+                                        random_seed = random_seed,
+                                        parallel = FALSE)
       names(results)[[i]] <- paste0("Group", i)
     }
   }
