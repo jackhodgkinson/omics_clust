@@ -258,7 +258,7 @@ clusterofclusters <- function(moc,                                              
                     }
                   }
                 }
-                consensusMatrix <- coClusteringMatrix
+                consensusMatrix <- coClusteringMatrix[ , , i-1]
                 
                 ### Step 2. Use hierarchical clustering on the consensus matrix
                 distances <- stats::as.dist(1 - consensusMatrix[, , i - 1])
