@@ -258,7 +258,7 @@ pheatmap::pheatmap(results2$consensusMatrix)
 
 results_hc <- multicoca(moc, ccClMethod = "hclust", hclustMethod = "complete", 
                         random_seed = 4881, N = 1000, max.iter = 1000, 
-                        parallel = FALSE) #This gives group 2 k = 2
+                        parallel = TRUE) #This gives group 2 k = 2
 results_hc_p <- multicoca(moc, ccClMethod = "hclust", hclustMethod = "complete", 
                         random_seed = 4881, N = 1000, max.iter = 1000, ccDistHC = "pearson",
                         parallel = TRUE) #This gives group 2 k = 2

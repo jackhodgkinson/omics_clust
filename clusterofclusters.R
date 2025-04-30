@@ -29,7 +29,7 @@ clusterofclusters <- function(moc,                                              
       # Intialise output list
       output <- list()
       
-      n <- dim(moc)
+      n <- dim(moc)[1]
       
       if (is.null(k)) {
         stop("Parameter 'k' is required. Please specify a value or range for 'k'.")
@@ -132,148 +132,18 @@ clusterofclusters <- function(moc,                                              
             if (length(k) != 1 & choiceKmethod == "silhouette") {
               consensusMatrix <- array(NA, c(n, n, max(k) - 1))
               clLabels <- array(NA, c(max(k) - 1, n))
-              clMethod <- "hclust"
-              dist <- "euclidean"
               
               for (i in seq_len(max(k) - 1) + 1) {
                 ### Step 1. Compute the consensus matrix
-                #consensusMatrix[, , i - 1] <-
-                #  coca::consensusCluster(moc, i, B = N, pItem, clMethod = ccClMethod,
-                #                          dist = ccDistHC, maxIterKM = max.iter)
-                for (cn in k){
-                  B <- N
-                  data <- moc
-                  K <- cn
-                  
-                  ### Debug consensusClustesr
-                  containsFactors <- 0
-                  if (!is.null(data)) {
-                    # Save number of observations
-                    N <- dim(data)[1]
-                    # Save number of covariates
-                    P <- dim(data)[2]
-                    # Check wheter there are factors among the covariates
-                    for (i in seq_len(P)) {
-                      containsFactors <-
-                        as.numeric(is.factor(data[, i])) + containsFactors
-                    }
-                  } else if (is.double(dist)) {
-                    N <- dim(dist)[1]
-                  } else {
-                    stop("If the data matrix is not provided, `dist` must be a symmetric
-          matrix of type double providing the distances between each pair of
-          observations.")
-                  }
-                  
-                  
-                  dataIndices <- seq_len(N)
-                  coClusteringMatrix <- indicatorMatrix <- matrix(0, N, N)
-                  
-                  # MOC has no all zero or all one rows! 
-                  
-                  # For each step of the algorithm
-                  for (b in seq_len(B)) {
-                    # Sample a proportion pItem of the observations without replacement
-                    items <- sample(N, ceiling(N * pItem), replace = FALSE)
-                    
-                    nUniqueDataPoints <- 0
-                    if (!is.null(data)) {
-                      # If there are more unique data points than clusters
-                      uniqueData <- unique(data[items, ])
-                      #print(uniqueData)
-                      nUniqueDataPoints <- nrow(uniqueData)
-                      #print(nUniqueDataPoints) # This gives 39 - shouldn't it be 419?
-                    }
-                    
-                    if (nUniqueDataPoints > K | is.null(data)) {
-                      # If the chosen clustering method is PAM or there is at least one
-                      # covariate that is a factor
-                      if (clMethod == "pam" | containsFactors) {
-                        if (is.double(dist) & isSymmetric(dist)) {
-                          distances <- stats::as.dist(dist[items, items])
-                        } else if (dist == "cor") {
-                          distances <- stats::as.dist(1 - stats::cor(t(data[items, ])))
-                        } else if (dist == "binary") {
-                          distances <- stats::dist(data[items, ], method = dist)
-                        } else if (dist == "gower") {
-                          distances <- cluster::daisy(data[items, ], metric = "gower")
-                        } else {
-                          stop("Distance not recognized. If method is `pam`, distance
-                  must be one of `cor`, `binary`, `gower` or the symmetric
-                  matrix of distances.")
-                        }
-                        # Apply pam to the subsample and extract cluster labels
-                        cl <- cluster::pam(distances, K)$clustering
-                      } else if (clMethod == "kmeans" & !is.null(data)) {
-                        # Apply k-means to the subsample and extract cluster labels
-                        cl <- stats::kmeans(
-                          data[items, ], K, iter.max = maxIterKM, nstart = 20)$cluster
-                      } else if (clMethod == "sparse-kmeans" & !is.null(data)) {
-                        if(is.null(sparseKmeansPenalty))
-                          sparseKmeansPenalty = sqrt(P)
-                        cat("sparseKmeansPenalty", sparseKmeansPenalty, "\n")
-                        # Apply sparse k-means to the subsample and extract cluster labels
-                        cl <- sparcl::KMeansSparseCluster(
-                          data[items,], K, wbounds = sparseKmeansPenalty)[[1]]$Cs
-                      } else if (clMethod == "hclust" | clMethod == "sparse-hclust") {
-                        if (dist == "pearson" | dist == "spearman") {
-                          pearsonCor <- stats::cor(t(data[items, ]), method = dist)
-                          distances <- stats::as.dist(1 - pearsonCor)
-                        } else if (is.double(dist)) {
-                          distances <- stats::as.dist(dist[items, items])
-                        } else {
-                          # Calculate pairwise distances between observations
-                          distances <- stats::dist(data[items, ], method = dist)
-                        }
-                        # Apply hierarchical clustering to the subsample
-                        if(clMethod == "hclust"){
-                          hClustering <- stats::hclust(distances, method = hclustMethod)
-                        } else {
-                          hClustering <- sparcl::HierarchicalSparseCluster(
-                            dists = as.matrix(distances), method = "average",
-                            wbound = 10)$hc
-                        }
-                        cl <- stats::cutree(hClustering, K)
-                      } else {
-                        stop("Clustering algorithm name not recognised. Please choose
-                       one of `kmeans`, `hclust`, `pam`, `sparse-kmeans`,
-                       `sparse-hclust`.")
-                      }
-                      
-                      #print(unique(cl)) - produces clusterings based on different k
-                      
-                      # Update matrix containing counts of number of times each pair has
-                      # been sampled together
-                      indicatorMatrix <- indicatorMatrix + crossprod(
-                        t(as.numeric(dataIndices %in% items)))
-                      
-                      # For each cluster
-                      for (k in seq_len(K)) {
-                        # Update counts of number of times each pair has been put in the
-                        # same cluster
-                        coClusteringMatrix[items, items] <-
-                          coClusteringMatrix[items, items] +
-                          crossprod(t(as.numeric(cl == k)))
-                      }
-                    }
-                  }
-                }
-                print(dim(coClusteringMatrix))
-                consensusMatrix <- coClusteringMatrix
+                consensusMatrix[, ,i - 1] <-
+                  coca::consensusCluster(moc, i, B = N, pItem, clMethod = ccClMethod,
+                                          dist = ccDistHC, maxIterKM = max.iter)
                 
                 ### Step 2. Use hierarchical clustering on the consensus matrix
-                distances <- stats::as.dist(1 - coClusteringMatrix)
-                return(distances)
+                distances <- stats::as.dist(1 - consensusMatrix[, , i - 1])
                 hClustering <- stats::hclust(distances, method = hclustMethod)
                 clLabels[i - 1, ] <- stats::cutree(hClustering, i)
               }
-                
-                ### Step 2. Use hierarchical clustering on the consensus matrix
-                #distances <- stats::as.dist(1 - consensusMatrix[, , i - 1])
-                #return(distances)
-                #hClustering <- stats::hclust(distances, method = hclustMethod)
-                #clLabels[i - 1, ] <- stats::cutree(hClustering, i)
-              #}
               
               K <- coca::maximiseSilhouette(consensusMatrix, clLabels, max(k), savePNG,
                                             fileName, widestGap = widestGap, dunns = dunns,
@@ -286,7 +156,7 @@ clusterofclusters <- function(moc,                                              
               
               for (i in seq_len(max(k) - 1) + 1) {
                 ### Step 1. Compute the consensus matrix ###
-                consensusMatrix[, , i - 1] <-
+                consensusMatrix[, ,i - 1] <-
                   coca::consensusCluster(moc, i, B = N, pItem, clMethod = ccClMethod,
                                          dist = ccDistHC, maxIterKM = max.iter)
                 ### Step 2. Compute area under the curve ###
@@ -311,17 +181,23 @@ clusterofclusters <- function(moc,                                              
       ### Step 1. Compute the consensus matrix ###
       if (!is.null(consensusMatrix)) {
          output$consensusMatrix <- consensusMatrix[, , K - 1]
+         output$consensusMatrix <- matrix(as.integer(output$consensusMatrix),
+                                          nrow = nrow(output$consensusMatrix),
+                                          ncol = ncol(output$consensusMatrix))
       } else {
          output$consensusMatrix <- coca::consensusCluster(moc, K, B = N, pItem,
                                                     clMethod = ccClMethod,
                                                     dist = ccDistHC,
                                                    maxIterKM = max.iter)
+         output$consensusMatrix <- matrix(as.integer(output$consensusMatrix),
+                                          nrow = nrow(output$consensusMatrix),
+                                          ncol = ncol(output$consensusMatrix))
       }
 
       ### Step 2. Use hierarchical clustering on the consensus matrix ###
-      distances <- stats::as.dist(1 - output$consensusMatrix)
-      hClustering <- stats::hclust(distances, method = hclustMethod)
-      output$clusterLabels <- stats::cutree(hClustering, K)
+      d <- stats::as.dist(1 - output$consensusMatrix)
+      hC <- stats::hclust(d, method = hclustMethod)
+      output$clusterLabels <- stats::cutree(hC, K)
 
       output$K <- K
 
