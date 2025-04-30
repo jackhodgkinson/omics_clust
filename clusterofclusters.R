@@ -258,14 +258,22 @@ clusterofclusters <- function(moc,                                              
                     }
                   }
                 }
-                consensusMatrix <- coClusteringMatrix[ , , i-1]
+                print(dim(coClusteringMatrix))
+                consensusMatrix <- coClusteringMatrix
                 
                 ### Step 2. Use hierarchical clustering on the consensus matrix
-                distances <- stats::as.dist(1 - consensusMatrix[, , i - 1])
+                distances <- stats::as.dist(1 - coClusteringMatrix)
                 return(distances)
                 hClustering <- stats::hclust(distances, method = hclustMethod)
                 clLabels[i - 1, ] <- stats::cutree(hClustering, i)
               }
+                
+                ### Step 2. Use hierarchical clustering on the consensus matrix
+                #distances <- stats::as.dist(1 - consensusMatrix[, , i - 1])
+                #return(distances)
+                #hClustering <- stats::hclust(distances, method = hclustMethod)
+                #clLabels[i - 1, ] <- stats::cutree(hClustering, i)
+              #}
               
               K <- coca::maximiseSilhouette(consensusMatrix, clLabels, max(k), savePNG,
                                             fileName, widestGap = widestGap, dunns = dunns,
