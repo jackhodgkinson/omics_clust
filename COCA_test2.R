@@ -175,7 +175,7 @@ for (m in method) {
                      method = m, min.nc = 2, max.nc = 9,
                      index = i)
       best_nc <- opt$Best.nc[[1]]
-      opt_results <- rbind(results, data.frame(Method = m,
+      results <- rbind(results, data.frame(Method = m,
                                            Index = i,
                                            BestNC = best_nc))
       index_df <- data.frame(NClust = as.numeric(names(opt$All.index)),
@@ -188,7 +188,7 @@ for (m in method) {
 }
 
 # Join with true number of groups 
-opt_results <- cbind(opt_results, n_groups)
+opt_results <- cbind(results, n_groups)
 
 # Create data frame for plotting
 all_index_df <- bind_rows(all_index_list)
@@ -203,12 +203,22 @@ ggplot(all_index_df, aes(x = NClust, y = Value)) +
 
 # Subset for dunn 
 dunn_vals <- all_index_df %>%
-  filter(Index == "dunn" & NClust == 2)
+  filter(Index == "dunn")
+
+# Plot graph for dunn
+ggplot(dunn_vals, aes(x = NClust, y = Value)) + 
+  geom_line() + 
+  facet_grid(Method ~ Index, scales = "free_y") + 
+  labs(title = "NbClust Index Scores for the Dunn Index using each Method",
+       x = "Number of Groups",
+       y = "Index Value")
+
+# Subset the best method for dunn index
+print(dunn_vals[which.max(dunn_vals$Value), ])
 
 # Based off results, calculate optimal number of groups of clusters
 opt <- NbClust(diss = dist_mat, distance = NULL, method = "single", 
                min.nc = 2, max.nc = 9, index = "dunn")
-
 
 # Choose optimal 
 if (is.vector(opt$Best.nc)) {
@@ -227,12 +237,82 @@ if (exists("true_groups")) {
 
 # Split the columns into datasets by group 
 data_group <- list()
+data_group2 <- list()
 
-# Do I need to recluster in groups here again? Or use the existing clusters?
 for(i in 1:length(unique(groups))){
   data_group[[i]] <- classification[groups == i]
   names(data_group)[[i]] <- paste0("Group",i)
 }
+
+# Test: Using existing data and reclustering - it makes no difference
+# for(i in 1:length(unique(groups))){
+#   data_group2[[i]] <- data1[, groups == i]
+#   names(data_group2)[[i]] <- paste0("Group",i)
+# }
+# 
+# data_group2$Group1 <- as.list(data_group2$Group1)
+# data_group2$Group2 <- as.list(data_group2$Group2)
+# 
+# mclust_results2 <- list()  
+# classification_results2 <- list() 
+# 
+# set.seed(seed)
+# for (i in 1:length(data_group2)) {
+#     data4 <- as.data.frame(data_group2[[i]])
+#     mclust2 <- vector("list", ncol(data4))
+#     classification2 <- as.data.frame(matrix(NA, nrow = nrow(data4), ncol = ncol(data4)))
+#     colnames(classification2) <- colnames(data4)
+#     data5 <- as.list(data4)
+#     for (j in 1:length(data5)) {
+#       mclust2[[j]] <- Mclust(data5[[j]])
+#       classification2[, j] <- mclust2[[j]]$classification  # Store clustered data column-wise
+#     }
+#     mclust_results2[[paste0("Group",i)]] <- mclust2
+#     classification_results2[[paste0("Group",i)]] <- classification2
+# }
+# 
+# for(i in 1:length(classification_results2)) {
+#   comparison_result <- all.equal(classification_results2[[i]], data_group[[i]])
+#   if (identical(classification_results2[[i]], data_group[[i]])) {  # Compare data frames
+#     print(paste0("Group ", i, " is the same with splitting data then clustering and data splitting based on original clustering."))
+#   } else {
+#     print(paste0("Group ", i, " is different with splitting data then clustering and data splitting based on original clustering."))
+#   }
+# }for(i in 1:length(unique(groups))){
+  data_group2[[i]] <- data1[, groups == i]
+  names(data_group2)[[i]] <- paste0("Group",i)
+}
+
+data_group2$Group1 <- as.list(data_group2$Group1)
+data_group2$Group2 <- as.list(data_group2$Group2)
+
+mclust_results2 <- list()  
+classification_results2 <- list() 
+
+set.seed(seed)
+for (i in 1:length(data_group2)) {
+    data4 <- as.data.frame(data_group2[[i]])
+    mclust2 <- vector("list", ncol(data4))
+    classification2 <- as.data.frame(matrix(NA, nrow = nrow(data4), ncol = ncol(data4)))
+    colnames(classification2) <- colnames(data4)
+    data5 <- as.list(data4)
+    for (j in 1:length(data5)) {
+      mclust2[[j]] <- Mclust(data5[[j]])
+      classification2[, j] <- mclust2[[j]]$classification  # Store clustered data column-wise
+    }
+    mclust_results2[[paste0("Group",i)]] <- mclust2
+    classification_results2[[paste0("Group",i)]] <- classification2
+}
+
+for(i in 1:length(classification_results2)) {
+  comparison_result <- all.equal(classification_results2[[i]], data_group[[i]])
+  if (identical(classification_results2[[i]], data_group[[i]])) {  # Compare data frames
+    print(paste0("Group ", i, " is the same with splitting data then clustering and data splitting based on original clustering."))
+  } else {
+    print(paste0("Group ", i, " is different with splitting data then clustering and data splitting based on original clustering."))
+  }
+}
+
 
 # Create a MOC for each data group
 moc <- constructMOC(data_group)
