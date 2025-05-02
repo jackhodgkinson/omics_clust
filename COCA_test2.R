@@ -323,7 +323,7 @@ pheatmap::pheatmap(moc$`MOC - Group2`)
 
 # For COCA function, how do we ensure that the max k is reasonable? Same as hclust problem.
 
-
+### THIS IS WHERE IT SEEMS TO GO WRONG ### 
 
 # Feed into COCA for each data group 
 results1 <- clusterofclusters(moc$`MOC - Group1`, ccClMethod = "hclust", hclustMethod = "complete", random_seed = 4881, N = 1000, max.iter = 1000)
@@ -367,5 +367,3 @@ ari_g1_km <- adjustedRandIndex(true_clusters$group1_clusterid, results_km$Group1
 ari_g2_km <- adjustedRandIndex(true_clusters$group2_clusterid, results_km$Group2$clusterLabels)
 
 # Spearman correlation and Euclidean distance are better than random guessing for group 2! 
-
-# Figure out why this is not working!
