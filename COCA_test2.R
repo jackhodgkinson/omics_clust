@@ -23,13 +23,23 @@ params1 <- list(
 #                      random_seed = seed, cluster_labels = clusters,
 #                      equal_clust = FALSE, equal_groups = FALSE)
 # data1 <- data1[[1]]
-n_groups <- 2
+
+# One group of clusters
+n_groups <- 1
 data1 <- simulateGMM(3, n_groups, params1, n_indiv = 419, n_col = N_col,
                      random_seed = seed,
                      equal_clust = FALSE, equal_groups = FALSE)
 true_clusters <- data1[[2]]
-true_groups <- data1[[3]]
 data1 <- data1[[1]]
+
+# Two groups of clusters
+n_groups2 <- 2
+data2 <- simulateGMM(3, n_groups2, params1, n_indiv = 419, n_col = N_col,
+                     random_seed = seed,
+                     equal_clust = FALSE, equal_groups = FALSE)
+true_clusters <- data2[[2]]
+true_groups <- data2[[3]]
+data2 <- data2[[1]]
 # N_col <- 10
 # params1 <- list(
 #   cluster1 = list(mean = runif(N_col, -10, -5), sd = runif(N_col, 0.5, 1)),
@@ -40,7 +50,8 @@ data1 <- data1[[1]]
 #                      equal_clust = FALSE, equal_groups = FALSE)
 # data2 <- data2[[1]]
 # data <- list(data1, data2)
-data <- data1
+
+data <- data2 # Change to data2 for two clustering structures
 
 # Data from COCA package
 # seed <- 4881
@@ -122,7 +133,7 @@ sim_matrix <- matrix(0, nrow = ncol(classification), ncol = ncol(classification)
 set.seed(seed)
 for (i in 1:ncol(classification)){
   for(j in 1:ncol(classification)){
-    sim_matrix[i,j] <- adjustedRandIndex(classification[[i]], classification[[j]])
+    sim_matrix[i,j] <- adjustedRandIndex(classification[[i]], classification[[j]]) # we have called this M (capital)
   }
 }
 
@@ -155,6 +166,14 @@ par(mfrow = c(1, 1))
 
 # Do best hclust 
 hclust <- hclust(dist_mat)
+
+# Calculate cophenetic distances 
+coph_dist <- cophenetic(hclust)
+coph_cor <- cor(dist_mat, coph_dist)
+
+if (coph_cor >= 0.95) {
+  # Here insert code to find the protein clusters. 
+}
 
 # Figure out optimal number of groups 
 set.seed(seed)
@@ -278,7 +297,7 @@ for(i in 1:length(unique(groups))){
 #   } else {
 #     print(paste0("Group ", i, " is different with splitting data then clustering and data splitting based on original clustering."))
 #   }
-# }for(i in 1:length(unique(groups))){
+for(i in 1:length(unique(groups))){
   data_group2[[i]] <- data1[, groups == i]
   names(data_group2)[[i]] <- paste0("Group",i)
 }
