@@ -1,7 +1,7 @@
 # constructMOC.R
 constructMOC <- function(data,                    # Input as data frame or list of data frames.
                          ID = NULL,               # ID column for participants
-                         parallel = TRUE          # Use parallel processsing. Default is TRUE.
+                         parallel = FALSE          # Use parallel processsing. Default is TRUE.
                          )              
 
   {
@@ -38,28 +38,28 @@ constructMOC <- function(data,                    # Input as data frame or list 
       # With parallel processing
       if (parallel == TRUE) {
       
-      # Create empty list for MOC
-      moc <- list()
-      
-      # Create a cluster with available cores
-      cl <- makeCluster(detectCores() - 1)
-      
-      # Export necessary variables and functions
-      clusterExport(cl, c("data"))
-      
-      # Create MOC for each group of data
-      moc <- parLapply(cl, 1:length(data), function(i) {
-        data[[i]] <- as.data.frame(sapply(data[[i]], as.factor))
-        m <- do.call(cbind, lapply(data[[i]], function(x) model.matrix(~ x - 1)))
-        m <- as.matrix(m)
-        colnames(m) <- NULL
-        return(m)
-      })
-      
-      names(moc) <- paste0("MOC - Group", 1:length(moc))
-      
-      stopCluster(cl)  # Stop the cluster
-    }
+        # Create empty list for MOC
+        moc <- list()
+        
+        # Create a cluster with available cores
+        cl <- makeCluster(detectCores() - 1)
+        
+        # Export necessary variables and functions
+        clusterExport(cl, c("data"))
+        
+        # Create MOC for each group of data
+        moc <- parLapply(cl, 1:length(data), function(i) {
+          data[[i]] <- as.data.frame(sapply(data[[i]], as.factor))
+          m <- do.call(cbind, lapply(data[[i]], function(x) model.matrix(~ x - 1)))
+          m <- as.matrix(m)
+          colnames(m) <- NULL
+          return(m)
+        })
+        
+        names(moc) <- paste0("MOC - Group", 1:length(moc))
+        
+        stopCluster(cl)  # Stop the cluster
+      }
     
       # Without parallel processing
       else  {

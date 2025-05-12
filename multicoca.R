@@ -16,7 +16,7 @@ multicoca <- function(moc_list,                                         # List o
                       dunn2s = FALSE,                                   # Boolean. If TRUE, compute also alternative Dunn's index to choose best number of clusters. Default is FALSE.
                       returnAllMatrices = FALSE,                        # Boolean. If TRUE, return consensus matrices for all considered values of K. Default is FALSE.
                       random_seed = NULL,                               # Set random seed for reproducibility. Default is NULL
-                      parallel = TRUE                                   # Use parallel processing. Default is TRUE.
+                      parallel = FALSE                                   # Use parallel processing. Default is TRUE.
                       )  
 {
   
