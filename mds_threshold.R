@@ -11,7 +11,7 @@ library(parallel)
 # Load external functions
 source("simulateGMM.R")
 source("constructMOC.R")
-source("grouping.R")
+source("classifier.R")
 source("numCores.R")
 source("clusterofclusters.R")
 source("multicoca.R")
@@ -79,7 +79,55 @@ for (i in N_col) {
     # )
     
     # Get distance matrix
-    dist_mat <- grouping(data)
+    classification <- GMMclassifier(data) # This does the MClust fitting - can replace with LCMM
+    
+    # Construct empty similarity matrix 
+    sim_matrix <- matrix(0, nrow = ncol(classification), ncol = ncol(classification),
+                         dimnames = list(colnames(classification), colnames(classification)))
+    
+    # Set seed 
+    set.seed(seed)
+    
+    if (parallel) {
+      
+      if (.Platform$OS.type == "windows") {
+        cl2 <- makeCluster(n_cores)
+        clusterExport(cl2, ls(envir = environment()), envir = environment())
+        
+        # Parallelised computation of similarity matrix
+        sim_mat <- parLapply(cl2, 1:ncol(classification), function(i) {
+          sapply(1:ncol(classification), function(j) {
+            adjustedRandIndex(classification[[i]], classification[[j]])
+          })
+        })
+        
+        # Stop the parallel cluster after the work is done
+        stopCluster(cl2)
+        
+      } else {
+        sim_mat <- mclapply(1:ncol(classification), function(i) {
+          sapply(1:ncol(classification), function(j) {
+            adjustedRandIndex(classification[[i]], classification[[j]])
+          })
+        }, mc.cores = n_cores)
+      }
+    }
+    
+    else {
+      sim_mat <- lapply(1:ncol(classification), function(i) {
+        sapply(1:ncol(classification), function(j) {
+          adjustedRandIndex(classification[[i]], classification[[j]])
+        })
+      })
+      
+    }
+    
+    # Combine the list into a matrix
+    sim_matrix <- do.call(cbind, sim_mat)
+    
+    # Convert to dissimilarity matrix
+    dissim_matrix <- 1 - sim_matrix
+    dist_mat <- as.dist(dissim_matrix)
     
     # Perform MDS on the distance matrix
     mds <- cmdscale(dist_mat)
