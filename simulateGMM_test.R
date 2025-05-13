@@ -1,19 +1,23 @@
 #### Testing of simulateGMM function in different scenarios 
 ### Install relevant packages 
 library(tidyverse)
-library(GGally)
 library(mclust)
+library(pheatmap)
 
 ### Load function 
 source("simulateGMM.R")
+
+# Switch graphics off
+graphics.off()
 
 ### Testing
 ## Parameters - means far apart 
 N_col <- 10
 params1 <- list(
-  cluster1 = list(mean = runif(N_col, -10, -5), sd = runif(N_col, 0.5, 1)),  
-  cluster2 = list(mean = runif(N_col, 10, 15), sd = runif(N_col, 0.75, 3)), 
-  cluster3 = list(mean = rep(0, N_col), sd = rep(5, N_col)))  
+  cluster1 = list(mean = rnorm(N_col, mean = -10, sd = 1), cov = cov(matrix(rnorm(N_col*N_col, mean = 0, sd = 0.75), nrow = N_col, ncol = N_col))),
+  cluster2 = list(mean = rnorm(N_col, mean = 0, sd = 2), cov = cov(matrix(rnorm(N_col*N_col, mean = 1, sd = 0.35), nrow = N_col, ncol = N_col))),
+  cluster3 = list(mean = rnorm(N_col, mean = 10, sd = 0.5), cov = cov(matrix(rnorm(N_col*N_col, mean = -1, sd = 0.15), nrow = N_col, ncol = N_col)))
+)
 
 ## Test: single clustering structure with equal sized clusters
 example1 <- simulateGMM(3, 1, params1, n_indiv = 419, n_col = N_col, random_seed = 4881)
@@ -301,13 +305,13 @@ pheatmap::pheatmap(example3.1_new[order(clusters[["group3_clusterid"]]),
 ## Parameters - extreme examples
 N_col2 <- 100
 params2 <- list(
-  cluster1 = list(mean = runif(N_col2, -10, -5), sd = runif(N_col2, 0.5, 1)),  
-  cluster2 = list(mean = runif(N_col2, 10, 15), sd = runif(N_col2, 0.75, 3)), 
-  cluster3 = list(mean = runif(N_col2, -1, 1), sd = runif(N_col2, 0.75, 3)),
-  cluster4 = list(mean = runif(N_col2, 0, 1), sd = runif(N_col2, 0, 0.5))) 
+  cluster1 = list(mean = rnorm(N_col2, mean = -2, sd = 0.6), cov = cov(matrix(rnorm(N_col2*N_col2, mean = 0, sd = 0.75), nrow = N_col2, ncol = N_col2))),
+  cluster2 = list(mean = rnorm(N_col2, mean = 0, sd = 0.2), cov = cov(matrix(rnorm(N_col2*N_col2, mean = 1, sd = 0.35), nrow = N_col2, ncol = N_col2))),
+  cluster3 = list(mean = rnorm(N_col2, mean = 2, sd = 0.5), cov = cov(matrix(rnorm(N_col2*N_col2, mean = -1, sd = 0.15), nrow = N_col2, ncol = N_col2)))
+)
 
 ## Test: extreme example - five clustering structures with differet sized clusters and groups 
-example4 <- simulateGMM(4, 5, params2, n_indiv = 4881, n_col = N_col2, 
+example4 <- simulateGMM(3, 5, params2, n_indiv = 4881, n_col = N_col2, 
                           random_seed = 4881, equal_clust = FALSE, equal_groups = FALSE)
 
 # Seperate data into data and clusters
@@ -318,7 +322,7 @@ clusters <- example4[[2]]
 colnames(example4_data) <- paste0("Protein", 1:N_col2)
 
 # Assign labels to the clusters
-clusters[] <- lapply(clusters, function(x) factor(x, labels = c("1","2","3","4")))
+clusters[] <- lapply(clusters, function(x) factor(x, labels = c("1","2","3")))
 
 # Produce heatmap - focused on group 1
 example4_new <- as.matrix(example4_data)
