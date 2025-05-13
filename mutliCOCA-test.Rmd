@@ -1,0 +1,876 @@
+---
+title: "MultiCOCA Test File"
+author: "Jack Hodgkinson"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Setup
+
+```{r seed}
+seed <- 4881
+set.seed(seed)
+```
+
+```{r setup2, echo=FALSE}
+# Load packages
+library(mclust)
+library(NbClust)
+library(tidyverse)
+library(shiny)
+
+# Install functions needed
+simulateGMM <- function(n_clust,                                                 # Number of clusters
+                        n_groups,                                                # Number of groups of data, 1 by default
+                        cluster_params,                                          # List of distribution parameters per cluster
+                        n_indiv,                                                 # Number of individuals  
+                        n_col,                                                   # Number of columns in simulated data
+                        random_seed,                                             # Input random seed for reproducibility
+                        cluster_labels = NULL,                                   # Input cluster labels, NULL by default.
+                        group_labels = NULL,                                     # Input group labels, NA by default
+                        equal_clust = TRUE,                                      # If generating cluster labels, ensure each cluster has approx equal individuals
+                        equal_groups = TRUE,                                     # If n_groups > 1, ensure each group contains approx equal number of cols
+                        parallel = FALSE                                          # Use parallel processsing. Default is TRUE
+                        ){
+  
+  # Load relevant packages
+  library(MASS)
+  library(parallel)
+  
+  # Ensure numeric inputs
+  n_clust <- as.numeric(n_clust)
+  n_groups <- as.numeric(n_groups)
+  n_indiv <- as.numeric(n_indiv)
+  n_col <- as.numeric(n_col)
+  random_seed <- as.numeric(random_seed)
+
+  # Set seed
+  set.seed(random_seed)
+  
+  # Validate parameters
+  if (length(cluster_params) != n_clust) {
+    stop(paste0("The number of clusters (", n_clust, ") does not match the number of elements in cluster_params (", length(cluster_params), ")."))
+  }
+  invisible(lapply(seq_len(n_clust), function(k) {
+    clust_name <- paste0("cluster", k)
+    params <- cluster_params[[clust_name]]
+    if (is.null(params)) stop(paste("Missing parameters for", clust_name))
+    if (is.null(params$mean)) stop(paste("Missing 'mean' for", clust_name))
+    if (length(params$mean) != n_col) stop(paste("Length of 'mean' must match n_col for", clust_name))
+    if (is.null(params$cov) && is.null(params$sd)) {
+      stop(paste("Must provide either 'cov' or 'sd' for", clust_name))
+    }
+    if (!is.null(params$sd) && length(params$sd) != n_col) {
+      stop(paste("Length of 'sd' must match n_col for", clust_name))
+    }
+    if (!is.null(params$cov) && (!is.matrix(params$cov) || any(dim(params$cov) != n_col))) {
+      stop(paste("Covariance matrix for", clust_name, "must be", n_col, "x", n_col))
+    }
+    if (!is.null(params$sd) && !is.null(params$cov)) {
+      warning(paste("Both 'sd' and 'cov' provided for", clust_name, "- using 'cov'"))
+    }
+  }))
+  
+  # Generate cluster labels
+  indiv_clust <- if (is.null(cluster_labels)){
+    if (!equal_clust){
+      sample(seq_len(n_clust), size = n_indiv, replace = TRUE, 
+             prob = {p <- runif(n_clust); p / sum(p)})
+    } else {
+      sample(seq_len(n_clust), size = n_indiv, replace = TRUE)  
+    } 
+  } else cluster_labels
+  
+  # Data simulation function
+  sim_clust_data <- function (k) {
+    idx <- which(indiv_clust == k)
+    if (length(idx) == 0) return(NULL)
+    param <- cluster_params[[paste0("cluster",k)]]
+    mu <- param$mean
+    Sigma <- if (!is.null(param$cov)) param$cov else diag(param$sd^2)
+    data <- mvrnorm(n = length(idx), mu = mu, Sigma = Sigma)
+    list(index = idx, data = data)
+  }
+  
+  # Generate data 
+  if (parallel && n_indiv > 1000 && n_clust > 3) {
+    if (.Platform$OS.type != "windows"){
+      cluster_results <- mclapply(seq_len(n_clust), sim_clust_data, 
+                                  mc.cores = detectCores() - 1)
+    }
+    else {
+      cl <- makeCluster(detectCores() - 1)
+      clusterExport(cl, ls(envir = environment()), envir = environment())
+      cluster_results <- parLapply(cl, seq_len(n_clust), sim_clust_data)
+      stopCluster(cl)
+    }
+  } else { 
+      cluster_results <- lapply(seq_len(n_clust), sim_clust_data)
+    }
+      
+    # Create data matrix 
+    sim_data <- matrix(NA, nrow = n_indiv, ncol = n_col)
+    invisible(lapply(cluster_results, function(res) {
+      if (!is.null(res)) sim_data[res$index, ] <<- res$data
+    }))
+    
+    # Assign empty group
+    group <- NULL
+    
+    # Permute data if different clustering structures required
+    if (n_groups > 1) {
+      group <- if (!is.null(group_labels)) {
+        group_labels
+      } else if (equal_groups == FALSE & !is.null(group)){
+        repeat {
+          p <- runif(n_groups)
+          p <- p / sum(p)  # normalize to sum to 1
+          group <- sample(seq_len(n_groups), n_col, replace = TRUE, prob = p)
+          if (length(unique(group)) == n_groups) break
+        }
+        group 
+      } else {
+        sample(seq_len(n_groups), n_col, replace = TRUE)
+      }
+      
+      # Run in parallel if needed
+      if (parallel && n_indiv > 1000 && n_groups > 2) {
+        if (.Platform$OS.type != "windows") {
+          cl <- mclapply(seq_len(n_groups - 1), function(g) {
+            permute_cols <- which(group == g)
+            order <- sample(n_indiv)
+            sim_data[, permute_cols] <<- sim_data[order, permute_cols]
+            out <- indiv_clust[order]
+            names(out) <- paste0("group", g, "_clusterid")
+            out
+          }, mc.cores = detectCores() - 1)
+        } else {
+          cl <- makeCluster(n_cores)
+          clusterExport(cl, c("sim_data", "group", "n_indiv", "indiv_clust"), envir = environment())
+          permuted_list <- parLapply(cl, seq_len(n_groups - 1), function(g) {
+            permute_cols <- which(group == g)
+            order <- sample(n_indiv)
+            sim_data[, permute_cols] <<- sim_data[order, permute_cols]
+            out <- indiv_clust[order]
+            names(out) <- paste0("group", g, "_clusterid")
+            out
+          })
+          stopCluster(cl)
+        }
+    } else {
+      # Serial column permutations for groups
+      permuted_list <- lapply(seq_len(n_groups - 1), function(g) {
+        permute_cols <- which(group == g)
+        order <- sample(n_indiv)
+        sim_data[, permute_cols] <<- sim_data[order, permute_cols]
+        out <- indiv_clust[order]
+        names(out) <- paste0("group", g, "_clusterid")
+        out
+      })
+    }
+      
+    names(permuted_list) <- paste0("group", seq_len(n_groups-1), "_clusterid")
+    permuted_list[[paste0("group", n_groups, "_clusterid")]] <- indiv_clust
+    group_clusterID <- as.data.frame(permuted_list)
+    
+    sim_data <- as.data.frame(sim_data)
+    
+    return(list("Simulated Data" = sim_data,
+                "Cluster ID per individual per group" = group_clusterID,
+                "Group ID"= group))
+  } else {
+      sim_data <- as.data.frame(sim_data)
+      return(list("Simulated Data" = sim_data,
+                  "Cluster ID" = indiv_clust))
+  }
+}
+
+# GMMclassifier.R
+# Load numCores.R function
+source("numCores.R")
+
+# Function
+GMMclassifier <- function(data,
+                          parallel = TRUE) {
+  
+  # Detect number of cores
+  n_cores <- numCores()
+  
+  # Cluster each column if single dataset
+  if (class(data) != "list") {
+    
+    # Create empty list for mclust and classification data frame 
+    mclust <- vector("list", ncol(data))
+    classification <- as.data.frame(matrix(NA, nrow = nrow(data), ncol = ncol(data)))
+    
+    # Convert data frame to a list of columns 
+    data2 <- as.list(data)
+    
+    # Set seed
+    set.seed(seed)
+    
+    if (parallel) {
+    
+      if (.Platform$OS.type == "windows"){
+      
+        # Set up parallel cluster
+        cl <- makeCluster(n_cores)
+        clusterExport(cl, ls(envir = environment()), envir = environment())
+        
+        # Fit Mclust to each protein to obtain classification
+        classification_results <- parLapply(cl, data2, function(i) {
+          colnames(i) <- NULL
+          return(Mclust(i)$classification)
+        })
+        
+        # Combine into a classification data frame
+        classification <- as.data.frame(do.call(cbind, classification_results))
+      
+        # End parallel cluster
+        stopCluster(cl) 
+        
+    } else {
+        
+        # Fit Mclust to each protein to obtain classification
+        classification_results <- mclapply(data2, function(i) {
+          colnames(i) <- NULL
+          return(mclust::Mclust(i)$classification)
+        },
+        mc.cores = n_cores)
+        
+        # Combine into a classification data frame
+        classification <- as.data.frame(do.call(cbind, classification_results))
+        
+    }
+    } else {
+          
+          # Fit Mclust to each protein to obtain classification
+          classification_results <- lapply(data2, function(i) {
+            colnames(i) <- NULL
+            return(Mclust(i)$classification)
+          })
+          
+          # Combine into a classification data frame
+          classification <- as.data.frame(do.call(cbind, classification_results))
+        }
+      }
+    
+    # Cluster each column if a list of datasets
+    else {
+    
+    # Initialize lists to store Mclust results and classification matrices for each data frame
+    mclust_results <- list()  
+    classification_results <- list() 
+    
+    # Set seed 
+    set.seed(seed)
+    
+    if (parallel) {
+    
+      if (.Platform$OS.type == "windows"){
+      
+        # Set parallel cluster
+        clo <- makeCluster(n_cores)
+        clusterExport(clo, ls(envir = environment()), envir = environment())
+        
+        # Loop over each element in data list
+        data_process <- function(data) {
+          
+          # Create empty list for mclust and classification data frame 
+          mclust <- vector("list", ncol(data))
+          classification <- as.data.frame(matrix(NA, nrow = nrow(data), ncol = ncol(data)))
+          
+          # Convert data frame to a list of columns 
+          data2 <- as.list(data)
+          
+          # Set up inner parallel cluster for columns
+          set.seed(seed)
+          cli <- makeCluster(n_cores)
+          clusterExport(cli, ls(envir = environment()), envir = environment())
+          clusterEvalQ(cli, library(mclust))
+          
+          # Fit Mclust to each protein to obtain classification 
+          class_res_in <- parLapply(cli, data2, function(i) {
+            colnames(i) <- NULL
+            mclust <- Mclust(i)
+            return(mclust$classification)  # Store clustered data column-wise
+          })
+          
+          # Stop the cluster
+          stopCluster(cli)
+          
+          # Combine classification results into a data frame
+          classification <- as.data.frame(do.call(cbind, class_res_in))
+          return(classification)
+        }
+        
+        # Parallelize the processing of each dataset in the 'data' list (outer parallelization)
+        classification_results <- parLapply(clo, data, function(dataset) {
+          process_dataset(dataset)  # Process each dataset in parallel
+        })
+        
+        # Stop the outer cluster after the work is done
+        stopCluster(clo)
+        
+        # Name the results for each dataset
+        names(classification_results) <- paste0("Dataset", 1:length(data))
+        
+    } else {
+      
+      # Loop over each element in data list
+      data_process <- function(data) {
+        
+        # Create empty list for mclust and classification data frame 
+        mclust <- vector("list", ncol(data))
+        classification <- as.data.frame(matrix(NA, nrow = nrow(data), ncol = ncol(data)))
+        
+        # Convert data frame to a list of columns 
+        data2 <- as.list(data)
+        
+        # Set seed
+        set.seed(seed)
+        
+        # Fit Mclust to each protein to obtain classification 
+        class_res_in <- mclapply(data2, function(i) {
+          colnames(i) <- NULL
+          mclust <- Mclust(i)
+          return(mclust$classification)},
+          mc.cores = n_cores)
+        
+        # Combine classification results into a data frame
+        classification <- as.data.frame(do.call(cbind, class_res_in))
+        return(classification)
+      }
+      
+      # Parallelize the processing of each dataset in the 'data' list (outer parallelization)
+      classification_results <- mclapply(data, function(dataset) {process_dataset(dataset)},
+                                         mc.cores = n_cores)
+      
+      # Name the results for each dataset
+      names(classification_results) <- paste0("Dataset", 1:length(data))
+        
+    }
+      
+    } else {
+    
+      # Loop over each element in data list
+      data_process <- function(data) {
+        
+        # Create empty list for mclust and classification data frame 
+        mclust <- vector("list", ncol(data))
+        classification <- as.data.frame(matrix(NA, nrow = nrow(data), ncol = ncol(data)))
+        
+        # Convert data frame to a list of columns 
+        data2 <- as.list(data)
+        
+        # Fit Mclust to each protein to obtain classification 
+        class_res_in <- lapply(data2, function(i) {
+          colnames(i) <- NULL
+          mclust <- Mclust(i)
+          return(mclust$classification)  # Store clustered data column-wise
+        })
+        
+        # Combine classification results into a data frame
+        classification <- as.data.frame(do.call(cbind, class_res_in))
+        return(classification)
+      }
+      
+      # Parallelize the processing of each dataset in the 'data' list (outer parallelization)
+      classification_results <-lapply(data, function(dataset) {
+        process_dataset(dataset)  # Process each dataset in parallel
+      })
+      
+      # Name the results for each dataset
+      names(classification_results) <- paste0("Dataset", 1:length(data))
+      classification <- classification_results
+      
+    }
+    }
+  
+  return(classification)
+}
+
+# optimal_hclust.R 
+optimal_hclust <- function(dist_mat,
+                           n_groups = NULL,
+                           method, 
+                           index) { 
+  
+  # Figure out optimal number of groups 
+  set.seed(seed)
+  
+  # Try different linkage functions with different indices and see which is most accurate. Report this in thesis.
+  results <- data.frame(Method = character(), 
+                        Index = character(), 
+                        NGroups = integer(), 
+                        stringsAsFactors = FALSE)
+  
+  all_index_list <- list()
+  
+  for (m in method) {
+    for (i in index) {
+      try({
+        opt <- NbClust(diss = dist_mat, distance = NULL,
+                       method = m, min.nc = 2, max.nc = 9,
+                       index = i)
+        best_nc <- opt$Best.nc[[1]]
+        results <- rbind(results, data.frame(Method = m,
+                                             Index = i,
+                                             BestNC = best_nc))
+        index_df <- data.frame(NClust = as.numeric(names(opt$All.index)),
+                               Value = as.numeric(opt$All.index),
+                               Method = m,
+                               Index = i)
+        
+        all_index_list[[paste(m, i, sep = "_")]] <- index_df
+      }, silent = TRUE)
+    }
+  }
+  
+  # Join with true number of groups 
+  opt_results <- cbind(results, n_groups)
+  
+  # Create data frame for plotting
+  all_index_df <- bind_rows(all_index_list)
+  
+  # Plot graph 
+  plot <- ggplot(all_index_df, aes(x = NClust, y = Value)) + 
+    geom_line() + 
+    facet_grid(Method ~ Index) + 
+    labs(title = "NbClust Index Scores for Each Method and Index",
+         x = "Number of Groups",
+         y = "Index Value")
+  
+  print(plot)
+  
+  return(list(`Number of Clusters` = opt_results, 
+              `Index Values` = all_index_df))
+}
+
+# optimal_hclust.R 
+optimal_hclust <- function(dist_mat,
+                           n_groups = NULL,
+                           method, 
+                           index) { 
+  
+  # Figure out optimal number of groups 
+  set.seed(seed)
+  
+  # Try different linkage functions with different indices and see which is most accurate. Report this in thesis.
+  results <- data.frame(Method = character(), 
+                        Index = character(), 
+                        NGroups = integer(), 
+                        stringsAsFactors = FALSE)
+  
+  all_index_list <- list()
+  
+  for (m in method) {
+    for (i in index) {
+      try({
+        opt <- NbClust(diss = dist_mat, distance = NULL,
+                       method = m, min.nc = 2, max.nc = 9,
+                       index = i)
+        best_nc <- opt$Best.nc[[1]]
+        results <- rbind(results, data.frame(Method = m,
+                                             Index = i,
+                                             BestNC = best_nc))
+        index_df <- data.frame(NClust = as.numeric(names(opt$All.index)),
+                               Value = as.numeric(opt$All.index),
+                               Method = m,
+                               Index = i)
+        
+        all_index_list[[paste(m, i, sep = "_")]] <- index_df
+      }, silent = TRUE)
+    }
+  }
+  
+  # Join with true number of groups 
+  opt_results <- cbind(results, n_groups)
+  
+  # Create data frame for plotting
+  all_index_df <- bind_rows(all_index_list)
+  
+  # Plot graph 
+  plot <- ggplot(all_index_df, aes(x = NClust, y = Value)) + 
+    geom_line() + 
+    facet_grid(Method ~ Index) + 
+    labs(title = "NbClust Index Scores for Each Method and Index",
+         x = "Number of Groups",
+         y = "Index Value")
+  
+  print(plot)
+  
+  return(list(`Number of Clusters` = opt_results, 
+              `Index Values` = all_index_df))
+}
+
+## clusterofclusters.R
+clusterofclusters <- function(moc,                                              # Matrix of Clusters - N X C data matrix, where C is the total number of clusters.
+                              k = 2:9,                                          # Number of clusters. Default is to loop through k = 2 to k = 9.
+                              N = 1000,                                         # Number of iterations of Consensus Clustering step.
+                              max.iter = 1000,                                  # Maximum number of iterations for k-means clustering
+                              pItem = 0.8,                                      # Proportion of items sampled at each iteration. 
+                              hclustMethod = "average",                         # Agglomeration method to be used by the hclust function to perform hierarchical clustering on the consensus matrix. Can be "single","complete", "average", etc. For more details please see ?stats::hclust.
+                              choiceKmethod = "silhouette",                     # Method used to choose the number of clusters if K is NULL, can be either "AUC" (area under the curve, work in progress) or "silhouette". Default is "silhouette".
+                              ccClMethod = "kmeans",                            # Clustering method to be used by the Consensus Clustering algorithm (CC). Can be either "kmeans" for k-means clustering or "hclust" for hiearchical clustering. Default is "kmeans".
+                              ccDistHC = "euclidean",                           # Distance to be used by the hiearchical clustering algorithm inside CC. Can be "pearson" (for 1 - Pearson correlation), "spearman" (for 1- Spearman correlation), or any of the distances provided in stats::dist() (i.e. "euclidean", "maximum", "manhattan", "canberra", "binary" or "minkowski"). Default is "euclidean".
+                              savePNG = FALSE,                                  # Boolean. Save plots as PNG files. Default is FALSE.
+                              fileName = "coca",                                # Boolean. If savePNG is TRUE, this is the string containing (the first part of) the name of the output files. Can be used to specify the folder path too. Default is "coca". The ".png" extension is automatically added to this string.
+                              verbose = FALSE,                                  # Boolean. 
+                              widestGap = FALSE,                                # Boolean. If TRUE, compute also widest gap index to choose best number of clusters. Default is FALSE.
+                              dunns = FALSE,                                    # Boolean. If TRUE, compute also Dunn's index to choose best number of clusters. Default is FALSE.
+                              dunn2s = FALSE,                                   # Boolean. If TRUE, compute also alternative Dunn's index to choose best number of clusters. Default is FALSE.
+                              returnAllMatrices = FALSE,                        # Boolean. If TRUE, return consensus matrices for all considered values of K. Default is FALSE.
+                              random_seed = NULL,                               # Set random seed for reproducibility. Default is NULL
+                              parallel = TRUE                                   # Use parallel processsing. Default is TRUE.
+                              ) 
+  {   # Install relevant packages
+      library(parallel)
+  
+      # Set random seed 
+      if(!is.null(random_seed)){
+        set.seed(random_seed)
+      }
+      
+      # Intialise output list
+      output <- list()
+      
+      n <- dim(moc)[1]
+      
+      if (is.null(k)) {
+        stop("Parameter 'k' is required. Please specify a value or range for 'k'.")
+      }
+      
+      # Run COCA with parallel processing
+      if (parallel == TRUE) {
+        
+          if (length(k) != 1 & choiceKmethod == "silhouette") {
+            
+            # Create a cluster with available cores
+            cl <- makeCluster(min(length(k), detectCores() - 1))
+            
+            # Export necessary variables and functions to the cluster
+            clusterExport(cl, ls(envir = environment()), envir = environment())
+            
+            # Run the parallelized operation using parLapply
+            results <- parLapply(cl, k, function(i) {
+              
+              ### Step 1: Compute consensus matrix for each k
+              cm <- coca::consensusCluster(moc, i, B = N, pItem, clMethod = ccClMethod,
+                                 dist = ccDistHC, maxIterKM = max.iter)
+              
+
+              
+              ### Step 2. Use hierarchical clustering on the consensus matrix
+              dist_mat <- stats::as.dist(1 - cm)
+              hc <- stats::hclust(dist_mat, method = hclustMethod)
+              labels <- stats::cutree(hc, i)
+              
+              # Return results per k
+              return(list(k = i, consensusMatrix = cm, clusterLabels = labels))
+            })
+            
+            stopCluster(cl)
+            
+            # Combine results for silhouette evaluation
+            consensusArray <- array(NA, dim = c(nrow(moc), nrow(moc), length(k)))
+            clLabels <- matrix(NA, nrow = length(k), ncol = nrow(moc))
+            
+            for (j in seq_along(k)) {
+              consensusArray[, , j] <- results[[j]]$consensusMatrix
+              clLabels[j, ] <- results[[j]]$clusterLabels
+            }
+            
+            consensusMatrix <- consensusArray
+            K <- coca::maximiseSilhouette(consensusMatrix, clLabels, max(k), savePNG,
+                                    fileName, widestGap = widestGap, dunns = dunns,
+                                    dunn2s = dunn2s)$K
+            
+        # return(K)
+        
+        } else if (length(k) != 1 & choiceKmethod == "AUC") {
+           
+          # Create a cluster with available cores
+          cl <- makeCluster(min(length(k), detectCores() - 1))
+          
+          # Export necessary variables and functions to the cluster
+          clusterExport(cl, ls(envir = environment()), envir = environment())
+          
+          # Run the parallelized operation using parLapply
+          results <- parLapply(cl, k, function(i) {
+        
+             ### Step 1. Compute the consensus matrix ###
+             cm <- coca::consensusCluster(moc, i, B = N, pItem, clMethod = ccClMethod,
+                                dist = ccDistHC, maxIterKM = max.iter)
+             ### Step 2. Compute area under the curve ###
+             auc <- computeAUC(cm)
+             
+             return(list(k = i, consensusMatrix = cm, auc = auc))
+           })
+          
+          stopCluster(cl)
+          
+          # Collect AUC values and consensus matrices
+          areaUnderTheCurve <- sapply(results, function(res) res$auc)
+          consensusArray <- array(NA, dim = c(nrow(moc), nrow(moc), length(k)))
+          
+          for (j in seq_along(k)) {
+            consensusArray[, , j] <- results[[j]]$consensusMatrix
+          }
+          
+           # Step 3: Pick K using AUC
+           K <- coca::chooseKusingAUC(areaUnderTheCurve, savePNG, fileName)$K
+           consensusMatrix <- consensusArray
+        #  return(K)
+           
+        } else if (length(k) != 1) {
+            stop("Method to choose number of clusters has not been recognised.
+               Please make sure that it is either `silhouette` or `AUC`.")
+         } 
+          else if (length(k) == 1) {
+           consensusMatrix <- NULL
+           K <- k
+          }
+      }
+        
+        # Run COCA without parallel processing
+        else {
+            if (length(k) != 1 & choiceKmethod == "silhouette") {
+              consensusMatrix <- array(NA, c(n, n, max(k) - 1))
+              clLabels <- array(NA, c(max(k) - 1, n))
+              
+              for (i in seq_len(max(k) - 1) + 1) {
+                ### Step 1. Compute the consensus matrix
+                consensusMatrix[, ,i - 1] <-
+                  coca::consensusCluster(moc, i, B = N, pItem, clMethod = ccClMethod,
+                                          dist = ccDistHC, maxIterKM = max.iter)
+                
+                ### Step 2. Use hierarchical clustering on the consensus matrix
+                distances <- stats::as.dist(1 - consensusMatrix[, , i - 1])
+                hClustering <- stats::hclust(distances, method = hclustMethod)
+                clLabels[i - 1, ] <- stats::cutree(hClustering, i)
+              }
+              
+              K <- coca::maximiseSilhouette(consensusMatrix, clLabels, max(k), savePNG,
+                                            fileName, widestGap = widestGap, dunns = dunns,
+                                            dunn2s = dunn2s)$K
+              # return(K)
+              
+            } else if (length(k) != 1 & choiceKmethod == "AUC") { # I think this needs to be removed and changed to dunn!
+              consensusMatrix <- array(NA, c(n, n, max(k) - 1))
+              areaUnderTheCurve <- rep(NA, max(k) - 1)
+              
+              for (i in seq_len(max(k) - 1) + 1) {
+                ### Step 1. Compute the consensus matrix ###
+                consensusMatrix[, ,i - 1] <-
+                  coca::consensusCluster(moc, i, B = N, pItem, clMethod = ccClMethod,
+                                         dist = ccDistHC, maxIterKM = max.iter)
+                ### Step 2. Compute area under the curve ###
+                areaUnderTheCurve[i - 1] <- computeAUC(consensusMatrix[, , i - 1])
+              }
+              
+              K <- coca::chooseKusingAUC(areaUnderTheCurve, savePNG, fileName)$K
+              #  return(K)
+              #
+            } else if (length(k) != 1) {
+              stop("Method to choose number of clusters has not been recognised.
+               Please make sure that it is either `silhouette` or `AUC`.")
+            } else if (length(k) == 1) {
+              consensusMatrix <- NULL
+              K <- k
+            }
+          }
+      
+      if (verbose)
+        print(paste("K =", k, sep = " "))
+      
+      ### Step 1. Compute the consensus matrix ###
+      if (!is.null(consensusMatrix)) {
+         output$consensusMatrix <- consensusMatrix[, , K - 1]
+         output$consensusMatrix <- matrix(as.integer(output$consensusMatrix),
+                                          nrow = nrow(output$consensusMatrix),
+                                          ncol = ncol(output$consensusMatrix))
+      } else {
+         output$consensusMatrix <- coca::consensusCluster(moc, K, B = N, pItem,
+                                                    clMethod = ccClMethod,
+                                                    dist = ccDistHC,
+                                                   maxIterKM = max.iter)
+         output$consensusMatrix <- matrix(as.integer(output$consensusMatrix),
+                                          nrow = nrow(output$consensusMatrix),
+                                          ncol = ncol(output$consensusMatrix))
+      }
+
+      ### Step 2. Use hierarchical clustering on the consensus matrix ###
+      d <- stats::as.dist(1 - output$consensusMatrix)
+      hC <- stats::hclust(d, method = hclustMethod)
+      output$clusterLabels <- stats::cutree(hC, K)
+
+      output$K <- K
+
+      if (returnAllMatrices)
+         output$consensusMatrices <- consensusMatrix
+
+      return(output)
+      
+}
+
+# multicoca.R
+multicoca <- function(moc_list,                                         # List of Matrix of Clusters
+                      k = 2:9,                                          # Number of clusters. Default is to loop through k = 1 to k = 9.
+                      N = 1000,                                         # Number of iterations of Consensus Clustering step.
+                      max.iter = 1000,                                  # Maximum number of iterations for k-means clustering
+                      pItem = 0.8,                                      # Proportion of items sampled at each iteration. 
+                      hclustMethod = "average",                         # Agglomeration method to be used by the hclust function to perform hierarchical clustering on the consensus matrix. Can be "single","complete", "average", etc. For more details please see ?stats::hclust.
+                      choiceKmethod = "silhouette",                     # Method used to choose the number of clusters if K is NULL, can be either "AUC" (area under the curve, work in progress) or "silhouette". Default is "silhouette".
+                      ccClMethod = "kmeans",                            # Clustering method to be used by the Consensus Clustering algorithm (CC). Can be either "kmeans" for k-means clustering or "hclust" for hiearchical clustering. Default is "kmeans".
+                      ccDistHC = "euclidean",                           # Distance to be used by the hiearchical clustering algorithm inside CC. Can be "pearson" (for 1 - Pearson correlation), "spearman" (for 1- Spearman correlation), or any of the distances provided in stats::dist() (i.e. "euclidean", "maximum", "manhattan", "canberra", "binary" or "minkowski"). Default is "euclidean".
+                      savePNG = FALSE,                                  # Boolean. Save plots as PNG files. Default is FALSE.
+                      fileName = "coca",                                # Boolean. If savePNG is TRUE, this is the string containing (the first part of) the name of the output files. Can be used to specify the folder path too. Default is "coca". The ".png" extension is automatically added to this string.
+                      verbose = FALSE,                                  # Boolean. 
+                      widestGap = FALSE,                                # Boolean. If TRUE, compute also widest gap index to choose best number of clusters. Default is FALSE.
+                      dunns = FALSE,                                    # Boolean. If TRUE, compute also Dunn's index to choose best number of clusters. Default is FALSE.
+                      dunn2s = FALSE,                                   # Boolean. If TRUE, compute also alternative Dunn's index to choose best number of clusters. Default is FALSE.
+                      returnAllMatrices = FALSE,                        # Boolean. If TRUE, return consensus matrices for all considered values of K. Default is FALSE.
+                      random_seed = NULL,                               # Set random seed for reproducibility. Default is NULL
+                      parallel = FALSE                                   # Use parallel processing. Default is TRUE.
+                      )  
+{
+  
+  # Load necessary libraries
+  library(coca)
+  library(parallel)
+  
+  # Source function 
+  source("clusterofclusters.R")
+  
+  # Set random seed 
+  if(!is.null(random_seed)){
+    set.seed(random_seed)
+  }
+  
+  # Create an empty list to store the results
+  results <- list()
+  
+  # Run MultiCOCA with parallel processing
+  if (parallel == TRUE) {
+    
+    # Create a cluster with available cores
+    cl <- makeCluster(detectCores() - 1)
+    
+    # Export necessary variables and functions to the cluster
+    clusterExport(cl, varlist = c("clusterofclusters"))
+    
+    # Run the parallelized operation using parLapply
+    results <- parLapply(cl, 1:length(moc_list), function(i) {
+        result <- clusterofclusters(moc_list[[i]], 
+                                    k = k,
+                                    N = N, 
+                                    max.iter = max.iter, 
+                                    pItem = pItem, 
+                                    hclustMethod = hclustMethod, 
+                                    choiceKmethod = choiceKmethod, 
+                                    ccClMethod = ccClMethod, 
+                                    ccDistHC = ccDistHC, 
+                                    savePNG = savePNG, 
+                                    fileName = paste0(fileName, "_Group", i), 
+                                    verbose = verbose, 
+                                    widestGap = widestGap, 
+                                    dunns = dunns, 
+                                    dunn2s = dunn2s, 
+                                    returnAllMatrices = returnAllMatrices,
+                                    random_seed = random_seed,
+                                    parallel = TRUE)
+        
+        # Name the results for each group
+        return(result)
+    })
+    
+    # Stop the cluster after computation
+    stopCluster(cl)
+    
+    # Name each group
+    names(results) <- paste0("Group", 1:length(results))
+    
+  } 
+  
+  # Run MultiCOCA without parallel processing
+  else {
+    for (i in 1:length(moc_list)) {
+      results[[i]] <- clusterofclusters(moc_list[[i]], 
+                                        k = k, 
+                                        N = N, 
+                                        max.iter = max.iter, 
+                                        pItem = pItem, 
+                                        hclustMethod = hclustMethod, 
+                                        choiceKmethod = choiceKmethod, 
+                                        ccClMethod = ccClMethod, 
+                                        ccDistHC = ccDistHC, 
+                                        savePNG = savePNG, 
+                                        fileName = paste0(fileName, "_Group", i), 
+                                        verbose = verbose, 
+                                        widestGap = widestGap, 
+                                        dunns = dunns, 
+                                        dunn2s = dunn2s, 
+                                        returnAllMatrices = returnAllMatrices,
+                                        random_seed = random_seed,
+                                        parallel = FALSE)
+      names(results)[[i]] <- paste0("Group", i)
+    }
+  }
+  
+  # Return the results list
+  return(results)
+}
+
+# groupARI.R
+groupARI <- function(output,
+                     true_clusters){
+  group_names <- names(results)
+  ari_values <- data.frame(Group = character(),
+                           ARI = numeric(),
+                           stringsAsFactors = FALSE
+                           )
+  for (group in group_names){
+    ari_values <- rbind(ari_values, data.frame(Group = group,
+                                               ARI = adjustedRandIndex(
+                                                 true_clusters[[paste0(tolower(group),"_clusterid")]],
+                                                 output[[group]]$clusterLabels)
+    ))
+  }
+  
+  return(ari_values)
+}
+```
+
+## Data Simulation
+
+### Define Parameters
+
+```{r params} 
+N_col <- 10
+n_groups <- 3
+params <- list(
+  cluster1 = list(mean = rnorm(N_col, mean = -2, sd = 0.1), cov = cov(matrix(rnorm(N_col*N_col, mean = 0.3, sd = 0.3), nrow = N_col, ncol = N_col))),
+  cluster2 = list(mean = rnorm(N_col, mean = 0, sd = 0.2), cov = cov(matrix(rnorm(N_col*N_col, mean = 0.6, sd = 0.25), nrow = N_col, ncol = N_col))),
+  cluster3 = list(mean = rnorm(N_col, mean = 3, sd = 0.2), cov = cov(matrix(rnorm(N_col*N_col, mean = -0.4, sd = 0.2), nrow = N_col, ncol = N_col)))
+)
+```
+
+### Simulate Data from a Gaussian Mixture Model 
+
+```{r}
+data <- simulateGMM(3, n_groups, params, n_indiv = 419, n_col = N_col,
+                     random_seed = seed,
+                     equal_clust = FALSE, equal_groups = FALSE)
+true_clusters <- data[[2]]
+if (n_groups > 1) { 
+  true_groups <- data[[3]]
+}
+data <- data[[1]]
+```
+
+### 
