@@ -12,56 +12,56 @@ constructMOC <- function(data,                    # Input as data frame or list 
     # Load relevant libraries
     library(parallel)
   
-    # Construct empty similarity matrix 
-    sim_matrix <- matrix(0, nrow = ncol(classification), ncol = ncol(classification),
-                       dimnames = list(colnames(classification), colnames(classification)))
-  
-    # Set seed 
-    set.seed(seed)
-    
-    if (parallel) {
-      
-      # Obtain number of cores 
-      n_cores <- numCores()
-      
-      if (.Platform$OS.type == "windows") {
-        cl2 <- makeCluster(n_cores)
-        clusterExport(cl2, ls(envir = environment()), envir = environment())
-        
-        # Parallelised computation of similarity matrix
-        sim_mat <- parLapply(cl2, 1:ncol(classification), function(i) {
-          sapply(1:ncol(classification), function(j) {
-            adjustedRandIndex(classification[[i]], classification[[j]])
-          })
-        })
-        
-        # Stop the parallel cluster after the work is done
-        stopCluster(cl2)
-        
-      } else {
-        sim_mat <- mclapply(1:ncol(classification), function(i) {
-          sapply(1:ncol(classification), function(j) {
-            adjustedRandIndex(classification[[i]], classification[[j]])
-          })
-        }, mc.cores = n_cores)
-      }
-    }
-    
-    else {
-      sim_mat <- lapply(1:ncol(classification), function(i) {
-        sapply(1:ncol(classification), function(j) {
-          adjustedRandIndex(classification[[i]], classification[[j]])
-        })
-      })
-      
-    }
-    
-    # Combine the list into a matrix
-    sim_matrix <- do.call(cbind, sim_mat)
-    
-    # Convert to dissimilarity matrix
-    dissim_matrix <- 1 - sim_matrix
-    dist_mat <- as.dist(dissim_matrix)
+    # # Construct empty similarity matrix 
+    # sim_matrix <- matrix(0, nrow = ncol(classification), ncol = ncol(classification),
+    #                    dimnames = list(colnames(classification), colnames(classification)))
+    # 
+    # # Set seed 
+    # set.seed(seed)
+    # 
+    # if (parallel) {
+    #   
+    #   # Obtain number of cores 
+    #   n_cores <- numCores()
+    #   
+    #   if (.Platform$OS.type == "windows") {
+    #     cl2 <- makeCluster(n_cores)
+    #     clusterExport(cl2, ls(envir = environment()), envir = environment())
+    #     
+    #     # Parallelised computation of similarity matrix
+    #     sim_mat <- parLapply(cl2, 1:ncol(classification), function(i) {
+    #       sapply(1:ncol(classification), function(j) {
+    #         adjustedRandIndex(classification[[i]], classification[[j]])
+    #       })
+    #     })
+    #     
+    #     # Stop the parallel cluster after the work is done
+    #     stopCluster(cl2)
+    #     
+    #   } else {
+    #     sim_mat <- mclapply(1:ncol(classification), function(i) {
+    #       sapply(1:ncol(classification), function(j) {
+    #         adjustedRandIndex(classification[[i]], classification[[j]])
+    #       })
+    #     }, mc.cores = n_cores)
+    #   }
+    # }
+    # 
+    # else {
+    #   sim_mat <- lapply(1:ncol(classification), function(i) {
+    #     sapply(1:ncol(classification), function(j) {
+    #       adjustedRandIndex(classification[[i]], classification[[j]])
+    #     })
+    #   })
+    #   
+    # }
+    # 
+    # # Combine the list into a matrix
+    # sim_matrix <- do.call(cbind, sim_mat)
+    # 
+    # # Convert to dissimilarity matrix
+    # dissim_matrix <- 1 - sim_matrix
+    # dist_mat <- as.dist(dissim_matrix)
     
     #### INSERT IN HERE MDS TEST CODE ####
 
