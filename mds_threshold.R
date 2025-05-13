@@ -11,7 +11,7 @@ library(parallel)
 # Load external functions
 source("simulateGMM.R")
 source("constructMOC.R")
-source("classifier.R")
+source("GMMclassifier.R")
 source("numCores.R")
 source("clusterofclusters.R")
 source("multicoca.R")
