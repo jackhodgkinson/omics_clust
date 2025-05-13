@@ -4,7 +4,7 @@ source("numCores.R")
 
 # Function
 GMMclassifier <- function(data,
-                     parallel = TRUE) {
+                          parallel = TRUE) {
   
   # Detect number of cores
   n_cores <- numCores()
@@ -65,7 +65,6 @@ GMMclassifier <- function(data,
           
           # Combine into a classification data frame
           classification <- as.data.frame(do.call(cbind, classification_results))
-        
         }
       }
     
@@ -196,9 +195,10 @@ GMMclassifier <- function(data,
       
       # Name the results for each dataset
       names(classification_results) <- paste0("Dataset", 1:length(data))
+      classification <- classification_results
       
     }
     }
   
-  return(classification_results)
+  return(classification)
 }
