@@ -7,6 +7,8 @@ constructMOC <- function(data,                    # Input as data frame or list 
   {
     # Load relevant libraries
     library(parallel)
+  
+    # Insert grouping.R code in here.
 
     # Generate MOC for a single dataset
     if (class(data) != "list") {
