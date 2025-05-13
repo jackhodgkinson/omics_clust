@@ -10,11 +10,8 @@ library(parallel)
 
 # Load external functions
 source("simulateGMM.R")
-source("constructMOC.R")
 source("GMMclassifier.R")
 source("numCores.R")
-source("clusterofclusters.R")
-source("multicoca.R")
 
 # Simulated data 
 seed <- 4881
