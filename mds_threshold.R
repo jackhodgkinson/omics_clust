@@ -44,6 +44,9 @@ for (i in N_col) {
   # Simulate data
   n_groups <- c(1, 2, 3, 4)
   
+  # Get cores
+  n_cores <- numCores()
+  
   for (n in n_groups) {
     
     data <- simulateGMM(3, n, params, n_indiv = 419, n_col = i,
