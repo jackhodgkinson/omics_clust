@@ -7,7 +7,7 @@ library(mclust)
 library(NbClust)
 library(tidyverse)
 library(parallel)
-library(otrimleg)
+library(otrimle)
 
 # Load external functions
 source("simulateGMM.R")
