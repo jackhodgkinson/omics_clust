@@ -10,7 +10,7 @@ simulateGMM <- function(n_clust,                                                
                         group_labels = NULL,                                     # Input group labels, NA by default
                         equal_clust = TRUE,                                      # If generating cluster labels, ensure each cluster has approx equal individuals
                         equal_groups = TRUE,                                     # If n_groups > 1, ensure each group contains approx equal number of cols
-                        _parallel = FALSE                                          # Use parallel processsing. Default is TRUE
+                        parallel_process = FALSE                                          # Use parallel processsing. Default is TRUE
                         ){
   
   # Load relevant packages
@@ -73,7 +73,7 @@ simulateGMM <- function(n_clust,                                                
   }
   
   # Generate data 
-  if (_parallel && n_indiv > 1000 && n_clust > 3) {
+  if (parallel_process && n_indiv > 1000 && n_clust > 3) {
     if (.Platform$OS.type != "windows"){
       cluster_results <- mclapply(seq_len(n_clust), sim_clust_data, 
                                   mc.cores = detectCores() - 1)
@@ -114,7 +114,7 @@ simulateGMM <- function(n_clust,                                                
       }
       
       # Run in parallel if needed
-      if (_parallel && n_indiv > 1000 && n_groups > 2) {
+      if (parallel_process && n_indiv > 1000 && n_groups > 2) {
         if (.Platform$OS.type != "windows") {
           cl <- mclapply(seq_len(n_groups - 1), function(g) {
             permute_cols <- which(group == g)
@@ -126,7 +126,7 @@ simulateGMM <- function(n_clust,                                                
           }, mc.cores = detectCores() - 1)
         } else {
           cl <- makeCluster(n_cores)
-          clusterExport(cl, c("sim_data", "group", "n_indiv", "indiv_clust"), envir = environment())
+          clusterExport(cl,  ls(envir = environment()), envir = environment())
           permuted_list <- parLapply(cl, seq_len(n_groups - 1), function(g) {
             permute_cols <- which(group == g)
             order <- sample(n_indiv)

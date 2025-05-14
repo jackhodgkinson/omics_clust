@@ -29,7 +29,7 @@ results <- data.frame(Columns = numeric(),
                       check.names = FALSE)
 
 # Parallel 
-_parallel <- TRUE
+parallel_process <- TRUE
 
 # Loop over different values of proteins
 for (i in N_col) {
@@ -88,7 +88,7 @@ for (i in N_col) {
     # Set seed 
     set.seed(seed)
     
-    if (_parallel) {
+    if (parallel_process) {
       
       if (.Platform$OS.type == "windows") {
         cl2 <- makeCluster(n_cores)

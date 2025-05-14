@@ -16,7 +16,7 @@ clusterofclusters <- function(moc,                                              
                               dunn2s = FALSE,                                   # Boolean. If TRUE, compute also alternative Dunn's index to choose best number of clusters. Default is FALSE.
                               returnAllMatrices = FALSE,                        # Boolean. If TRUE, return consensus matrices for all considered values of K. Default is FALSE.
                               random_seed = NULL,                               # Set random seed for reproducibility. Default is NULL
-                              _parallel = TRUE                                   # Use parallel processsing. Default is TRUE.
+                              parallel_process = TRUE                                   # Use parallel processsing. Default is TRUE.
                               ) 
   {   # Install relevant packages
       library(parallel)
@@ -36,7 +36,7 @@ clusterofclusters <- function(moc,                                              
       }
       
       # Run COCA with parallel processing
-      if (_parallel) {
+      if (parallel_process) {
         
           if (length(k) != 1 & choiceKmethod == "silhouette") {
             

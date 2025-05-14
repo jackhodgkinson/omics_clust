@@ -5,7 +5,7 @@ source("numCores.R")
 # Function
 constructMOC <- function(data,                    # Input as data frame or list of data frames.
                          ID = NULL,               # ID column for participants
-                         _parallel = FALSE         # Use parallel processsing. Default is TRUE.
+                         parallel_process = FALSE         # Use parallel processsing. Default is TRUE.
                          )              
 
   {
@@ -93,7 +93,7 @@ constructMOC <- function(data,                    # Input as data frame or list 
       }
       
       # With parallel processing
-      if (_parallel) {
+      if (parallel_process) {
       
         # Create empty list for MOC
         moc <- list()

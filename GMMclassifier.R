@@ -4,7 +4,7 @@ source("numCores.R")
 
 # Function
 GMMclassifier <- function(data,
-                          _parallel = TRUE) {
+                          parallel_process = TRUE) {
   
   # Detect number of cores
   n_cores <- numCores()
@@ -22,7 +22,7 @@ GMMclassifier <- function(data,
     # Set seed
     set.seed(seed)
     
-    if (_parallel) {
+    if (parallel_process) {
     
       if (.Platform$OS.type == "windows"){
       
@@ -78,7 +78,7 @@ GMMclassifier <- function(data,
     # Set seed 
     set.seed(seed)
     
-    if (_parallel) {
+    if (parallel_process) {
     
       if (.Platform$OS.type == "windows"){
       
