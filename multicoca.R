@@ -16,7 +16,7 @@ multicoca <- function(moc_list,                                         # List o
                       dunn2s = FALSE,                                   # Boolean. If TRUE, compute also alternative Dunn's index to choose best number of clusters. Default is FALSE.
                       returnAllMatrices = FALSE,                        # Boolean. If TRUE, return consensus matrices for all considered values of K. Default is FALSE.
                       random_seed = NULL,                               # Set random seed for reproducibility. Default is NULL
-                      parallel = FALSE                                   # Use parallel processing. Default is TRUE.
+                      _parallel = FALSE                                   # Use parallel processing. Default is TRUE.
                       )  
 {
   
@@ -36,7 +36,7 @@ multicoca <- function(moc_list,                                         # List o
   results <- list()
   
   # Run MultiCOCA with parallel processing
-  if (parallel == TRUE) {
+  if (_parallel == TRUE) {
     
     # Create a cluster with available cores
     cl <- makeCluster(detectCores() - 1)
@@ -63,7 +63,7 @@ multicoca <- function(moc_list,                                         # List o
                                     dunn2s = dunn2s, 
                                     returnAllMatrices = returnAllMatrices,
                                     random_seed = random_seed,
-                                    parallel = TRUE)
+                                    _parallel = TRUE)
         
         # Name the results for each group
         return(result)
@@ -97,7 +97,7 @@ multicoca <- function(moc_list,                                         # List o
                                         dunn2s = dunn2s, 
                                         returnAllMatrices = returnAllMatrices,
                                         random_seed = random_seed,
-                                        parallel = FALSE)
+                                        _parallel = FALSE)
       names(results)[[i]] <- paste0("Group", i)
     }
   }

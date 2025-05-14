@@ -22,8 +22,38 @@ library(mclust)
 library(NbClust)
 library(tidyverse)
 library(shiny)
+```
 
-# Install functions needed
+```{r numCores, echo = FALSE}
+# numCores.R
+numCores <- function(fallback = 1) {
+  # Try multiple known environment variables used by different schedulers
+  env_vars <- c(
+    "SLURM_CPUS_PER_TASK",     # Slurm
+    "PBS_NUM_PPN",             # PBS
+    "NSLOTS",                  # SGE
+    "OMP_NUM_THREADS",         # OpenMP or general hint
+    "NUM_THREADS",             # Generic cloud var
+    "NUMBER_OF_PROCESSORS"     # Windows-specific sometimes
+  )
+  
+  # Try each environment variable
+  for (var in env_vars) {
+    val <- Sys.getenv(var, unset = NA)
+    if (!is.na(val) && nzchar(val)) {
+      cores <- suppressWarnings(as.integer(val))
+      if (!is.na(cores) && cores > 0) return(cores)
+    }
+  }
+  
+  # Fall back to local detection
+  cores <- parallel::detectCores(logical = FALSE)
+  if (is.na(cores) || cores < 1) return(fallback)
+  return(cores)
+}
+```
+
+```{r simulateGMM, echo=FALSE}
 simulateGMM <- function(n_clust,                                                 # Number of clusters
                         n_groups,                                                # Number of groups of data, 1 by default
                         cluster_params,                                          # List of distribution parameters per cluster
@@ -188,11 +218,10 @@ simulateGMM <- function(n_clust,                                                
                   "Cluster ID" = indiv_clust))
   }
 }
+```
 
+```{r GMMclassifier, echo=FALSE}
 # GMMclassifier.R
-# Load numCores.R function
-source("numCores.R")
-
 # Function
 GMMclassifier <- function(data,
                           parallel = TRUE) {
@@ -393,7 +422,9 @@ GMMclassifier <- function(data,
   
   return(classification)
 }
+```
 
+```{r optimal_hclust, echo=FALSE}
 # optimal_hclust.R 
 optimal_hclust <- function(dist_mat,
                            n_groups = NULL,
@@ -450,64 +481,9 @@ optimal_hclust <- function(dist_mat,
   return(list(`Number of Clusters` = opt_results, 
               `Index Values` = all_index_df))
 }
+```
 
-# optimal_hclust.R 
-optimal_hclust <- function(dist_mat,
-                           n_groups = NULL,
-                           method, 
-                           index) { 
-  
-  # Figure out optimal number of groups 
-  set.seed(seed)
-  
-  # Try different linkage functions with different indices and see which is most accurate. Report this in thesis.
-  results <- data.frame(Method = character(), 
-                        Index = character(), 
-                        NGroups = integer(), 
-                        stringsAsFactors = FALSE)
-  
-  all_index_list <- list()
-  
-  for (m in method) {
-    for (i in index) {
-      try({
-        opt <- NbClust(diss = dist_mat, distance = NULL,
-                       method = m, min.nc = 2, max.nc = 9,
-                       index = i)
-        best_nc <- opt$Best.nc[[1]]
-        results <- rbind(results, data.frame(Method = m,
-                                             Index = i,
-                                             BestNC = best_nc))
-        index_df <- data.frame(NClust = as.numeric(names(opt$All.index)),
-                               Value = as.numeric(opt$All.index),
-                               Method = m,
-                               Index = i)
-        
-        all_index_list[[paste(m, i, sep = "_")]] <- index_df
-      }, silent = TRUE)
-    }
-  }
-  
-  # Join with true number of groups 
-  opt_results <- cbind(results, n_groups)
-  
-  # Create data frame for plotting
-  all_index_df <- bind_rows(all_index_list)
-  
-  # Plot graph 
-  plot <- ggplot(all_index_df, aes(x = NClust, y = Value)) + 
-    geom_line() + 
-    facet_grid(Method ~ Index) + 
-    labs(title = "NbClust Index Scores for Each Method and Index",
-         x = "Number of Groups",
-         y = "Index Value")
-  
-  print(plot)
-  
-  return(list(`Number of Clusters` = opt_results, 
-              `Index Values` = all_index_df))
-}
-
+```{r clusterofclusters, echo = FALSE}
 ## clusterofclusters.R
 clusterofclusters <- function(moc,                                              # Matrix of Clusters - N X C data matrix, where C is the total number of clusters.
                               k = 2:9,                                          # Number of clusters. Default is to loop through k = 2 to k = 9.
@@ -717,7 +693,9 @@ clusterofclusters <- function(moc,                                              
       return(output)
       
 }
+```
 
+```{r multicoca, echo = FALSE}
 # multicoca.R
 multicoca <- function(moc_list,                                         # List of Matrix of Clusters
                       k = 2:9,                                          # Number of clusters. Default is to loop through k = 1 to k = 9.
@@ -743,9 +721,6 @@ multicoca <- function(moc_list,                                         # List o
   # Load necessary libraries
   library(coca)
   library(parallel)
-  
-  # Source function 
-  source("clusterofclusters.R")
   
   # Set random seed 
   if(!is.null(random_seed)){
@@ -825,7 +800,9 @@ multicoca <- function(moc_list,                                         # List o
   # Return the results list
   return(results)
 }
+```
 
+```{r groupARI, echo = FALSE}
 # groupARI.R
 groupARI <- function(output,
                      true_clusters){
@@ -846,16 +823,162 @@ groupARI <- function(output,
 }
 ```
 
+```{r constructMOC, echo = FALSE}
+# constructMOC.R
+constructMOC <- function(data,                    # Input as data frame or list of data frames.
+                         ID = NULL,               # ID column for participants
+                         parallel = FALSE         # Use parallel processsing. Default is TRUE.
+                         )              
+
+  {
+    # Load relevant libraries
+    library(parallel)
+  
+    # # Construct empty similarity matrix 
+    # sim_matrix <- matrix(0, nrow = ncol(classification), ncol = ncol(classification),
+    #                    dimnames = list(colnames(classification), colnames(classification)))
+    # 
+    # # Set seed 
+    # set.seed(seed)
+    # 
+    # if (parallel) {
+    #   
+    #   # Obtain number of cores 
+    #   n_cores <- numCores()
+    #   
+    #   if (.Platform$OS.type == "windows") {
+    #     cl2 <- makeCluster(n_cores)
+    #     clusterExport(cl2, ls(envir = environment()), envir = environment())
+    #     
+    #     # Parallelised computation of similarity matrix
+    #     sim_mat <- parLapply(cl2, 1:ncol(classification), function(i) {
+    #       sapply(1:ncol(classification), function(j) {
+    #         adjustedRandIndex(classification[[i]], classification[[j]])
+    #       })
+    #     })
+    #     
+    #     # Stop the parallel cluster after the work is done
+    #     stopCluster(cl2)
+    #     
+    #   } else {
+    #     sim_mat <- mclapply(1:ncol(classification), function(i) {
+    #       sapply(1:ncol(classification), function(j) {
+    #         adjustedRandIndex(classification[[i]], classification[[j]])
+    #       })
+    #     }, mc.cores = n_cores)
+    #   }
+    # }
+    # 
+    # else {
+    #   sim_mat <- lapply(1:ncol(classification), function(i) {
+    #     sapply(1:ncol(classification), function(j) {
+    #       adjustedRandIndex(classification[[i]], classification[[j]])
+    #     })
+    #   })
+    #   
+    # }
+    # 
+    # # Combine the list into a matrix
+    # sim_matrix <- do.call(cbind, sim_mat)
+    # 
+    # # Convert to dissimilarity matrix
+    # dissim_matrix <- 1 - sim_matrix
+    # dist_mat <- as.dist(dissim_matrix)
+    
+    #### INSERT IN HERE MDS TEST CODE ####
+
+    # Generate MOC for a single dataset
+    if (class(data) != "list") {
+      data <- as.data.frame(sapply(data, as.factor))
+      moc <- do.call(cbind, lapply(data, function(x) model.matrix(~ x - 1)))
+      moc <- as.matrix(moc)
+      colnames(moc) <- NULL
+      names(moc) <- "MOC"  # Ensure proper naming for the single MOC
+    }
+    
+    # Generate MOC for multiple datasets
+    else {
+      
+      # Only keep individuals that are common across all datasets
+      if (length(unique(sapply(data, nrow))) != 1) {
+        if(!is.null(ID)){
+          common_IDs <- Reduce(intersect, lapply(data, function(data) data$ID))
+          data <- lapply(data, function(data) data[data$ID %in% common_ids, ])
+        }
+        else {
+          stop("If datasets are not provided with an ID column, then they need
+                to have all the same number of rows (and the elements must be in
+                the same order in each dataset), otherwise it is impossible
+                to match observations from different datasets into the same
+                matrix of clusters.")
+        }
+      }
+      
+      # With parallel processing
+      if (parallel) {
+      
+        # Create empty list for MOC
+        moc <- list()
+        
+        # If using Windows
+        if (.Platform$OS.type == "windows"){
+        
+          # Create a cluster with available cores
+          cl <- makeCluster(n_cores)
+          
+          # Export necessary variables and functions
+          clusterExport(cl, c("data"))
+          
+          # Create MOC for each group of data
+          moc <- parLapply(cl, 1:length(data), function(i) {
+            data[[i]] <- as.data.frame(sapply(data[[i]], as.factor))
+            m <- do.call(cbind, lapply(data[[i]], function(x) model.matrix(~ x - 1)))
+            m <- as.matrix(m)
+            colnames(m) <- NULL
+            return(m)
+          })
+          
+          # End the cluster
+          stopCluster(cl)
+        
+        } else {
+          moc <- mclapply(1:length(data), function(i) {
+            data[[i]] <- as.data.frame(sapply(data[[i]], as.factor))
+            m <- do.call(cbind, lapply(data[[i]], function(x) model.matrix(~ x - 1)))
+            m <- as.matrix(m)
+            colnames(m) <- NULL
+            return(m)
+          }, mc.cores = n_cores)
+        } 
+        names(moc) <- paste0("MOC - Group", 1:length(moc))
+      }
+    
+      # Without parallel processing
+      else  {
+        moc <- list()
+        for (i in 1:length(data)) {
+          data[[i]] <- as.data.frame(sapply(data[[i]], as.factor))
+          moc[[i]] <- do.call(cbind, lapply(data[[i]], function(x) model.matrix(~ x - 1)))
+          moc[[i]] <- as.matrix(moc[[i]])
+          colnames(moc[[i]]) <- NULL
+          names(moc)[[i]] <- paste0("MOC - Group", i)  
+        }
+      }
+    }
+    return(moc)
+  }
+```
+
 ## Data Simulation
 
 ### Define Parameters
 
 ```{r params} 
-N_col <- 10
+N_col <- 30
 n_groups <- 3
 params <- list(
-  cluster1 = list(mean = rnorm(N_col, mean = -2, sd = 0.1), cov = cov(matrix(rnorm(N_col*N_col, mean = 0.3, sd = 0.3), nrow = N_col, ncol = N_col))),
-  cluster2 = list(mean = rnorm(N_col, mean = 0, sd = 0.2), cov = cov(matrix(rnorm(N_col*N_col, mean = 0.6, sd = 0.25), nrow = N_col, ncol = N_col))),
+  cluster1 = list(mean = rnorm(N_col, mean = -3, sd = 0.1), cov = cov(matrix(rnorm(N_col*N_col, mean = 0.3, sd = 0.3), nrow = N_col, ncol = N_col))),
+  cluster2 = list(mean = rnorm(N_col, mean = 0, sd = 0.2), cov = cov(matrix(rnorm(N_col*N_col, mean = 0.6, sd = 0.2), nrow = N_col, ncol = N_col))),
   cluster3 = list(mean = rnorm(N_col, mean = 3, sd = 0.2), cov = cov(matrix(rnorm(N_col*N_col, mean = -0.4, sd = 0.2), nrow = N_col, ncol = N_col)))
 )
 ```
@@ -872,5 +995,147 @@ if (n_groups > 1) {
 }
 data <- data[[1]]
 ```
+### Plot of Simulated Data
 
-### 
+```{r, echo = FALSE}
+data_plot <- as.matrix(data)
+annotationRow <- as.data.frame(true_clusters[1])
+names(annotationRow) <- "Clusters"
+
+annotationCol <- as.data.frame(as.factor(true_groups))
+names(annotationCol) <- "ProteinClusters"
+rownames(annotationCol) <- colnames(data_plot)
+
+rownames(data_plot) <- rownames(annotationRow)
+annotationRow$Clusters <- as.factor(annotationRow$Clusters)
+annotationCol$ProteinClusters <- as.factor(annotationCol$ProteinCluster)
+true_clust <- as.numeric(true_clusters[["group1_clusterid"]])
+ordered_data <- data_plot[order(true_clust), order(annotationCol$ProteinClusters)]
+pheatmap::pheatmap(
+  ordered_data,
+  annotation_row = annotationRow,
+  annotation_col = annotationCol[order(annotationCol$ProteinClusters), , drop = FALSE],
+  cluster_rows = FALSE
+)
+```
+
+## Classification
+
+```{r}
+# Classify data using a GMM 
+classification <- GMMclassifier(data)
+```
+
+## Hierarchical Clustering of Groups
+
+```{r, echo = FALSE}
+# Construct similarity matrix 
+sim_matrix <- matrix(0, nrow = ncol(classification), ncol = ncol(classification),
+                     dimnames = list(colnames(classification), colnames(classification)))
+
+set.seed(seed)
+for (i in 1:ncol(classification)){
+  for(j in 1:ncol(classification)){
+    sim_matrix[i,j] <- adjustedRandIndex(classification[[i]], classification[[j]]) # we have called this M (capital)
+  }
+}
+
+# Convert to dissimilarity matrix
+dissim_matrix <- 1 - sim_matrix
+dist_mat <- as.dist(dissim_matrix)
+```
+
+### Heatmap of the Similarity Matrix
+
+```{r}
+# Pheatmap
+pheatmap::pheatmap(sim_matrix)
+```
+
+### Testing different linkages and indices 
+
+```{r} 
+# Specify methods and indices to test
+methods <- list("single","complete","average","ward.D2","ward.D","mcquitty","median","centroid")
+indices <- list("cindex","silhouette","dunn","mcclain")
+```
+
+```{r, include=FALSE}
+opt_hclust <- optimal_hclust(dist_mat,
+                             n_groups,
+                             method = methods,
+                             index = indices)
+```
+```{r, echo = FALSE}
+# Choose best index and linkage function
+opt_hclust$`Number of Clusters`
+
+# Plot results 
+indices <- opt_hclust$`Index Values`
+ggplot(data = indices, aes(x = NClust, y = Value)) + 
+  geom_line() + 
+  facet_grid(Method ~ Index) +  # Facet by both Method and Index
+  labs(
+    title = "Clustering Indices by Number of Clusters",
+    x = "Number of Clusters",
+    y = "Index Value"
+  ) +
+  theme_minimal()
+```
+
+```{r}
+# Apply based on the results above
+hclust <- hclust(dist_mat, method = "complete")
+opt <- NbClust(diss = dist_mat, distance = NULL, method = "single", 
+               min.nc = 2, max.nc = 9, index = "dunn")
+```
+
+```{r, echo = FALSE}
+# Choose optimal 
+if (is.vector(opt$Best.nc)) {
+  opt_ng <- as.numeric(opt$Best.nc[1])
+} else {
+  opt_ng <- as.numeric(names(which.max(table(opt$Best.nc[1, ]))))
+}
+```
+
+```{r}
+print(paste("Optimal Number of Groups:", opt_ng))
+```
+
+```{r}
+# Split dendogram
+groups <- cutree(hclust, k = opt_ng)
+```
+
+```{r, echo = FALSE}
+# Test grouping 
+if (exists("true_groups")) {
+  print(paste("ARI for the derived groups vs the true groups:", adjustedRandIndex(groups, true_groups)))
+}
+```
+
+```{r}
+# Split the columns into datasets by group 
+data_group <- list()
+
+for(i in 1:length(unique(groups))){
+  data_group[[i]] <- classification[groups == i]
+  names(data_group)[[i]] <- paste0("Group",i)
+}
+
+# Create a MOC for each group
+moc <- constructMOC(data_group)
+
+# Try MultiCOCA
+results <- multicoca(moc, ccClMethod = "hclust", hclustMethod = "complete", 
+                        random_seed = 4881, N = 1000, max.iter = 1000, 
+                        parallel = TRUE)
+```
+
+```{r, echo = FALSE}
+# Test against true values
+ARI_group <- groupARI(results, true_clusters)
+print("ARI for the derived clustering by group vs true clustering by group")
+print(ARI_group)
+```

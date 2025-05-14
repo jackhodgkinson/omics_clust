@@ -10,7 +10,7 @@ simulateGMM <- function(n_clust,                                                
                         group_labels = NULL,                                     # Input group labels, NA by default
                         equal_clust = TRUE,                                      # If generating cluster labels, ensure each cluster has approx equal individuals
                         equal_groups = TRUE,                                     # If n_groups > 1, ensure each group contains approx equal number of cols
-                        parallel = FALSE                                          # Use parallel processsing. Default is TRUE
+                        _parallel = FALSE                                          # Use parallel processsing. Default is TRUE
                         ){
   
   # Load relevant packages
@@ -73,7 +73,7 @@ simulateGMM <- function(n_clust,                                                
   }
   
   # Generate data 
-  if (parallel && n_indiv > 1000 && n_clust > 3) {
+  if (_parallel && n_indiv > 1000 && n_clust > 3) {
     if (.Platform$OS.type != "windows"){
       cluster_results <- mclapply(seq_len(n_clust), sim_clust_data, 
                                   mc.cores = detectCores() - 1)
@@ -114,7 +114,7 @@ simulateGMM <- function(n_clust,                                                
       }
       
       # Run in parallel if needed
-      if (parallel && n_indiv > 1000 && n_groups > 2) {
+      if (_parallel && n_indiv > 1000 && n_groups > 2) {
         if (.Platform$OS.type != "windows") {
           cl <- mclapply(seq_len(n_groups - 1), function(g) {
             permute_cols <- which(group == g)

@@ -41,16 +41,6 @@ optimal_hclust <- function(dist_mat,
   # Create data frame for plotting
   all_index_df <- bind_rows(all_index_list)
   
-  # Plot graph 
-  plot <- ggplot(all_index_df, aes(x = NClust, y = Value)) + 
-    geom_line() + 
-    facet_grid(Method ~ Index) + 
-    labs(title = "NbClust Index Scores for Each Method and Index",
-         x = "Number of Groups",
-         y = "Index Value")
-  
-  print(plot)
-  
   return(list(`Number of Clusters` = opt_results, 
               `Index Values` = all_index_df))
   }
