@@ -85,7 +85,7 @@ for (i in N_col) {
   # Loop over different parameters
   for (param_index in seq_along(params_list)) {
     param_set <- params_list[[param_index]] 
-    param_label <- param_labels[param_index]
+    param_label <- param_labels[[param_index]]
   
     # Simulate data
     n_groups <- c(1, 2, 3, 4)
