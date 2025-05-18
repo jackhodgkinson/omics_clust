@@ -1,6 +1,6 @@
 ## MDS Thresholding 
 # Turn off graphics
-#graphics.off()
+graphics.off()
 
 # Load packages
 library(mclust)
@@ -61,16 +61,16 @@ for (i in N_col) {
     
     # 4. Full covariance, small overlap
     list(
-      cluster1 = list(mean = rnorm(i, mean = -0.75, sd = 0.1), cov = cov(matrix(rnorm(i*i, 0, 0.5), ncol = i))),
-      cluster2 = list(mean = rnorm(i, mean = 0,     sd = 0.1), cov = cov(matrix(rnorm(i*i, 0, 0.5), ncol = i))),
-      cluster3 = list(mean = rnorm(i, mean = 0.75,  sd = 0.1), cov = cov(matrix(rnorm(i*i, 0, 0.5), ncol = i)))
+      cluster1 = list(mean = rnorm(i, mean = -0.75, sd = 0.1), cov = cov(matrix(rnorm(i*i, 0, 0.5), nrow = i, ncol = i))),
+      cluster2 = list(mean = rnorm(i, mean = 0,     sd = 0.1), cov = cov(matrix(rnorm(i*i, 0, 0.5), nrow = i, ncol = i))),
+      cluster3 = list(mean = rnorm(i, mean = 0.75,  sd = 0.1), cov = cov(matrix(rnorm(i*i, 0, 0.5), nrow = i, ncol = i)))
     ),
     
     # 5. High overlap, full covariance + correlation
     list(
-      cluster1 = list(mean = rnorm(i, mean = -0.3, sd = 0.1), cov = cov(matrix(rnorm(i*i, 1, 0.3), ncol = i))),
-      cluster2 = list(mean = rnorm(i, mean = 0,    sd = 0.1), cov = cov(matrix(rnorm(i*i, 1, 0.3), ncol = i))),
-      cluster3 = list(mean = rnorm(i, mean = 0.3,  sd = 0.1), cov = cov(matrix(rnorm(i*i, 1, 0.3), ncol = i)))
+      cluster1 = list(mean = rnorm(i, mean = -0.3, sd = 0.1), cov = cov(matrix(rnorm(i*i, 1, 0.3), nrow = i, ncol = i))),
+      cluster2 = list(mean = rnorm(i, mean = 0,    sd = 0.1), cov = cov(matrix(rnorm(i*i, 1, 0.3), nrow = i, ncol = i))),
+      cluster3 = list(mean = rnorm(i, mean = 0.3,  sd = 0.1), cov = cov(matrix(rnorm(i*i, 1, 0.3), nrow = i, ncol = i)))
     )
   )
   
@@ -180,6 +180,7 @@ for (i in N_col) {
       
       # Perform MDS on the distance matrix
       mds <- cmdscale(dist_mat)
+      print(mds)
       
       # Fit Gaussian and Gaussian Mixture (2 components) to MDS
       models <- c("EII","VII","EEI","VEI","EVI","VVI","EEE",
@@ -216,20 +217,51 @@ for (i in N_col) {
       }
       
       # OTRIMLE
-      start_time = Sys.time()
-      model_otrimle <- otrimleg(mds, G=1:2)
-      end_time = Sys.time()
-      bic <- min(model_otrimle$ibic)
+      otrimle_result <- tryCatch({
+        message("Calling otrimleg()...")
+        model_otrimle <- otrimleg(mds, G = 1:2)
+        message("Result class: ", class(model_otrimle))
+        message("Result structure:")
+        print(str(model_otrimle))
+        
+        message("Checking if result is a list...")
+        if (!is.list(model_otrimle)) stop("OTRIMLE did not return a list")
+        
+        message("Checking if 'ibic' exists in result...")
+        if (!"ibic" %in% names(model_otrimle)) stop("OTRIMLE missing 'ibic'")
+        
+        message("Extracting ibic...")
+        ibic <- model_otrimle[["ibic"]]
+        message("ibic extracted, values: ", toString(round(ibic, 4)))
+        
+        min_ibic <- min(ibic)
+        message("Minimum ibic: ", min_ibic)
+        
+        data.frame(
+          Parameter.ID = param_index,
+          Parameter.Label = param_label,
+          Columns = i,
+          `True Number of Groups` = n,
+          Method = "OTRIMLE",
+          Statistic = paste("min(BIC):", toString(round(min_ibic, 4))),
+          `Determined Number of Groups` = as.character(which.min(ibic)),
+          RunTime = Sys.time() - start_time
+        )
+      }, error = function(e) {
+        message("OTRIMLE error for param set ", param_index, ": ", e$message)
+        data.frame(
+          Parameter.ID = param_index,
+          Parameter.Label = param_label,
+          Columns = i,
+          `True Number of Groups` = n,
+          Method = "OTRIMLE",
+          Statistic = paste("ERROR:", e$message),
+          `Determined Number of Groups` = "NA",
+          RunTime = NA
+        )
+      })
       
-      results <- rbind(results, data.frame(Parameter.ID = param_index,
-                                           Parameter.Label = param_label,
-                                            Columns = i,
-                                           `True Number of Groups` = n,
-                                           Method = "OTRIMLE",
-                                           Statistic = paste("min(BIC):", bic),
-                                           `Determined Number of Groups` = ifelse(which.min(model_otrimle$ibic) == 1, "1", ">1"),
-                                           RunTime = end_time - start_time)
-      )
+      results <- rbind(results, otrimle_result)
     }
   }
 }
