@@ -33,60 +33,60 @@ results <- data.frame(Parameter.ID = numeric(),
 # Parallel 
 parallel_process <- TRUE
 
-# Create many different parameters 
-params_list <- list(
-  # 1. Well-separated means, identity covariance
-  list(
-    cluster1 = list(mean = rnorm(i, mean = -3, sd = 0.1), cov = diag(i)),
-    cluster2 = list(mean = rnorm(i, mean = 0,  sd = 0.1), cov = diag(i)),
-    cluster3 = list(mean = rnorm(i, mean = 3,  sd = 0.1), cov = diag(i))
-  ),
+# Loop over different values of proteins
+for (i in N_col) {
   
-  # 2. Closer means, identity covariance
-  list(
-    cluster1 = list(mean = rnorm(i, mean = -1.5, sd = 0.1), cov = diag(i)),
-    cluster2 = list(mean = rnorm(i, mean = 0,    sd = 0.1), cov = diag(i)),
-    cluster3 = list(mean = rnorm(i, mean = 1.5,  sd = 0.1), cov = diag(i))
-  ),
-  
-  # 3. Closer still, diagonal covariance with varied scale
-  list(
-    cluster1 = list(mean = rnorm(i, mean = -1, sd = 0.1), cov = diag(runif(i, 0.5, 1.5))),
-    cluster2 = list(mean = rnorm(i, mean = 0,  sd = 0.1), cov = diag(runif(i, 0.5, 1.5))),
-    cluster3 = list(mean = rnorm(i, mean = 1,  sd = 0.1), cov = diag(runif(i, 0.5, 1.5)))
-  ),
-  
-  # 4. Full covariance, small overlap
-  list(
-    cluster1 = list(mean = rnorm(i, mean = -0.75, sd = 0.1), cov = cov(matrix(rnorm(i*i, 0, 0.5), ncol = i))),
-    cluster2 = list(mean = rnorm(i, mean = 0,     sd = 0.1), cov = cov(matrix(rnorm(i*i, 0, 0.5), ncol = i))),
-    cluster3 = list(mean = rnorm(i, mean = 0.75,  sd = 0.1), cov = cov(matrix(rnorm(i*i, 0, 0.5), ncol = i)))
-  ),
-  
-  # 5. High overlap, full covariance + correlation
-  list(
-    cluster1 = list(mean = rnorm(i, mean = -0.3, sd = 0.1), cov = cov(matrix(rnorm(i*i, 1, 0.3), ncol = i))),
-    cluster2 = list(mean = rnorm(i, mean = 0,    sd = 0.1), cov = cov(matrix(rnorm(i*i, 1, 0.3), ncol = i))),
-    cluster3 = list(mean = rnorm(i, mean = 0.3,  sd = 0.1), cov = cov(matrix(rnorm(i*i, 1, 0.3), ncol = i)))
-  )
-)
-
-param_labels <- c(
-  "Well-separated means, identity cov",
-  "Closer means, identity cov",
-  "Closer still, diag cov varied scale",
-  "Full covariance, small overlap",
-  "High overlap, full covariance + correlation"
-)
-
-# Loop over different parameters
-for (param_index in seq_along(params_list)) {
-  param_set <- params_list[[param_index]] 
-  param_label <- param_labels[param_index]
-
-  # Loop over different values of proteins
-  for (i in N_col) {
+  # Create many different parameters 
+  params_list <- list(
+    # 1. Well-separated means, identity covariance
+    list(
+      cluster1 = list(mean = rnorm(i, mean = -3, sd = 0.1), cov = diag(i)),
+      cluster2 = list(mean = rnorm(i, mean = 0,  sd = 0.1), cov = diag(i)),
+      cluster3 = list(mean = rnorm(i, mean = 3,  sd = 0.1), cov = diag(i))
+    ),
     
+    # 2. Closer means, identity covariance
+    list(
+      cluster1 = list(mean = rnorm(i, mean = -1.5, sd = 0.1), cov = diag(i)),
+      cluster2 = list(mean = rnorm(i, mean = 0,    sd = 0.1), cov = diag(i)),
+      cluster3 = list(mean = rnorm(i, mean = 1.5,  sd = 0.1), cov = diag(i))
+    ),
+    
+    # 3. Closer still, diagonal covariance with varied scale
+    list(
+      cluster1 = list(mean = rnorm(i, mean = -1, sd = 0.1), cov = diag(runif(i, 0.5, 1.5))),
+      cluster2 = list(mean = rnorm(i, mean = 0,  sd = 0.1), cov = diag(runif(i, 0.5, 1.5))),
+      cluster3 = list(mean = rnorm(i, mean = 1,  sd = 0.1), cov = diag(runif(i, 0.5, 1.5)))
+    ),
+    
+    # 4. Full covariance, small overlap
+    list(
+      cluster1 = list(mean = rnorm(i, mean = -0.75, sd = 0.1), cov = cov(matrix(rnorm(i*i, 0, 0.5), ncol = i))),
+      cluster2 = list(mean = rnorm(i, mean = 0,     sd = 0.1), cov = cov(matrix(rnorm(i*i, 0, 0.5), ncol = i))),
+      cluster3 = list(mean = rnorm(i, mean = 0.75,  sd = 0.1), cov = cov(matrix(rnorm(i*i, 0, 0.5), ncol = i)))
+    ),
+    
+    # 5. High overlap, full covariance + correlation
+    list(
+      cluster1 = list(mean = rnorm(i, mean = -0.3, sd = 0.1), cov = cov(matrix(rnorm(i*i, 1, 0.3), ncol = i))),
+      cluster2 = list(mean = rnorm(i, mean = 0,    sd = 0.1), cov = cov(matrix(rnorm(i*i, 1, 0.3), ncol = i))),
+      cluster3 = list(mean = rnorm(i, mean = 0.3,  sd = 0.1), cov = cov(matrix(rnorm(i*i, 1, 0.3), ncol = i)))
+    )
+  )
+  
+  param_labels <- c(
+    "Well-separated means, identity cov",
+    "Closer means, identity cov",
+    "Closer still, diag cov varied scale",
+    "Full covariance, small overlap",
+    "High overlap, full covariance + correlation"
+  )
+  
+  # Loop over different parameters
+  for (param_index in seq_along(params_list)) {
+    param_set <- params_list[[param_index]] 
+    param_label <- param_labels[param_index]
+  
     # Simulate data
     n_groups <- c(1, 2, 3, 4)
     
@@ -95,7 +95,7 @@ for (param_index in seq_along(params_list)) {
     
     for (n in n_groups) {
       
-      data <- simulateGMM(3, n, params, n_indiv = 419, n_col = i,
+      data <- simulateGMM(3, n, param_set, n_indiv = 419, n_col = i,
                            random_seed = seed,
                            equal_clust = FALSE, equal_groups = FALSE)
       true_clusters <- data[[2]]
