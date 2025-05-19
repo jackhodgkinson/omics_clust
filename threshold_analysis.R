@@ -28,7 +28,7 @@ print(mclust_summary)
 
 mclust_success %>%
   filter(Method %in% c("EEE","EEI")) %>%
-  group_by(Columns, Method) %>%
+  group_by(Parameter.Label, Columns, Method) %>%
   mutate(Match = TrueGroupLabel == DeterminedGroupLabel) %>%
   summarise(Total = n(),
             Matches = sum(Match, na.rm = TRUE),
@@ -41,6 +41,7 @@ otrimle_success <- mds_results %>%
 
 otrimle_summary <- otrimle_success %>%
   mutate(Match = TrueGroupLabel == DeterminedGroupLabel) %>%
+  group_by(Parameter.Label, Columns) %>%
   summarise(Total = n(),
             Matches = sum(Match, na.rm = TRUE),
             MatchRate = round(Matches / Total * 100, 2))
