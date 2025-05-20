@@ -180,10 +180,11 @@ mds <- cmdscale(dist_mat)
 # Fit models to MDS
 if (toupper(model) != "OTRIMLE") {
   
-  # Fit Gaussian and Gaussian mixture (2 components) to MDS
+  # Fit Gaussian mixture with bootstrap LRT
   start_time <- Sys.time()
   test <- mclust::mclustBootstrapLRT(mds, modelName = model, nboot = 1000, level = 0.95, maxG = 1)
   end_time <- Sys.time()
+  
   if (!is.null(test$p.value)) {
     p <- round(test$p.value, 4)
     results <- rbind(results, data.frame(
@@ -194,10 +195,9 @@ if (toupper(model) != "OTRIMLE") {
       Method = paste("mclustBootstrapLRT:", model),
       Statistic = paste("p-value:", p),
       `Determined Number of Groups` = ifelse(p < 0.05, ">1", "1"),
-      RunTime = end_time - start_time
+      RunTime = as.numeric(difftime(end_time, start_time, units = "secs"))
     ))
   } else {
-    # Optional: record failure
     results <- rbind(results, data.frame(
       Parameter.ID = param_index,
       Parameter.Label = param_label,
@@ -206,32 +206,26 @@ if (toupper(model) != "OTRIMLE") {
       Method = paste("mclustBootstrapLRT:", model),
       Statistic = "p-value: NA",
       `Determined Number of Groups` = "NA",
-      RunTime = "NA"
+      RunTime = NA
     ))
   }
+  
 } else {
-  # Fit OTRIMLE to MDS 
+  # Fit OTRIMLE to MDS
   otrimle_result <- tryCatch({
     message("Calling otrimleg()...")
     start_time <- Sys.time()
     model_otrimle <- otrimleg(mds, G = 1:2)
     end_time <- Sys.time()
+    
     message("Result class: ", class(model_otrimle))
-    message("Result structure:")
-    print(str(model_otrimle))
     
-    message("Checking if result is a list...")
     if (!is.list(model_otrimle)) stop("OTRIMLE did not return a list")
+    if (!"ibic" %in% names(model_otrimle)) stop("OTRIMLE result missing 'ibic'")
     
-    message("Checking if 'ibic' exists in result...")
-    if (!"ibic" %in% names(model_otrimle)) stop("OTRIMLE missing 'ibic'")
-    
-    message("Extracting ibic...")
     ibic <- model_otrimle[["ibic"]]
-    message("ibic extracted, values: ", toString(round(ibic, 4)))
-    
     min_ibic <- min(ibic)
-    message("Minimum ibic: ", min_ibic)
+    determined_G <- which.min(ibic)
     
     data.frame(
       Parameter.ID = param_index,
@@ -240,12 +234,12 @@ if (toupper(model) != "OTRIMLE") {
       `True Number of Groups` = n_groups,
       Method = "OTRIMLE",
       Statistic = paste("min(BIC):", toString(round(min_ibic, 4))),
-      `Determined Number of Groups` = as.character(which.min(ibic)),
-      RunTime = end_time - start_time
+      `Determined Number of Groups` = as.character(determined_G),
+      RunTime = as.numeric(difftime(end_time, start_time, units = "secs"))
     )
   }, error = function(e) {
     message("OTRIMLE error for param set ", param_index, ": ", e$message)
-    results <- rbind(results, data.frame(
+    data.frame(
       Parameter.ID = param_index,
       Parameter.Label = param_label,
       Columns = N_col,
@@ -254,8 +248,10 @@ if (toupper(model) != "OTRIMLE") {
       Statistic = paste("ERROR:", e$message),
       `Determined Number of Groups` = "NA",
       RunTime = NA
-    ))
+    )
   })
+  
+  # Append result
   results <- rbind(results, otrimle_result)
 }
 
