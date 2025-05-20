@@ -165,7 +165,6 @@ else {
       adjustedRandIndex(classification[[i]], classification[[j]])
     })
   })
-  
 }
 
 # Combine the list into a matrix
@@ -180,7 +179,7 @@ mds <- cmdscale(dist_mat)
 print(mds)
 
 # Fit models to MDS
-if model != "OTRIMLE" {
+if (model != "OTRIMLE") {
   
   # Fit Gaussian and Gaussian mixture (2 components) to MDS
   start_time <- Sys.time()
