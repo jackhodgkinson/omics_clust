@@ -20,6 +20,7 @@ N_col <- as.numeric(args[1])
 param_index <- as.numeric(args[2])
 n_groups <- as.numeric(args[3])
 model <- args[4]
+print(model)
 task_id <- as.numeric(args[5])
 seed <- task_id
 set.seed(task_id)

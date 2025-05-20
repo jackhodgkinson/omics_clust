@@ -19,4 +19,4 @@ grid <- expand.grid(N_col = N_col,
 grid$task_id <- seq_len(nrow(grid))
 
 # Write to CSV
-write.table(grid, "input_grid.csv", sep = ",", row.names = FALSE, col.names = FALSE)
+write.table(grid, "input_grid.csv", sep = ",", quote = FALSE, row.names = FALSE, col.names = FALSE)
