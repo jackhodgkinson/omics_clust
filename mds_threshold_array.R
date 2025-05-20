@@ -27,37 +27,37 @@ set.seed(task_id)
 params_list <- list(
   # 1. Well-separated means, identity covariance
   list(
-    cluster1 = list(mean = rnorm(i, mean = -3, sd = 0.1), cov = diag(i)),
-    cluster2 = list(mean = rnorm(i, mean = 0,  sd = 0.1), cov = diag(i)),
-    cluster3 = list(mean = rnorm(i, mean = 3,  sd = 0.1), cov = diag(i))
+    cluster1 = list(mean = rnorm(N_col, mean = -3, sd = 0.1), cov = diag(N_col)),
+    cluster2 = list(mean = rnorm(N_col, mean = 0,  sd = 0.1), cov = diag(N_col)),
+    cluster3 = list(mean = rnorm(N_col, mean = 3,  sd = 0.1), cov = diag(N_col))
   ),
   
   # 2. Closer means, identity covariance
   list(
-    cluster1 = list(mean = rnorm(i, mean = -1.5, sd = 0.1), cov = diag(i)),
-    cluster2 = list(mean = rnorm(i, mean = 0,    sd = 0.1), cov = diag(i)),
-    cluster3 = list(mean = rnorm(i, mean = 1.5,  sd = 0.1), cov = diag(i))
+    cluster1 = list(mean = rnorm(N_col, mean = -1.5, sd = 0.1), cov = diag(N_col)),
+    cluster2 = list(mean = rnorm(N_col, mean = 0,    sd = 0.1), cov = diag(N_col)),
+    cluster3 = list(mean = rnorm(N_col, mean = 1.5,  sd = 0.1), cov = diag(N_col))
   ),
   
   # 3. Closer still, diagonal covariance with varied scale
   list(
-    cluster1 = list(mean = rnorm(i, mean = -1, sd = 0.1), cov = diag(runif(i, 0.5, 1.5))),
-    cluster2 = list(mean = rnorm(i, mean = 0,  sd = 0.1), cov = diag(runif(i, 0.5, 1.5))),
-    cluster3 = list(mean = rnorm(i, mean = 1,  sd = 0.1), cov = diag(runif(i, 0.5, 1.5)))
+    cluster1 = list(mean = rnorm(N_col, mean = -1, sd = 0.1), cov = diag(runif(N_col, 0.5, 1.5))),
+    cluster2 = list(mean = rnorm(N_col, mean = 0,  sd = 0.1), cov = diag(runif(N_col, 0.5, 1.5))),
+    cluster3 = list(mean = rnorm(N_col, mean = 1,  sd = 0.1), cov = diag(runif(N_col, 0.5, 1.5)))
   ),
   
   # 4. Full covariance, small overlap
   list(
-    cluster1 = list(mean = rnorm(i, mean = -0.75, sd = 0.1), cov = cov(matrix(rnorm(i*i, 0, 0.5), nrow = i, ncol = i))),
-    cluster2 = list(mean = rnorm(i, mean = 0,     sd = 0.1), cov = cov(matrix(rnorm(i*i, 0, 0.5), nrow = i, ncol = i))),
-    cluster3 = list(mean = rnorm(i, mean = 0.75,  sd = 0.1), cov = cov(matrix(rnorm(i*i, 0, 0.5), nrow = i, ncol = i)))
+    cluster1 = list(mean = rnorm(N_col, mean = -0.75, sd = 0.1), cov = cov(matrix(rnorm(N_col*N_col, 0, 0.5), nrow = N_col, ncol = N_col))),
+    cluster2 = list(mean = rnorm(N_col, mean = 0,     sd = 0.1), cov = cov(matrix(rnorm(N_col*N_col, 0, 0.5), nrow = N_col, ncol = N_col))),
+    cluster3 = list(mean = rnorm(N_col, mean = 0.75,  sd = 0.1), cov = cov(matrix(rnorm(N_col*N_col, 0, 0.5), nrow = N_col, ncol = N_col)))
   ),
   
   # 5. High overlap, full covariance + correlation
   list(
-    cluster1 = list(mean = rnorm(i, mean = -0.3, sd = 0.1), cov = cov(matrix(rnorm(i*i, 1, 0.3), nrow = i, ncol = i))),
-    cluster2 = list(mean = rnorm(i, mean = 0,    sd = 0.1), cov = cov(matrix(rnorm(i*i, 1, 0.3), nrow = i, ncol = i))),
-    cluster3 = list(mean = rnorm(i, mean = 0.3,  sd = 0.1), cov = cov(matrix(rnorm(i*i, 1, 0.3), nrow = i, ncol = i)))
+    cluster1 = list(mean = rnorm(N_col, mean = -0.3, sd = 0.1), cov = cov(matrix(rnorm(N_col*N_col, 1, 0.3), nrow = N_col, ncol = N_col))),
+    cluster2 = list(mean = rnorm(N_col, mean = 0,    sd = 0.1), cov = cov(matrix(rnorm(N_col*N_col, 1, 0.3), nrow = N_col, ncol = N_col))),
+    cluster3 = list(mean = rnorm(N_col, mean = 0.3,  sd = 0.1), cov = cov(matrix(rnorm(N_col*N_col, 1, 0.3), nrow = N_col, ncol = N_col)))
   )
 )
 
@@ -91,7 +91,7 @@ param_label <- param_labels[[param_index]]
 n_cores <- numCores()
   
 # Start simulation    
-data <- simulateGMM(3, n, param_set, n_indiv = 419, n_col = i,
+data <- simulateGMM(3, n_groups, param_set, n_indiv = 419, n_col = N_col,
                      random_seed = seed,
                      equal_clust = FALSE, equal_groups = FALSE)
 true_clusters <- data[[2]]
@@ -180,6 +180,7 @@ print(mds)
 
 # Fit models to MDS
 if model != "OTRIMLE" {
+  
   # Fit Gaussian and Gaussian mixture (2 components) to MDS
   start_time <- Sys.time()
   test <- mclust::mclustBootstrapLRT(mds, modelName = model, nboot = 1000, level = 0.95, maxG = 1)
@@ -189,9 +190,9 @@ if model != "OTRIMLE" {
     results <- rbind(results, data.frame(
       Parameter.ID = param_index,
       Parameter.Label = param_label,
-      Columns = i,
-      `True Number of Groups` = n,
-      Method = paste("mclustBootstrapLRT:", m),
+      Columns = N_col,
+      `True Number of Groups` = n_groups,
+      Method = paste("mclustBootstrapLRT:", model),
       Statistic = paste("p-value:", p),
       `Determined Number of Groups` = ifelse(p < 0.05, ">1", "1"),
       RunTime = end_time - start_time
@@ -201,8 +202,8 @@ if model != "OTRIMLE" {
     results <- rbind(results, data.frame(
       Parameter.ID = param_index,
       Parameter.Label = param_label,
-      Columns = i,
-      `True Number of Groups` = n,
+      Columns = N_col,
+      `True Number of Groups` = n_groups,
       Method = paste("mclustBootstrapLRT:", m),
       Statistic = "p-value: NA",
       `Determined Number of Groups` = "NA",
@@ -234,8 +235,8 @@ if model != "OTRIMLE" {
     data.frame(
       Parameter.ID = param_index,
       Parameter.Label = param_label,
-      Columns = i,
-      `True Number of Groups` = n,
+      Columns = N_col,
+      `True Number of Groups` = n_groups,
       Method = "OTRIMLE",
       Statistic = paste("min(BIC):", toString(round(min_ibic, 4))),
       `Determined Number of Groups` = as.character(which.min(ibic)),
@@ -246,8 +247,8 @@ if model != "OTRIMLE" {
     data.frame(
       Parameter.ID = param_index,
       Parameter.Label = param_label,
-      Columns = i,
-      `True Number of Groups` = n,
+      Columns = N_col,
+      `True Number of Groups` = n_groups,
       Method = "OTRIMLE",
       Statistic = paste("ERROR:", e$message),
       `Determined Number of Groups` = "NA",
