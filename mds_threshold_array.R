@@ -176,10 +176,9 @@ dist_mat <- as.dist(dissim_matrix)
 
 # Perform MDS on the distance matrix
 mds <- cmdscale(dist_mat)
-print(mds)
 
 # Fit models to MDS
-if (model != "OTRIMLE") {
+if (toupper(model) != "OTRIMLE") {
   
   # Fit Gaussian and Gaussian mixture (2 components) to MDS
   start_time <- Sys.time()
@@ -204,7 +203,7 @@ if (model != "OTRIMLE") {
       Parameter.Label = param_label,
       Columns = N_col,
       `True Number of Groups` = n_groups,
-      Method = paste("mclustBootstrapLRT:", m),
+      Method = paste("mclustBootstrapLRT:", model),
       Statistic = "p-value: NA",
       `Determined Number of Groups` = "NA",
       RunTime = "NA"
@@ -214,7 +213,9 @@ if (model != "OTRIMLE") {
   # Fit OTRIMLE to MDS 
   otrimle_result <- tryCatch({
     message("Calling otrimleg()...")
+    start_time <- Sys.time()
     model_otrimle <- otrimleg(mds, G = 1:2)
+    end_time <- Sys.time()
     message("Result class: ", class(model_otrimle))
     message("Result structure:")
     print(str(model_otrimle))
@@ -240,11 +241,11 @@ if (model != "OTRIMLE") {
       Method = "OTRIMLE",
       Statistic = paste("min(BIC):", toString(round(min_ibic, 4))),
       `Determined Number of Groups` = as.character(which.min(ibic)),
-      RunTime = Sys.time() - start_time
+      RunTime = end_time - start_time
     )
   }, error = function(e) {
     message("OTRIMLE error for param set ", param_index, ": ", e$message)
-    data.frame(
+    results <- rbind(results, data.frame(
       Parameter.ID = param_index,
       Parameter.Label = param_label,
       Columns = N_col,
@@ -253,11 +254,10 @@ if (model != "OTRIMLE") {
       Statistic = paste("ERROR:", e$message),
       `Determined Number of Groups` = "NA",
       RunTime = NA
-    )
+    ))
   })
+  results <- rbind(results, otrimle_result)
 }
-
-results <- rbind(results, otrimle_result)
 
 # Need to write the output using task_id 
 write.csv(results, file = paste0("mds_results_", task_id, ".csv"),
