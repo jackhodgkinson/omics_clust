@@ -70,31 +70,20 @@ param_labels <- c(
   "High overlap, full covariance + correlation"
 )
 
-# Create empty results dataframe
-results <- data.frame(Parameter.ID = numeric(),
-                      Columns = numeric(),
-                      `True Number of Groups` = numeric(), 
-                      Method = character(), 
-                      Statistic = character(),
-                      `Determined Number of Groups` = character(),
-                      RunTime = numeric(),
-                      stringsAsFactors = FALSE,
-                      check.names = FALSE)
-
-# Parallel 
+# Parallel  
 parallel_process <- TRUE
 
 # Generate parameters 
 param_set <- params_list[[param_index]] 
 param_label <- param_labels[[param_index]]
-  
+
 # Get cores
 n_cores <- numCores()
-  
+
 # Start simulation    
 data <- simulateGMM(3, n_groups, param_set, n_indiv = 419, n_col = N_col,
-                     random_seed = seed,
-                     equal_clust = FALSE, equal_groups = FALSE)
+                    random_seed = seed,
+                    equal_clust = FALSE, equal_groups = FALSE)
 true_clusters <- data[[2]]
 
 if (n_groups > 1) {
@@ -103,29 +92,8 @@ if (n_groups > 1) {
 
 data <- data[[1]]
 
-# Plot data
-# data_plot <- as.matrix(data)
-# annotationRow <- as.data.frame(true_clusters[1])
-# names(annotationRow) <- "Clusters"
-# 
-# annotationCol <- as.data.frame(as.factor(true_groups))
-# names(annotationCol) <- "ProteinClusters"
-# rownames(annotationCol) <- colnames(data_plot)
-# 
-# rownames(data_plot) <- rownames(annotationRow)
-# annotationRow$Clusters <- as.factor(annotationRow$Clusters)
-# annotationCol$ProteinClusters <- as.factor(annotationCol$ProteinCluster)
-# true_clust <- as.numeric(true_clusters[["group1_clusterid"]])
-# ordered_data <- data_plot[order(true_clust), order(annotationCol$ProteinClusters)]
-# pheatmap::pheatmap(
-#   ordered_data,
-#   annotation_row = annotationRow,
-#   annotation_col = annotationCol[order(annotationCol$ProteinClusters), , drop = FALSE],
-#   cluster_rows = FALSE
-# )
-
-# Get distance matrix
-classification <- GMMclassifier(data) # This does the MClust fitting - can replace with LCMM
+# Classify using GMM
+classification <- GMMclassifier(data) # This does the MClust fitting
 
 # Construct empty similarity matrix 
 sim_matrix <- matrix(0, nrow = ncol(classification), ncol = ncol(classification),
@@ -157,9 +125,8 @@ if (parallel_process) {
       })
     }, mc.cores = n_cores)
   }
-}
-
-else {
+  
+} else {
   sim_mat <- lapply(1:ncol(classification), function(i) {
     sapply(1:ncol(classification), function(j) {
       adjustedRandIndex(classification[[i]], classification[[j]])
@@ -177,17 +144,24 @@ dist_mat <- as.dist(dissim_matrix)
 # Perform MDS on the distance matrix
 mds <- cmdscale(dist_mat)
 
+# Make sure results directory exists
+if (!dir.exists("results")) {
+  dir.create("results")
+}
+
+# Initialize results variable to NULL just in case
+results <- NULL
+
 # Fit models to MDS
 if (toupper(model) != "OTRIMLE") {
   
-  # Fit Gaussian mixture with bootstrap LRT
   start_time <- Sys.time()
   test <- mclust::mclustBootstrapLRT(mds, modelName = model, nboot = 1000, level = 0.95, maxG = 1)
   end_time <- Sys.time()
   
   if (!is.null(test$p.value)) {
     p <- round(test$p.value, 4)
-    results <- rbind(results, data.frame(
+    results <- data.frame(
       Parameter.ID = param_index,
       Parameter.Label = param_label,
       Columns = N_col,
@@ -195,10 +169,13 @@ if (toupper(model) != "OTRIMLE") {
       Method = paste("mclustBootstrapLRT:", model),
       Statistic = paste("p-value:", p),
       `Determined Number of Groups` = ifelse(p < 0.05, ">1", "1"),
-      RunTime = as.numeric(difftime(end_time, start_time, units = "secs"))
-    ))
+      RunTime = end_time - start_time,
+      stringsAsFactors = FALSE,
+      check.names = FALSE
+    )
   } else {
-    results <- rbind(results, data.frame(
+    # Optional: record failure
+    results <- data.frame(
       Parameter.ID = param_index,
       Parameter.Label = param_label,
       Columns = N_col,
@@ -206,26 +183,28 @@ if (toupper(model) != "OTRIMLE") {
       Method = paste("mclustBootstrapLRT:", model),
       Statistic = "p-value: NA",
       `Determined Number of Groups` = "NA",
-      RunTime = NA
-    ))
+      RunTime = NA,
+      stringsAsFactors = FALSE,
+      check.names = FALSE
+    )
   }
   
+  write.table(results, file = paste0("results/mds_results_", task_id, ".csv"), col.names = FALSE, row.names = FALSE)
+  
 } else {
-  # Fit OTRIMLE to MDS
-  otrimle_result <- tryCatch({
+  
+  results <- tryCatch({
     message("Calling otrimleg()...")
     start_time <- Sys.time()
     model_otrimle <- otrimleg(mds, G = 1:2)
     end_time <- Sys.time()
     
-    message("Result class: ", class(model_otrimle))
-    
     if (!is.list(model_otrimle)) stop("OTRIMLE did not return a list")
     if (!"ibic" %in% names(model_otrimle)) stop("OTRIMLE result missing 'ibic'")
     
-    ibic <- model_otrimle[["ibic"]]
+    ibic <- model_otrimle$ibic
     min_ibic <- min(ibic)
-    determined_G <- which.min(ibic)
+    best_G <- which.min(ibic)
     
     data.frame(
       Parameter.ID = param_index,
@@ -233,9 +212,11 @@ if (toupper(model) != "OTRIMLE") {
       Columns = N_col,
       `True Number of Groups` = n_groups,
       Method = "OTRIMLE",
-      Statistic = paste("min(BIC):", toString(round(min_ibic, 4))),
-      `Determined Number of Groups` = as.character(determined_G),
-      RunTime = as.numeric(difftime(end_time, start_time, units = "secs"))
+      Statistic = paste("min(BIC):", round(min_ibic, 4)),
+      `Determined Number of Groups` = as.character(best_G),
+      RunTime = end_time - start_time,
+      stringsAsFactors = FALSE,
+      check.names = FALSE
     )
   }, error = function(e) {
     message("OTRIMLE error for param set ", param_index, ": ", e$message)
@@ -247,15 +228,12 @@ if (toupper(model) != "OTRIMLE") {
       Method = "OTRIMLE",
       Statistic = paste("ERROR:", e$message),
       `Determined Number of Groups` = "NA",
-      RunTime = NA
+      RunTime = NA,
+      stringsAsFactors = FALSE,
+      check.names = FALSE
     )
   })
   
-  # Append result
-  results <- rbind(results, otrimle_result)
+  write.table(results, file = paste0("results/mds_results_", task_id, ".csv"), col.names = FALSE, row.names = FALSE)
 }
-
-# Need to write the output using task_id 
-write.csv(results, file = paste0("mds_results_", task_id, ".csv"),
-          row.names = FALSE)
 
