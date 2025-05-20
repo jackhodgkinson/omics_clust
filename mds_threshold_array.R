@@ -21,6 +21,7 @@ param_index <- as.numeric(args[2])
 n_groups <- as.numeric(args[3])
 model <- args[4]
 task_id <- as.numeric(args[5])
+seed <- task_id
 set.seed(task_id)
 
 # Create many different parameters 
