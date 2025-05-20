@@ -97,7 +97,7 @@ data <- simulateGMM(3, n_groups, param_set, n_indiv = 419, n_col = N_col,
                      equal_clust = FALSE, equal_groups = FALSE)
 true_clusters <- data[[2]]
 
-if (n > 1) {
+if (n_groups > 1) {
   true_groups <- data[[3]]
 }
 
