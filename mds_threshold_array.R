@@ -170,7 +170,7 @@ if (toupper(model) != "OTRIMLE") {
       Method = paste("mclustBootstrapLRT:", model),
       Statistic = paste("p-value:", p),
       `Determined Number of Groups` = ifelse(p < 0.05, ">1", "1"),
-      RunTime = paste0(round(end_time - start_time, 4),"s")
+      RunTime = paste0(round(as.numeric(end_time - start_time, units = "secs"), 4), "s"),
       stringsAsFactors = FALSE,
       check.names = FALSE
     )
@@ -215,7 +215,7 @@ if (toupper(model) != "OTRIMLE") {
       Method = "OTRIMLE",
       Statistic = paste("min(BIC):", round(min_ibic, 4)),
       `Determined Number of Groups` = as.character(best_G),
-      RunTime = paste0(round(end_time - start_time, 4),"s")
+      RunTime = paste0(round(as.numeric(end_time - start_time, units = "secs"), 4), "s"),
       stringsAsFactors = FALSE,
       check.names = FALSE
     )
