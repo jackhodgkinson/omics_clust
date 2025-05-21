@@ -143,7 +143,16 @@ dissim_matrix <- 1 - sim_matrix
 dist_mat <- as.dist(dissim_matrix)
 
 # Perform MDS on the distance matrix
-mds <- cmdscale(dist_mat)
+mds_result <- cmdscale(dist_mat, k = 2, eig = TRUE)
+
+# Validate MDS output
+valid_eigs <- sum(mds_result$eig > 0)
+if (valid_eigs < 2 || any(is.na(mds_result$points))) {
+  stop("MDS failed: fewer than 2 positive eigenvalues or contains NA values.")
+}
+
+# Extract MDS coordinates
+mds <- mds_result$points
 
 # Make sure results directory exists
 if (!dir.exists("results")) {
