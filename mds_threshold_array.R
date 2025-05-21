@@ -235,6 +235,6 @@ if (toupper(model) != "OTRIMLE") {
     )
   })
   
-  write.csv(results, file = paste0("results/mds_results_", task_id, ".csv"), row.names = FALSE)
+  write.csv(results, file = paste0("results/mds_results_", task_id, ".csv"), row.names = FALSE, sep = ",")
 }
 
