@@ -1,11 +1,10 @@
 # Define parameter space
 N_col <- c(10, 100, 500, 1000)
-param_index <- 1:3
-n_groups <- 1:2
-models <- c("EII")
-#models <- c("EII", "VII", "EEI", "VEI", "EVI", "VVI",
-#            "EEE", "VEE", "EVE", "VVE", "EEV", "VEV", "EVV", "VVV",
-#            "OTRIMLE")
+param_index <- 1:5
+n_groups <- 1:4
+models <- c("EII", "VII", "EEI", "VEI", "EVI", "VVI",
+            "EEE", "VEE", "EVE", "VVE", "EEV", "VEV", "EVV", "VVV",
+            "OTRIMLE")
 
 # Create the grid
 grid <- expand.grid(N_col = N_col,
