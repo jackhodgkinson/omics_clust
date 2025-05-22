@@ -17,6 +17,10 @@ grid <- expand.grid(N_col = N_col,
 # Add a unique task ID (optional, for tracking)
 grid$task_id <- seq_len(nrow(grid))
 
+# Subset failed ones 
+grid <- grid %>%
+  filter(task_id %in% c(143, 1038, 998, 1018, 978))
+
 # Write to CSV
 write.table(grid, "input_grid.csv", sep = ",", quote = FALSE, row.names = FALSE, col.names = FALSE)
 
