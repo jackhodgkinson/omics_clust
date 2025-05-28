@@ -3,6 +3,7 @@
 library(mclust)
 library(NbClust)
 library(tidyverse)
+library(gtools)
 
 # Load external functions
 source("simulateGMM.R")
@@ -16,12 +17,12 @@ source("groupARI.R")
 # Simulate data 
 seed <- 4881
 set.seed(seed)
-N_col <- 14
-n_groups <- 3
+N_col <- 15
+n_groups <- 2
 params <- list(
-  cluster1 = list(mean = rnorm(N_col, mean = -2, sd = 0.1), cov = cov(matrix(rnorm(N_col*N_col, mean = 0.3, sd = 0.3), nrow = N_col, ncol = N_col))),
-  cluster2 = list(mean = rnorm(N_col, mean = 0, sd = 0.2), cov = cov(matrix(rnorm(N_col*N_col, mean = 0.6, sd = 0.25), nrow = N_col, ncol = N_col))),
-  cluster3 = list(mean = rnorm(N_col, mean = 3, sd = 0.2), cov = cov(matrix(rnorm(N_col*N_col, mean = -0.4, sd = 0.2), nrow = N_col, ncol = N_col)))
+    cluster1 = list(mean = rnorm(N_col, mean = -10, sd = 0.1), cov = cov(matrix(rnorm(N_col*N_col, 0, 0.5), nrow = N_col, ncol = N_col))),
+    cluster2 = list(mean = rnorm(N_col, mean = 0,     sd = 0.1), cov = cov(matrix(rnorm(N_col*N_col, 0, 0.5), nrow = N_col, ncol = N_col))),
+    cluster3 = list(mean = rnorm(N_col, mean = 10,  sd = 0.1), cov = cov(matrix(rnorm(N_col*N_col, 0, 0.5), nrow = N_col, ncol = N_col)))
 )
 
 data <- simulateGMM(3, n_groups, params, n_indiv = 419, n_col = N_col,
@@ -76,7 +77,7 @@ opt_hclust$`Index Values` # %>%
 # Apply based on the results above
 hclust <- hclust(dist_mat, method = "complete")
 opt <- NbClust(diss = dist_mat, distance = NULL, method = "single", 
-               min.nc = 2, max.nc = 9, index = "dunn")
+               min.nc = 2, max.nc = 5, index = "dunn")
 
 # Choose optimal 
 if (is.vector(opt$Best.nc)) {
@@ -112,5 +113,31 @@ results <- multicoca(moc, ccClMethod = "hclust", hclustMethod = "complete",
                         parallel = TRUE)
 
 # Test against true values
-ARI_group <- groupARI(results, true_clusters)
-print(ARI_group)
+#ARI_group <- groupARI(results, true_clusters)
+#print(ARI_group)
+
+# Paul's Code
+## THIS FAILS IF MULTICOCA SUSPECTS MORE GROUPS! NEED MORE ROBUST WAY TO CHOOSE NUMBER OF GROUPS
+allPermutationsOfTheGroupLabels <- permutations(opt_ng, opt_ng)
+
+
+ariResultsMatrix <- matrix(nrow = nrow(allPermutationsOfTheGroupLabels), ncol = opt_ng)
+for(i in 1:nrow(allPermutationsOfTheGroupLabels))
+{
+  currentPermutation       <- allPermutationsOfTheGroupLabels[i,]
+  currentOrderingOfResults <- results[currentPermutation]
+  
+  for(j in 1:opt_ng){
+    ariResultsMatrix[i,j] <- adjustedRandIndex(currentOrderingOfResults[[j]]$clusterLabels, true_clusters[,j])
+  }
+  
+}
+
+print(ariResultsMatrix)
+
+bestMatch <- which.max(rowSums(ariResultsMatrix))
+
+finalARI  <- ariResultsMatrix[bestMatch,]
+
+print("ARI for the derived clustering by group vs true clustering by group")
+print(finalARI)
