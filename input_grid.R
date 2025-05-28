@@ -1,3 +1,6 @@
+# Load packages
+library(tidyverse)
+
 # Define parameter space
 N_col <- c(10, 100, 500, 1000)
 param_index <- 1:5
