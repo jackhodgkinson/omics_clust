@@ -1,8 +1,3 @@
-# Combine all results files 
-# Get task_id from command line argument 
-args <- commandArgs(trailingOnly = TRUE)
-task_id <- args[1]
-
 # Combine all result files
 result_files <- list.files("results", pattern = "\\.csv$", full.names = TRUE)
 
@@ -24,19 +19,23 @@ for (file in result_files) {
   write.csv(df, output_csv, row.names = FALSE)
   cat("Saved:", output_csv, "\n")
   
-  # If task_id is in the data, delete matching .out/.err files
-  if ("task_id" %in% colnames(df) && task_id %in% df$task_id) {
-    for (ext in c("out", "err")) {
-      log_file <- file.path("logs", paste0(output_name, "_", task_id, ".", ext))
-      if (file.exists(log_file)) {
-        file.remove(log_file)
-        cat("Deleted:", log_file, "\n")
-      } else {
-        cat("Not found:", log_file, "\n")
+  # If "task_id" column exists, find all unique task_ids in this file
+  if ("task_id" %in% colnames(df)) {
+    task_ids <- unique(df$task_id)
+    
+    for (task_id in task_ids) {
+      for (ext in c("out", "err")) {
+        log_file <- file.path("logs", paste0(output_name, "_", task_id, ".", ext))
+        if (file.exists(log_file)) {
+          file.remove(log_file)
+          cat("Deleted:", log_file, "\n")
+        } else {
+          cat("Not found:", log_file, "\n")
+        }
       }
     }
   } else {
-    cat("Task ID", task_id, "not found in", file, "\n")
+    cat("No task_id column found in", file, "\n")
   }
 }
 
