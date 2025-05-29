@@ -33,18 +33,18 @@ results <- data.frame(Parameter.ID = numeric(),
 # Parallel 
 parallel_process <- TRUE
   
-# Create many different parameters 
+# Specify parameters 
 params <- list(
   cluster1 = list(mean = rnorm(N_col, mean = -5, sd = 0.1), cov = diag(runif(N_col, 0.5, 1.5))),
   cluster2 = list(mean = rnorm(N_col, mean = 0,  sd = 0.1), cov = diag(runif(N_col, 0.5, 1.5))),
   cluster3 = list(mean = rnorm(N_col, mean = 5,  sd = 0.1), cov = diag(runif(N_col, 0.5, 1.5)))
 )
 
-# Simulate data
-n_groups <- 2
-
 # Get cores
 n_cores <- numCores()
+
+# Simulate data
+n_groups <- 2
 
 data <- simulateGMM(3, n_groups, params, n_indiv = 419, n_col = N_col,
                     random_seed = seed,
