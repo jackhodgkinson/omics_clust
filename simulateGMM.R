@@ -16,6 +16,7 @@ simulateGMM <- function(n_clust,                                                
   # Load relevant packages
   library(MASS)
   library(parallel)
+  source("numCores.R")
   
   # Ensure numeric inputs
   n_clust <- as.numeric(n_clust)
@@ -26,6 +27,9 @@ simulateGMM <- function(n_clust,                                                
 
   # Set seed
   set.seed(random_seed)
+  
+  # Set number of cores
+  n_cores <- numCores()
   
   # Validate parameters
   if (length(cluster_params) != n_clust) {
@@ -76,10 +80,10 @@ simulateGMM <- function(n_clust,                                                
   if (parallel_process && n_indiv > 1000 && n_clust > 3) {
     if (.Platform$OS.type != "windows"){
       cluster_results <- mclapply(seq_len(n_clust), sim_clust_data, 
-                                  mc.cores = detectCores() - 1)
+                                  mc.cores = n_cores)
     }
     else {
-      cl <- makeCluster(detectCores() - 1)
+      cl <- makeCluster(n_cores)
       clusterExport(cl, ls(envir = environment()), envir = environment())
       cluster_results <- parLapply(cl, seq_len(n_clust), sim_clust_data)
       stopCluster(cl)
@@ -116,14 +120,14 @@ simulateGMM <- function(n_clust,                                                
       # Run in parallel if needed
       if (parallel_process && n_indiv > 1000 && n_groups > 2) {
         if (.Platform$OS.type != "windows") {
-          cl <- mclapply(seq_len(n_groups - 1), function(g) {
+          permuted_list <- mclapply(seq_len(n_groups - 1), function(g) {
             permute_cols <- which(group == g)
             order <- sample(n_indiv)
             sim_data[, permute_cols] <<- sim_data[order, permute_cols]
             out <- indiv_clust[order]
             names(out) <- paste0("group", g, "_clusterid")
             out
-          }, mc.cores = detectCores() - 1)
+          }, mc.cores = n_cores)
         } else {
           cl <- makeCluster(n_cores)
           clusterExport(cl,  ls(envir = environment()), envir = environment())

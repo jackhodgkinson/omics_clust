@@ -1,30 +1,54 @@
 # Load packages
 library(tidyverse)
 
-# Define parameter space
+# Define other parameter values
 N_col <- c(10, 100, 500, 1000)
 param_index <- 1:5
-n_groups <- 1:4
-models <- c("EII", "VII", "EEI", "VEI", "EVI", "VVI",
-            "EEE", "VEE", "EVE", "VVE", "EEV", "VEV", "EVV", "VVV",
-            "OTRIMLE")
+methods <- c("single", "complete", "average", "ward.D2", "ward.D", "mcquitty", "median", "centroid")
+indices <- c("cindex", "silhouette", "dunn", "mcclain")
 
-# Create the grid
-grid <- expand.grid(N_col = N_col,
-                    param_index = param_index,
-                    n_groups = n_groups,
-                    models = models,
-                    KEEP.OUT.ATTRS = FALSE,
-                    stringsAsFactors = FALSE)
+# Function to determine n_clust based on N_col
+get_cluster_range <- function(ncol) {
+  if (ncol <= 10) {
+    return(2:3)
+  } else if (ncol <= 100) {
+    return(2:4)
+  } else {
+    return(2:5)
+  }
+}
 
-# Add a unique task ID (optional, for tracking)
-grid$task_id <- seq_len(nrow(grid))
+# Function to determine n_groups based on N_col
+get_group_range <- function(ncol) {
+  if (ncol <= 10) {
+    return(2)
+  } else if (ncol <= 100) {
+    return(2:3)
+  } else {
+    return(2:5)
+  }
+}
 
-# Subset failed ones 
+# Build grid dynamically
+grid <- map_dfr(N_col, function(ncol) {
+  n_clust <- get_cluster_range(ncol)
+  n_groups <- get_group_range(ncol)
+  
+  expand.grid(
+    N_col = ncol,
+    param_index = param_index,
+    n_clust = n_clust,
+    n_groups = n_groups,
+    methods = methods,
+    indices = indices,
+    KEEP.OUT.ATTRS = FALSE,
+    stringsAsFactors = FALSE
+  )
+})
+
+# Add task ID
 grid <- grid %>%
-  filter(task_id %in% c(25, 105, 143, 185, 269, 305, 325, 445, 485, 505, 529, 
-                        549, 586, 605, 618, 645, 665, 805, 829, 845, 849, 897, 
-                        909, 925, 949, 969, 978, 998, 1005, 1018, 1038, 1089, 1109))
+  mutate(task_id = row_number())
 
 # Write to CSV
 write.table(grid, "input_grid.csv", sep = ",", quote = FALSE, row.names = FALSE, col.names = FALSE)

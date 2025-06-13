@@ -69,6 +69,9 @@ opt_hclust <- optimal_hclust(dist_mat,
                              method = methods,
                              index = indices)
 
+# Only frey, mcclain, cindex, sihouette and dunn can be computed. 
+# To compute the other indices, data matrix is needed.
+
 # Choose best index and linkage function
 opt_hclust$`Number of Clusters`
 opt_hclust$`Index Values` # %>% 
@@ -79,7 +82,7 @@ hclust <- hclust(dist_mat, method = "complete")
 opt <- NbClust(diss = dist_mat, distance = NULL, method = "single", 
                min.nc = 2, max.nc = 5, index = "dunn")
 
-# Choose optimal 
+# Choose optimal number of clusters
 if (is.vector(opt$Best.nc)) {
   opt_ng <- as.numeric(opt$Best.nc[1])
 } else {
