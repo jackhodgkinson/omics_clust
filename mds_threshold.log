@@ -1,0 +1,22 @@
+Called from: sample.int(length(x), size, replace, prob)
+Called from: sample.int(length(x), size, replace, prob)
+Called from: sample.int(length(x), size, replace, prob)
+Called from: simulateLCMM(subject_data = NULL, timepoints, n_clust, n_groups, 
+    params, n_indiv, n_col = N_col, seed, missing = TRUE, missing_perc = c(0.052, 
+        0.0563, 0.0748, 0.3586), timepoint_perc = c(0.3521, 0.0802, 
+        0.0098), timepoint_noise = TRUE, timepoint_sd = timepoints_sd, 
+    cluster_labels = NULL, equal_clust = FALSE)
+Called from: simulateLCMM(subject_data = NULL, timepoints, n_clust, n_groups, 
+    params, n_indiv, n_col = N_col, seed, missing = TRUE, missing_perc = c(0.052, 
+        0.0563, 0.0748, 0.3586), timepoint_perc = c(0.3521, 0.0802, 
+        0.0098), timepoint_noise = TRUE, timepoint_sd = timepoints_sd, 
+    cluster_labels = NULL, equal_clust = FALSE)
+Called from: simulateLCMM(subject_data = NULL, timepoints, n_clust, n_groups, 
+    params, n_indiv, n_col = N_col, seed, missing = TRUE, missing_perc = c(0.052, 
+        0.0563, 0.0748, 0.3586), missing_timepoints = timepoints, 
+    timepoint_perc = c(0.3521, 0.0802, 0.0098), timepoint_noise = TRUE, 
+    timepoint_sd = timepoints_sd, cluster_labels = NULL, equal_clust = FALSE)
+Called from: sim_longitud_data(cluster_params, data_hlme, "Subject_ID", indiv_clust, 
+    n_col, parallel_proc = parallel_process)
+Called from: sim_longitud_data(cluster_params, data_hlme, "Subject_ID", indiv_clust, 
+    n_col, parallel_proc = parallel_process)
