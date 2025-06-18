@@ -1,4 +1,5 @@
 # simulateLCMM
+# NOTE: If participants want missing data, they need to provide this through subject_data
 simulateLCMM <- function(subject_data = NULL,                                     # Provide subject data. Default is NULL and function will generate subject data with no missingness.
                          timepoints,                                              # Timepoints for longitudinal data
                          n_clust,                                                 # Number of clusters
