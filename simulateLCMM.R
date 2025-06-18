@@ -13,8 +13,8 @@ simulateLCMM <- function(subject_data = NULL,                                   
                        # missing_perc = 0.05,                                     # Percentage of missing data if missing == TRUE. Default is 0.05.
                        # missing_timepoints = NULL,                               # The index of timepoints you would like to add missing data to. Default is NULL, so selection is random.
                        # timepoint_perc = 0.1,                                    # The proportion of participants missing 1:n-1 timepoints. Can be a scalar or a vector of length n-1 timepoints. Default is 0.1
-                         timepoint_noise = TRUE,                                  # Add noise to the timepoints. Default is TRUE.
-                         timepoint_sd = 0,                                        # Specify the standard deviation of the timepoints to add noise. Can be a single number of a vector the same length as timepoints. Default is 0.
+                         timepoint_noise = TRUE,                                  # Add noise to the timepoints. Default is TRUE. Only triggered if timepoint is not NULL.
+                         timepoint_sd = 0,                                        # Specify the standard deviation of the timepoints to add noise. Can be a single number of a vector the same length as timepoints. Default is 0. Only triggered if timepoint is not NULL.
                          cluster_labels = NULL,                                   # Input cluster labels, NULL by default.
                          group_labels = NULL,                                     # Input group labels, NULL by default
                          equal_clust = TRUE,                                      # Boolean. If generating cluster labels, ensure each cluster has approx equal individuals. Default is TRUE.
@@ -291,17 +291,21 @@ simulateLCMM <- function(subject_data = NULL,                                   
   # ==== ADD TIMEPOINT NOISE ====
   non_missing_idx <- which(!is.na(data_hlme$Time))
 
-  if (timepoint_noise) {
-    if (length(timepoint_sd) == 1) {
-      sd_vals <- rep(timepoint_sd, length(non_missing_idx))
-    } else if (length(timepoint_sd) == length(non_missing_idx)) {
-      sd_vals <- timepoint_sd
-    } else {
-      stop("`timepoint_sd` must be a scalar or a vector matching the number of non-missing timepoints.")
+  if (!is.null(timepoints)) {
+    if (timepoint_noise) {
+      non_missing_idx <- which(!is.na(data_hlme$Time))
+      
+      if (length(timepoint_sd) == 1) {
+        sd_vals <- rep(timepoint_sd, length(non_missing_idx))
+      } else if (length(timepoint_sd) == length(non_missing_idx)) {
+        sd_vals <- timepoint_sd
+      } else {
+        stop("`timepoint_sd` must be a scalar or a vector matching the number of non-missing timepoints.")
+      }
+      
+      data_hlme$Time[non_missing_idx] <- data_hlme$Time[non_missing_idx] +
+        rnorm(length(non_missing_idx), mean = 0, sd = sd_vals)
     }
-
-    data_hlme$Time[non_missing_idx] <- data_hlme$Time[non_missing_idx] +
-      rnorm(length(non_missing_idx), mean = 0, sd = sd_vals)
   }
 
   # ==== CLUSTER LABELS ====
