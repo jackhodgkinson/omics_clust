@@ -9,7 +9,7 @@ source("simulateLCMM.R")
 # Initialise parameters
 n_groups <- 3
 n_clust <- 3
-N_col <- 25
+N_col <- 33
 n_indiv <- 923
 timepoints <- c(12.7, 20.4, 28.3, 36.2)
 timepoints_sd  <- c(0.842, 0.485, 0.419, 0.394)
@@ -48,7 +48,7 @@ params <- list(
 
 # ==== Simulating with Subjects ====
 # Generate data
-sim_data <- simulateLCMM(subject_data = NULL, timepoints, n_clust, n_groups, params, 
+sim_data <- simulateLCMM(subject_data = NULL, ID = NULL, timepoints, n_clust, n_groups, params, 
                         n_indiv, n_col = N_col, 39192, timepoint_noise = TRUE, timepoint_sd = 1, cluster_labels = NULL, 
                         equal_clust = FALSE)
 
@@ -100,3 +100,21 @@ pheatmap::pheatmap(sim_mat[order(clusters[["Group2_clusterID"]]),
                    cluster_rows = F,
                    cluster_cols = F)
 
+# ==== Simulating with Subjects ====
+# Generate subjects
+subj_data <- data.frame(SubjectID = rep(1:100, each = 4), 
+                        Time = unlist(replicate(100, c(12, 20, 28, 36) + 
+                                           rnorm(4, mean = 0, 
+                                                 sd = c(0.842, 0.485, 0.419, 0.394)), 
+                                         simplify = FALSE)),
+                        GA = rep(c(12, 20, 28, 36), times = 4))
+
+# Generate data
+sim_data2 <- simulateLCMM(subject_data = subj_data, ID = NULL, timepoints = NULL, n_clust, n_groups, params, 
+                         100, n_col = N_col, 4881, cluster_labels = NULL, 
+                         equal_clust = FALSE)
+
+# Gather the data
+sim_dat2 <- sim_data2$`Simulated Data`
+clusters2 <- sim_data2$`Cluster ID per participant per group`
+groups2 <- sim_data2$`Group ID`

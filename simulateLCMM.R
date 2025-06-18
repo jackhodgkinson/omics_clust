@@ -1,17 +1,18 @@
 # simulateLCMM
 # NOTE: If participants want missing data, they need to provide this through subject_data
 simulateLCMM <- function(subject_data = NULL,                                     # Provide subject data. Default is NULL and function will generate subject data with no missingness.
-                         timepoints,                                              # Timepoints for longitudinal data
+                         ID = NULL,                                               # If specifying subject_data, provide ID column. Default is NULL.
+                         timepoints = NULL,                                       # Timepoints for longitudinal data if not provided in subject_data. Default is NULL.
                          n_clust,                                                 # Number of clusters
                          n_groups,                                                # Number of groups of data, 1 by default
                          cluster_params,                                          # List of distribution parameters per cluster
                          n_indiv,                                                 # Number of individuals
                          n_col,                                                   # Number of columns in simulated data
                          random_seed,                                             # Input random seed for reproducibility
-                         # missing = FALSE,                                         # Boolean. Default is FALSE.
-                         # missing_perc = 0.05,                                     # Percentage of missing data if missing == TRUE. Default is 0.05.
-                         # missing_timepoints = NULL,                               # The index of timepoints you would like to add missing data to. Default is NULL, so selection is random.
-                         # timepoint_perc = 0.1,                                    # The proportion of participants missing 1:n-1 timepoints. Can be a scalar or a vector of length n-1 timepoints. Default is 0.1
+                       # missing = FALSE,                                         # Boolean. Default is FALSE.
+                       # missing_perc = 0.05,                                     # Percentage of missing data if missing == TRUE. Default is 0.05.
+                       # missing_timepoints = NULL,                               # The index of timepoints you would like to add missing data to. Default is NULL, so selection is random.
+                       # timepoint_perc = 0.1,                                    # The proportion of participants missing 1:n-1 timepoints. Can be a scalar or a vector of length n-1 timepoints. Default is 0.1
                          timepoint_noise = TRUE,                                  # Add noise to the timepoints. Default is TRUE.
                          timepoint_sd = 0,                                        # Specify the standard deviation of the timepoints to add noise. Can be a single number of a vector the same length as timepoints. Default is 0.
                          cluster_labels = NULL,                                   # Input cluster labels, NULL by default.
@@ -27,7 +28,33 @@ simulateLCMM <- function(subject_data = NULL,                                   
   source("numCores.R")
 
   # ==== PARAMETER VALIDATION ====
-  if (!is.numeric(timepoints) || length(timepoints) < 1) stop("`timepoints` must be a numeric vector.")
+  if (is.null(timepoints)) {
+    if (is.null(subject_data)) {
+      stop("`timepoints` must be specified if `subject_data` is NULL.")
+    }
+  } else if (!is.numeric(timepoints) || length(timepoints) < 1) {
+    stop("`timepoints` must be a non-empty numeric vector.")
+  }  
+  if (!is.null(subject_data)) {
+    if (is.null(ID)) {
+      id_col <- grep("ID", colnames(subject_data), value = TRUE, ignore.case = TRUE)
+      if (length(id_col) != 1) {
+        stop("`subject_data` must contain exactly one column with 'ID' in its name.")
+      }
+      ID <- id_col
+    } else {
+      if (!ID %in% colnames(subject_data)) {
+        stop(paste0("`ID` column '", ID, "' not found in subject_data."))
+      }
+    }
+    
+    n_unique_ids <- length(unique(subject_data[[ID]]))
+    if (n_unique_ids != n_indiv) {
+      stop(paste0("`n_indiv` (", n_indiv,
+                  ") does not match number of unique IDs in `subject_data` (",
+                  n_unique_ids, ")."))
+    }
+  }
   if (!is.numeric(n_clust) || n_clust < 1) stop("`n_clust` must be a positive integer.")
   if (!is.numeric(n_groups) || n_groups < 1) stop("`n_groups` must be a positive integer.")
   if (!is.list(cluster_params)) stop("`cluster_params` must be a list.")
@@ -61,17 +88,21 @@ simulateLCMM <- function(subject_data = NULL,                                   
       Subject_ID = rep(1:n_indiv, each = length(timepoints)),
       Time = rep(timepoints, times = n_indiv)
     )   
-  } else {     
-    required_cols <- c("Subject_ID", "Time")     
-    missing_cols <- setdiff(required_cols, colnames(subject_data))     
-    if (length(missing_cols) > 0) {       
-      stop(paste("Subject data is missing required column(s):", paste(missing_cols, collapse = ", ")))     
-    }     
-    expected_rows <- n_indiv * length(timepoints)     
-    if (nrow(subject_data) != expected_rows) {       
-      warning(paste("Subject data has", nrow(subject_data), "rows; expected", expected_rows))     
-    }     
-    data_hlme <- subject_data   
+  } else {
+    # Find any column name that contains "ID" (case-insensitive)
+    id_col <- grep("ID", colnames(subject_data), value = TRUE, ignore.case = TRUE)
+    
+    if (length(id_col) != 1) {
+      stop("Subject data must contain exactly one column with 'ID' in its name.")
+    }
+    
+    required_cols <- c(id_col, "Time")
+    missing_cols <- setdiff(required_cols, colnames(subject_data))
+    if (length(missing_cols) > 0) {
+      stop(paste("Subject data is missing required column(s):", paste(missing_cols, collapse = ", ")))
+    }
+    
+    data_hlme <- subject_data
   }
 
   # ==== APPLY MISSINGNESS ====
@@ -285,7 +316,7 @@ simulateLCMM <- function(subject_data = NULL,                                   
   } else cluster_labels
 
   indiv_clust_long <- rep(NA_integer_, nrow(data_hlme))
-  subject_ids <- data_hlme$Subject_ID
+  subject_ids <- data_hlme[[ID]]
   for (i in seq_along(indiv_clust)) {
     subj_id <- i  # Assuming Subject_ID = 1:n_indiv
     rows_subj <- which(subject_ids == subj_id)
@@ -423,7 +454,7 @@ simulateLCMM <- function(subject_data = NULL,                                   
   }
 
   # ==== RUN SIMULATION ====
-  sim_data <- sim_longitud_data(cluster_params, data_hlme, "Subject_ID",
+  sim_data <- sim_longitud_data(cluster_params, data_hlme, ID,
                                indiv_clust, n_col, parallel_proc = parallel_process)
 
   # ==== GENERATE VIEWS ====
@@ -448,12 +479,12 @@ simulateLCMM <- function(subject_data = NULL,                                   
     # Split the dataset into the different groups
     group_list <- list()
     split_data <- sim_data %>%
-      dplyr::select(-Subject_ID, -Time)
+      dplyr::select(where(is.numeric), -any_of(names(data_hlme)))
 
     unique_groups <- unique(group)
     for (g in unique_groups[-length(unique_groups)]) {  # Exclude last group
       view <- split_data[, group == g, drop = FALSE]
-      view <- cbind(sim_data[, c("Subject_ID", "Time")], view)
+      view <- cbind(sim_data[, c(ID, "Time")], view)
       name <- paste0("Group", g)
       group_list[[name]] <- view
     }
@@ -465,20 +496,20 @@ simulateLCMM <- function(subject_data = NULL,                                   
     for (i in seq_along(names(group_list))) {
       name <- names(group_list)[i]
       group_df <- group_list[[name]]
-
+      
       permute_col <- function(data, ID, cluster, random_seed) {
         set.seed(random_seed)
-        clust_data <- as.data.frame(cbind(cluster, unique(data$Subject_ID)))
-        colnames(clust_data)[2] <- "Subject_ID"
+        clust_data <- as.data.frame(cbind(cluster, unique(data[[ID]])))
+        colnames(clust_data)[2] <- ID
         data_clust <- data %>%
-          left_join(clust_data, by = "Subject_ID")
-
+          left_join(clust_data, by = ID)
+        
         subject_counts <- data_clust %>%
-          group_by(Subject_ID) %>%
+          group_by(.data[[ID]]) %>%
           summarise(n_timepoints = n())
 
         data_clust_counts <- data_clust %>%
-          left_join(subject_counts, by = "Subject_ID")
+          left_join(subject_counts, by = ID)
 
         data_by_timepoint <- split(data_clust_counts, data_clust_counts$n_timepoints)
         names(data_by_timepoint) <- paste(seq_along(data_by_timepoint),"Timepoint(s)")
@@ -488,64 +519,70 @@ simulateLCMM <- function(subject_data = NULL,                                   
 
         data_by_timepoint <- lapply(data_by_timepoint, function(df) {
 
-          orig_ID <- df$Subject_ID
+          orig_ID <- df[[ID]]
           orig_time <- df$Time
-          permute_ID <- sample(unique(df$Subject_ID))
+          permute_ID <- sample(unique(df[[ID]]))
           df <- df %>%
-            arrange(match(Subject_ID, permute_ID), Time) %>%
-            mutate(Subject_ID = orig_ID,
+            arrange(match(df[[ID]], permute_ID), Time) %>%
+            mutate(!!ID := orig_ID,
                    Time = orig_time)
           df
         })
 
         data2 <- bind_rows(data_by_timepoint) %>%
-          arrange(Subject_ID, Time)
+          arrange(ID, Time)
 
         return(data2)
       }
+      
+      
 
       seed <- random_seed + i
-      group_permute[[name]] <- permute_col(group_df, "Subject_ID", indiv_clust, seed)
+      group_permute[[name]] <- permute_col(group_df, ID, indiv_clust, seed)
       names(group_permute[[name]])[names(group_permute[[name]]) == "cluster"] <- paste0(name, "_clusterID")
     }
 
     # Obtain data for non-permuted group
     non_permute_group_num <- unique_groups[length(unique_groups)]
     non_permute_view <- split_data[, group == non_permute_group_num, drop = FALSE]
-    non_permute_group <- cbind(sim_data[, c("Subject_ID", "Time")], non_permute_view)
+    non_permute_group <- cbind(sim_data[, c(ID, "Time")], non_permute_view)
     non_perm_clust_data <- data.frame(
-      Subject_ID = unique(sim_data$Subject_ID),
       cluster = indiv_clust
     )
+    non_perm_clust_data[[ID]] <- unique(sim_data[[ID]])
     non_perm_data_clust <- non_permute_group %>%
-      left_join(non_perm_clust_data, by = "Subject_ID")
-    names(non_perm_data_clust)[names(non_perm_data_clust) == "cluster"] <- paste0("Group",non_permute_group_num, "_clusterID")
-
+      left_join(non_perm_clust_data, by = ID)
+    names(non_perm_data_clust)[names(non_perm_data_clust) == "cluster"] <- 
+      paste0("Group",non_permute_group_num, "_clusterID")
+    
     # List of dataframes
     name <- paste0("Group", non_permute_group_num)
     named_non_perm <- setNames(list(non_perm_data_clust), name)
     dfs <- c(named_non_perm, group_permute)
+    dfs <- lapply(dfs, function(df) {
+      df[order(df[[ID]], df$Time), ]
+    })
 
-    # Join all dataframes avoiding duplication of Subject_ID and Time
+    # Join all dataframes avoiding duplication of ID and Time
     final_df <- reduce(dfs, full_join, by = intersect(names(dfs[[1]]), names(dfs[[2]])))
 
     # Generate group_clusterID dataset
     group_clusterID <- final_df %>%
-      dplyr::select(Subject_ID, contains("cluster")) %>%
+      dplyr::select(all_of(ID), contains("cluster")) %>%
       dplyr::select(all_of(
         names(.)[order(as.numeric(stringr::str_extract(names(.), "(?<=Group)\\d+")))]
       )) %>%
       dplyr::distinct() %>%
-      dplyr::select(-Subject_ID)
+      dplyr::select(-all_of(ID))
 
     # Tidy final dataset by ordering and then removing cluster labels
     final_df <- final_df %>%
       dplyr::select(-contains("cluster")) %>%
       dplyr::select(
-        Subject_ID, Time,  # fixed ID columns
+        all_of(ID), Time,  # fixed ID columns
         all_of(
           names(.) %>%
-            setdiff(c("Subject_ID", "Time")) %>%
+            setdiff(c(ID, "Time")) %>%
             .[order(as.numeric(str_extract(., "\\d+")))]  # sort numerically
         )
       )
