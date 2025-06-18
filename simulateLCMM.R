@@ -1,5 +1,5 @@
 # simulateLCMM
-simulateLCMM <- function(subject_data = NULL,                                     # Provide subject data. Default is NULL and function will generate subject data.
+simulateLCMM <- function(subject_data = NULL,                                     # Provide subject data. Default is NULL and function will generate subject data with no missingness.
                          timepoints,                                              # Timepoints for longitudinal data
                          n_clust,                                                 # Number of clusters
                          n_groups,                                                # Number of groups of data, 1 by default
@@ -7,10 +7,10 @@ simulateLCMM <- function(subject_data = NULL,                                   
                          n_indiv,                                                 # Number of individuals
                          n_col,                                                   # Number of columns in simulated data
                          random_seed,                                             # Input random seed for reproducibility
-                         missing = FALSE,                                         # Boolean. Default is FALSE.
-                         missing_perc = 0.05,                                     # Percentage of missing data if missing == TRUE. Default is 0.05.
-                         missing_timepoints = NULL,                               # The index of timepoints you would like to add missing data to. Default is NULL, so selection is random.
-                         timepoint_perc = 0.1,                                    # The proportion of participants missing 1:n-1 timepoints. Can be a scalar or a vector of length n-1 timepoints. Default is 0.1
+                         # missing = FALSE,                                         # Boolean. Default is FALSE.
+                         # missing_perc = 0.05,                                     # Percentage of missing data if missing == TRUE. Default is 0.05.
+                         # missing_timepoints = NULL,                               # The index of timepoints you would like to add missing data to. Default is NULL, so selection is random.
+                         # timepoint_perc = 0.1,                                    # The proportion of participants missing 1:n-1 timepoints. Can be a scalar or a vector of length n-1 timepoints. Default is 0.1
                          timepoint_noise = TRUE,                                  # Add noise to the timepoints. Default is TRUE.
                          timepoint_sd = 0,                                        # Specify the standard deviation of the timepoints to add noise. Can be a single number of a vector the same length as timepoints. Default is 0.
                          cluster_labels = NULL,                                   # Input cluster labels, NULL by default.
@@ -33,26 +33,26 @@ simulateLCMM <- function(subject_data = NULL,                                   
   if (!is.numeric(n_indiv) || n_indiv < 1) stop("`n_indiv` must be a positive integer.")
   if (!is.numeric(n_col) || n_col < 1) stop("`n_col` must be a positive integer.")
   if (!is.numeric(random_seed)) stop("`random_seed` must be numeric.")
-  if (!is.logical(missing)) stop("`missing` must be TRUE or FALSE.")
+  # if (!is.logical(missing)) stop("`missing` must be TRUE or FALSE.")
   
-  if (!is.null(missing_timepoints)) {
-    if (!all(missing_timepoints %in% timepoints)) {
-      stop("All `missing_timepoints` must be in `timepoints`.")
-    }
-  } else {
-    if (!is.numeric(timepoint_perc) || any(timepoint_perc < 0)) {
-      stop("timepoint_perc must be numeric and non-negative")
-    }
-  }
-  
-  if (length(missing_perc) != 1 && !is.null(missing_timepoints) &&
-      length(missing_perc) != length(missing_timepoints)) {
-    stop("`missing_perc` must be a single value or match length of `missing_timepoints`.")
-  }
-  
-  if (any(missing_perc < 0 | missing_perc > 1)) {
-    stop("`missing_perc` values must be between 0 and 1.")
-  }
+  # if (!is.null(missing_timepoints)) {
+  #   if (!all(missing_timepoints %in% timepoints)) {
+  #     stop("All `missing_timepoints` must be in `timepoints`.")
+  #   }
+  # } else {
+  #   if (!is.numeric(timepoint_perc) || any(timepoint_perc < 0)) {
+  #     stop("timepoint_perc must be numeric and non-negative")
+  #   }
+  # }
+  # 
+  # if (length(missing_perc) != 1 && !is.null(missing_timepoints) &&
+  #     length(missing_perc) != length(missing_timepoints)) {
+  #   stop("`missing_perc` must be a single value or match length of `missing_timepoints`.")
+  # }
+  # 
+  # if (any(missing_perc < 0 | missing_perc > 1)) {
+  #   stop("`missing_perc` values must be between 0 and 1.")
+  # }
   
   # ==== GENERATE SUBJECT DATA ====  
   if (is.null(subject_data)) {     
@@ -74,139 +74,188 @@ simulateLCMM <- function(subject_data = NULL,                                   
   }
 
   # ==== APPLY MISSINGNESS ====
-  if (missing) {
-    set.seed(random_seed) 
-    subj <- unique(data_hlme$Subject_ID)
-    
-    n_miss <- numeric(length(timepoint_perc))
-    
-    # Calculate number of participants missing at least n-1,...,1 timepoint
-    for (k in seq_along(timepoint_perc)) {
-        n_miss[k] <- round(timepoint_perc[k] * length(subj))
-    }
-    n_miss <- c("0" = length(subj) - sum(n_miss), setNames(n_miss, seq_along(n_miss)))
-    
-    # Initialise the target of missing counts per timepoint
-    target_miss_tp <- round(missing_perc * length(subj))
-    names(target_miss_tp) <- timepoints
-    
-    # Extend n_miss to the number of participants and permute randomly. 
-    n_miss <- rep(as.integer(names(n_miss)), times = n_miss)
-    set.seed(random_seed) 
-    n_miss <- sample(n_miss, length(n_miss), replace = FALSE)
-    
-    # Matrix
-    mat <- matrix(runif(length(n_miss * )))
-    
-    # Matrix of missingness
-    missing_mat <- matrix(FALSE, nrow = length(subj), ncol = length(timepoints))
-    
-    
-    # Loop over each timepoint and mark n_miss timepoints as missing using target_miss_tp
-    for (i in seq_along(subj)){
-      if (n_miss[i] == 0) next
-      tps <- names(which(colSums(missing_mat) < target_miss_tp))
-      
-      n_assign <- min(n_miss[i], length(tps))
-      
-      tp_assign <- sample(tps, n_assign)
-      
-      missing_mat[i, tp_assign] <- TRUE
-    }
-    
-    return(missing_mat)
-  }
-  
+  # if (missing) {
+  #   set.seed(random_seed)
+  #   subj <- unique(data_hlme$Subject_ID)
+  #
+  #   n_miss <- numeric(length(timepoint_perc))
+  #
+  #   # Calculate number of participants missing at least n-1,...,1 timepoint
+  #   for (k in seq_along(timepoint_perc)) {
+  #       n_miss[k] <- round(timepoint_perc[k] * length(subj))
+  #   }
+  #   n_miss <- c("0" = length(subj) - sum(n_miss), setNames(n_miss, seq_along(n_miss)))
+  #
+  #   # Initialise the target of missing counts per timepoint
+  #   target_miss_tp <- round(missing_perc * length(subj))
+  #   names(target_miss_tp) <- timepoints
+  #
+  #   # Extend n_miss to the number of participants and permute randomly.
+  #   n_miss <- rep(as.integer(names(n_miss)), times = n_miss)
+  #   set.seed(random_seed)
+  #   n_miss <- sample(n_miss, length(n_miss), replace = FALSE)
+  #
+  #   # Matrix
+  #   mat <- matrix(runif(length(n_miss * )))
+  #
+  #   # Matrix of missingness
+  #   missing_mat <- matrix(FALSE, nrow = length(subj), ncol = length(timepoints))
+  #
+  #
+  #   # Loop over each timepoint and mark n_miss timepoints as missing using target_miss_tp
+  #   for (i in seq_along(subj)){
+  #     if (n_miss[i] == 0) next
+  #     tps <- names(which(colSums(missing_mat) < target_miss_tp))
+  #
+  #     n_assign <- min(n_miss[i], length(tps))
+  #
+  #     tp_assign <- sample(tps, n_assign)
+  #
+  #     missing_mat[i, tp_assign] <- TRUE
+  #   }
+  #
+  #   return(missing_mat)
+  # }
+  #
   # if (missing) {
   #   set.seed(random_seed)
   #   all_subjects <- unique(data_hlme$Subject_ID)
-  #   total_participants <- length(all_subjects)
-  #   
-  #   # Define hierarchical missingness proportions (must sum <= 1)
-  #   prop_missing_3 <- 0.0098
-  #   prop_missing_2 <- 0.0802
-  #   prop_missing_1 <- 0.3521
-  #   
-  #   # Calculate number of participants missing at least 3, 2, and 1 timepoints
-  #   n_miss_3 <- round(prop_missing_3 * total_participants)
-  #   n_miss_2 <- round(prop_missing_2 * total_participants)
-  #   n_miss_1 <- round(prop_missing_1 * total_participants)
-  #   
-  #   # Sample participants hierarchically (no overlap between groups)
-  #   miss_3_participants <- sample(all_subjects, n_miss_3, replace = FALSE)
-  #   remaining_for_2 <- setdiff(all_subjects, miss_3_participants)
-  #   miss_2_participants <- sample(remaining_for_2, n_miss_2, replace = FALSE)
-  #   remaining_for_1 <- setdiff(all_subjects, c(miss_3_participants, miss_2_participants))
-  #   miss_1_participants <- sample(remaining_for_1, n_miss_1, replace = FALSE)
-  #   
-  #   # Initialize missing participants per timepoint list
-  #   missing_participants_per_tp <- vector("list", length(timepoints))
-  #   names(missing_participants_per_tp) <- as.character(timepoints)
-  #   for (tp in timepoints) {
-  #     missing_participants_per_tp[[as.character(tp)]] <- integer(0)
-  #   }
-  #   
-  #   # Assign missing timepoints to 3-missing group
-  #   for (subj in miss_3_participants) {
-  #     tps <- sample(timepoints, 3, replace = FALSE)
-  #     for (tp in tps) {
-  #       missing_participants_per_tp[[as.character(tp)]] <- c(missing_participants_per_tp[[as.character(tp)]], subj)
-  #     }
-  #   }
-  #   
-  #   # Assign missing timepoints to 2-missing group
-  #   for (subj in miss_2_participants) {
-  #     tps <- sample(timepoints, 2, replace = FALSE)
-  #     for (tp in tps) {
-  #       missing_participants_per_tp[[as.character(tp)]] <- c(missing_participants_per_tp[[as.character(tp)]], subj)
-  #     }
-  #   }
-  #   
-  #   # Assign missing timepoints to 1-missing group
-  #   for (subj in miss_1_participants) {
-  #     tp <- sample(timepoints, 1)
-  #     missing_participants_per_tp[[as.character(tp)]] <- c(missing_participants_per_tp[[as.character(tp)]], subj)
-  #   }
-  #   
-  #   # Remove duplicates inside each timepoint list
-  #   for (tp in timepoints) {
-  #     missing_participants_per_tp[[as.character(tp)]] <- unique(missing_participants_per_tp[[as.character(tp)]])
-  #   }
-  #   
-  #   # Collect rows to remove based on missing participants per timepoint
-  #   rows_to_remove <- integer(0)
-  #   for (tp in timepoints) {
-  #     tp_char <- as.character(tp)
-  #     subs <- missing_participants_per_tp[[tp_char]]
-  #     for (subj in subs) {
-  #       rows <- which(data_hlme$Subject_ID == subj & data_hlme$Time == tp)
-  #       rows_to_remove <- c(rows_to_remove, rows)
-  #     }
-  #   }
-  #   
-  #   # Remove rows to create missingness
-  #   data_hlme <- data_hlme[-rows_to_remove, ]
-  #   
-  #   # --- Check actual missing percentages ---
-  #   missing_counts <- sapply(timepoints, function(tp) {
-  #     length(unique(setdiff(all_subjects, unique(data_hlme$Subject_ID[data_hlme$Time == tp]))))
-  #   })
-  #   actual_missing_perc <- missing_counts / total_participants
-  #   
-  #   # Print summary
-  #   cat("Target missing percentages per timepoint:\n")
-  #   print(setNames(round(c(prop_missing_1, prop_missing_2, prop_missing_3), 4), c("1_tp", "2_tp", "3_tp")))
-  #   
-  #   cat("\nActual missing participants per timepoint:\n")
-  #   print(setNames(missing_counts, as.character(timepoints)))
-  #   
-  #   cat("\nActual missing percentages per timepoint:\n")
-  #   print(round(actual_missing_perc, 4))
-  #   
-  #   cat("\nDifference from target missing_perc (input vector):\n")
-  #   print(round(actual_missing_perc - missing_perc, 4))
-  # }
   # 
+  #   # Initialize rows to remove
+  #   rows_to_remove <- integer(0)
+  # 
+  #   # Store missing selections as a data.frame: Subject_ID + Time
+  #   missing_log <- data.frame(
+  #     Subject_ID = character(0),
+  #     Time = numeric(0)  # or character(0) if your timepoints are non-numeric
+  #   )
+  # 
+  #   # 1. Select participants to have missing data at each timepoint according to missing_perc
+  #   for (i in seq_along(timepoints)) {
+  #     tp <- timepoints[i]
+  #     perc <- missing_perc[i]
+  # 
+  #     tp_rows <- which(data_hlme$Time == tp)
+  #     tp_subjects <- unique(data_hlme$Subject_ID[tp_rows])
+  # 
+  #     n_missing <- round(perc * length(tp_subjects))
+  #     miss_subj <- sample(tp_subjects, size = n_missing, replace = FALSE)
+  # 
+  #     # Log each (Subject_ID, Time) pair
+  #     missing_log <- rbind(missing_log, data.frame(
+  #       Subject_ID = miss_subj,
+  #       Time = tp
+  #     ))
+  # 
+  #     tp_remove <- which(data_hlme$Subject_ID %in% miss_subj & data_hlme$Time == tp)
+  #     rows_to_remove <- c(rows_to_remove, tp_remove)
+  #   }
+  # 
+  #   # Correct number of participants with multiple missing timepoints to match timepoint_perc
+  #   subject_missing_counts <- table(missing_log$Subject_ID)
+  #   multi_missing <- names(subject_missing_counts[subject_missing_counts > 1])
+  #   n_total_multi <- length(multi_missing)
+  #   n_target_multi <- round(timepoint_perc * length(subject_missing_counts))
+  # 
+  #   # Randomly select a subset to keep
+  #   if (n_total_multi > n_target_multi) {
+  #     keep <- sample(multi_missing, size = n_target_multi)
+  #     drop <- setdiff(multi_missing, keep)
+  #   }
+  # 
+  #   keep_rows <- data.frame(Subject_ID = character(), Time = numeric(), stringsAsFactors = FALSE)
+  # 
+  #   for (id in drop){
+  #     subj_log <- subset(missing_log, Subject_ID == id)
+  #     keep_tp <- subj_log[sample(1:nrow(subj_log), size = 1),]
+  #     keep_rows <- rbind(keep_rows, keep_tp)
+  #   }
+  # 
+  #   # Correct missing_log
+  #   missing_log <- rbind(missing_log[!(missing_log$Subject_ID %in% drop), ], keep_rows)
+  # 
+  #   # Correct number of participants with missing data at each timepoint by selecting new participants
+  #   for (i in seq_along(timepoints)) {
+  #     tp <- timepoints[i]
+  #     target_miss <- round(missing_perc[i] * length(unique(data_hlme$Subject_ID[data_hlme$Time == tp])))
+  # 
+  #     # Current missing subjects at timepoint
+  #     curr_miss <- unique(missing_log$Subject_ID[missing_log$Time == tp])
+  #     n_curr_miss <- length(curr_miss)
+  # 
+  #     # Number of new subjects to add
+  #     n_add <- target_miss - n_curr_miss
+  # 
+  #     # Eligble participants for new missing at this tp
+  #     if (n_add > 0) {
+  #       curr_miss2 <- unique(missing_log$Subject_ID)
+  #       av_subj <- setdiff(unique(data_hlme$Subject_ID[data_hlme$Time == tp]), curr_miss2)
+  # 
+  #       if (length(av_subj) >= n_add) {
+  #         new_miss <- sample(av_subj, n_add, replace = FALSE)
+  #       } else {
+  #         new_miss <- av_subj
+  #       }
+  # 
+  #       missing_log <- rbind(missing_log, data.frame(Subject_ID = new_miss, Time = tp))
+  # 
+  #       new_rows <- which(data_hlme$Subject_ID %in% new_miss & data_hlme$Time == tp)
+  #       rows_to_remove <- c(rows_to_remove, new_rows)
+  #     }
+  #   }
+  # 
+  #   ## TEST
+  # 
+  #   # # Get full list of timepoints
+  #   all_timepoints <- sort(unique(data_hlme$Time))
+  # 
+  #   # Total number of participants (assuming all timepoints originally present)
+  #   n_participants <- length(all_subjects)
+  # 
+  #   # 1. % of participants with missing data at each timepoint
+  #   missing_by_tp <- sapply(all_timepoints, function(tp) {
+  #     missing_subjects <- unique(missing_log$Subject_ID[missing_log$Time == tp])
+  #     round(100 * length(missing_subjects) / n_participants, 2)
+  #   })
+  #   names(missing_by_tp) <- all_timepoints
+  # 
+  #   # # 2. % of participants with multiple timepoints missing
+  #   subject_missing_counts <- table(missing_log$Subject_ID)
+  #   n_missing_any <- length(subject_missing_counts)
+  #   n_missing_multi <- sum(subject_missing_counts > 1)
+  #   multi_tp_missing_perc <- round(100 * n_missing_multi / n_missing_any, 2)
+  #   return(multi_tp_missing_perc)
+
+
+    # # 3. Remove multiple timepoints from selected individuals
+    # for (subj in multi_missing_participants) {
+    #   subj_rows <- which(data_hlme$Subject_ID == subj)
+    #   subj_tp <- unique(data_hlme$Time[subj_rows])
+    #
+    #   if (length(subj_tp) > 2) {
+    #     n_remove <- sample(2:(n_tp - 1), 1)
+    #   } else {
+    #     n_remove <- 2
+    #   }
+    #
+    #   tp_to_remove <- tail(subj_rows, n_remove)
+    #   rows_to_remove <- c(rows_to_remove, tp_to_remove)
+    # }
+    #
+    #
+    # for (subj in single_missing_participants) {
+    #   subj_rows <- which(data_hlme$Subject_ID == subj)
+    #   tp_to_remove <- tail(subj_rows, 1)
+    #   rows_to_remove <- c(rows_to_remove, tp_to_remove)
+    # }
+    #
+    #
+    #
+    # # Drop the rows from data_hlme to remove missing timepoints
+    # data_hlme <- data_hlme[-rows_to_remove, ]
+  # }
+
+
   # ==== ADD TIMEPOINT NOISE ====
   non_missing_idx <- which(!is.na(data_hlme$Time))
 
@@ -374,7 +423,7 @@ simulateLCMM <- function(subject_data = NULL,                                   
 
   # ==== RUN SIMULATION ====
   sim_data <- sim_longitud_data(cluster_params, data_hlme, "Subject_ID",
-                               indiv_clust_long, n_col, parallel_proc = parallel_process)
+                               indiv_clust, n_col, parallel_proc = parallel_process)
 
   # ==== GENERATE VIEWS ====
   # Initialise empty group vector

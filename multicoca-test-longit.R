@@ -65,51 +65,6 @@ group <- sim_data[[3]]
 data <- sim_data[[1]]
 
 # Classify data using an LCMM
-# classification <- list()
-# columns <- names(data %>% dplyr::select(-Subject_ID, -Time))
-# max_clusters <- floor(sqrt(length(columns)))
-# if (max_clusters < 2) max_clusters <- 2  # at least 2 clusters
-# 
-# for (col in columns) {
-#   numeric_data <- data %>% dplyr::select(Subject_ID, Time, all_of(col))
-#   f <- as.formula(paste(col, "~ Time"))
-#   
-#   # Fit 1-class model
-#   model_prev <- lcmm::hlme(
-#     fixed = f,
-#     random = ~ Time,
-#     subject = "Subject_ID",
-#     ng = 1,
-#     data = numeric_data,
-#     nwg = FALSE
-#   )
-#   
-#   bics <- data.frame(Classes = 1, BIC = model_prev$BIC)
-#   
-#   for (k in 2:max_clusters) {
-#       model_k <- lcmm::hlme(
-#         fixed = f,
-#         random = ~ Time,
-#         subject = "Subject_ID",
-#         ng = k,
-#         mixture = ~ Time,
-#         data = numeric_data,
-#         nwg = TRUE,
-#         B = model_prev
-#       )
-#     
-#     bics <- rbind(bics, data.frame(Classes = k, BIC = model_k$BIC))
-#     model_prev <- model_k
-#   }
-#   
-#   best_k <- bics$Classes[which.min(bics$BIC)]
-#   message("Best number of classes for ", col, ": ", best_k)
-#   
-#   classification[[col]] <- list(best_k = best_k, bics = bics)
-# }
-# classification <- as.data.frame(classification)
-
-col <- columns[1]
 numeric_data <- data %>% dplyr::select(Subject_ID, Time, all_of(col))
 f <- as.formula(paste(col, "~ Time"))
 

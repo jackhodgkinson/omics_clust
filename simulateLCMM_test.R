@@ -48,34 +48,13 @@ params <- list(
 
 # Generate data
 sim_data <- simulateLCMM(subject_data = NULL, timepoints, n_clust, n_groups, params, 
-                        n_indiv, n_col = N_col, 39192, missing = TRUE, 
-                        missing_perc = c(0.052, 0.0563, 0.0748, 0.3586), 
-                        missing_timepoints = timepoints,
-                        timepoint_perc = c(0.3521, 0.0802, 0.0098), 
-                        timepoint_noise = TRUE, timepoint_sd = 1, cluster_labels = NULL, 
+                        n_indiv, n_col = N_col, 39192, timepoint_noise = TRUE, timepoint_sd = 1, cluster_labels = NULL, 
                         equal_clust = FALSE)
-sim_data
 
 # Gather the data
 sim_dat <- sim_data$`Simulated Data`
 clusters <- sim_data$`Cluster ID per participant per group`
 group <- sim_data$`Group ID`
-
-# Missing Data analysis
-sim_dat <- sim_data[[3]]
-n_participants <- length(unique(sim_dat$Subject_ID))
-assign_group <- function(tp, groups) {
-  groups[which.min(abs(tp - groups))]
-}
-sim_dat$GA <- sapply(sim_dat$Time, assign_group, groups = timepoints)
-label_map <- setNames(c(12, 20, 28, 36), timepoints)
-sim_dat$GA <- label_map[as.character(sim_dat$GA)]
-sim_dat$GA <- as.numeric(sim_dat$GA)
-Time_counts <- table(sim_dat$GA)
-missing_pc <- round(100*(1 - (Time_counts / n_participants)), 2)
-missing_pc <- paste0(missing_pc, "%")
-names(missing_pc) <- names(Time_counts)
-missing_pc
 
 # Plot the data
 subjects <- unique(sim_dat$Subject_ID)
