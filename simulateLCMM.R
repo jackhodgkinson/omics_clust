@@ -530,10 +530,12 @@ simulateLCMM <- function(subject_data = NULL,                                   
 
     # Generate group_clusterID dataset
     group_clusterID <- final_df %>%
-      dplyr::select(contains("cluster")) %>%
+      dplyr::select(Subject_ID, contains("cluster")) %>%
       dplyr::select(all_of(
         names(.)[order(as.numeric(stringr::str_extract(names(.), "(?<=Group)\\d+")))]
-      ))
+      )) %>%
+      dplyr::distinct() %>%
+      dplyr::select(-Subject_ID)
 
     # Tidy final dataset by ordering and then removing cluster labels
     final_df <- final_df %>%
