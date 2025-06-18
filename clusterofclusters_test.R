@@ -18,6 +18,7 @@ sim_data <- simulateGMM(3, 1, params1, n_indiv = 419, n_col = N_col, random_seed
 clusters1 <- sim_data$`Cluster ID`
 sim_data <- sim_data$`Simulated Data`[, 1:N_col]
 
+moc1 <- constructMOC
 outputCOCA <- clusterofclusters(sim_data, max.iter = 10000)
 clusters2 <- outputCOCA$clusterLabels
 adjustedRandIndex(clusters1, clusters2)
@@ -39,12 +40,12 @@ adjustedRandIndex(clusters1a, clusters2a)
 
 # Create data - multiple clustering structures and clearly defined data
 
-# sim_data2 <- simulateGMM(3, 2, params1, n_indiv = 419, n_col = N_col, random_seed = 4881)
-# clusters1a <- sim_data2$`Cluster ID per individual per group`
-# group1a <- sim_data2$`Group ID`
-# sim_data2 <- sim_data2$`Simulated Data`[, 1:N_col]
-# 
-# moc <- constructMOC(sim_data2)
-# outputCOCA_2 <- clusterofclusters(sim_data2)
-# clusters2a <- outputCOCA_2$clusterLabels
-# adjustedRandIndex(clusters1a, clusters2a)
+sim_data2 <- simulateGMM(3, 2, params1, n_indiv = 419, n_col = N_col, random_seed = 4881)
+clusters1a <- sim_data2$`Cluster ID per individual per group`
+group1a <- sim_data2$`Group ID`
+sim_data2 <- sim_data2$`Simulated Data`[, 1:N_col]
+
+moc <- constructMOC(sim_data2)
+outputCOCA_2 <- clusterofclusters(sim_data2)
+clusters2a <- outputCOCA_2$clusterLabels
+adjustedRandIndex(clusters1a, clusters2a)
