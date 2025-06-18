@@ -6,7 +6,7 @@ simulateLCMM <- function(subject_data = NULL,                                   
                          n_clust,                                                 # Number of clusters
                          n_groups,                                                # Number of groups of data, 1 by default
                          cluster_params,                                          # List of distribution parameters per cluster
-                         n_indiv,                                                 # Number of individuals
+                         n_indiv,                                                 # Number of individuals. 
                          n_col,                                                   # Number of columns in simulated data
                          random_seed,                                             # Input random seed for reproducibility
                        # missing = FALSE,                                         # Boolean. Default is FALSE.
