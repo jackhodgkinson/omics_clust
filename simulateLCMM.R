@@ -331,7 +331,7 @@ simulateLCMM <- function(subject_data = NULL,                                   
   # ==== SIMULATION FUNCTION ====
 
   n_cores <- numCores()
-  sim_longitud_data <- function(params, subject_data, ID, indiv_clust, n_col, parallel_proc = TRUE) {
+  sim_longitud_data <- function(params, subject_data, ID, indiv_clust, n_col, parallel_proc = parallel_process) {
     # ==== Parameter validation ====
     if (!is.list(params) || length(params) == 0) {
       stop("params must be a non-empty list of cluster parameter lists.")

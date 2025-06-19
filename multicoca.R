@@ -26,6 +26,7 @@ multicoca <- function(moc_list,                                         # List o
   
   # Source function 
   source("clusterofclusters.R")
+  source("numCores.R")
   
   # Set random seed 
   if(!is.null(random_seed)){
@@ -35,8 +36,39 @@ multicoca <- function(moc_list,                                         # List o
   # Create an empty list to store the results
   results <- list()
   
+  # Obtain number of available cores
+  n_cores <- numCores() 
+  
   # Run MultiCOCA with parallel processing
   if (parallel_process) {
+    # Detect OS for parallel backend
+    os_type <- .Platform$OS.type
+    if (os_type != "windows") {
+      results <- parallel::mclapply(1:length(moc_list), function(i) {
+        result <- clusterofclusters(moc_list[[i]], 
+                                    k = k,
+                                    N = N, 
+                                    max.iter = max.iter, 
+                                    pItem = pItem, 
+                                    hclustMethod = hclustMethod, 
+                                    choiceKmethod = choiceKmethod, 
+                                    ccClMethod = ccClMethod, 
+                                    ccDistHC = ccDistHC, 
+                                    savePNG = savePNG, 
+                                    fileName = paste0(fileName, "_Group", i), 
+                                    verbose = verbose, 
+                                    widestGap = widestGap, 
+                                    dunns = dunns, 
+                                    dunn2s = dunn2s, 
+                                    returnAllMatrices = returnAllMatrices,
+                                    random_seed = random_seed,
+                                    parallel_process = TRUE)
+        
+        # Name the results for each group
+        return(result)
+      })
+    }
+    else {
     
     # Create a cluster with available cores
     cl <- makeCluster(detectCores() - 1)
@@ -75,7 +107,8 @@ multicoca <- function(moc_list,                                         # List o
     # Name each group
     names(results) <- paste0("Group", 1:length(results))
     
-  } 
+    }
+  }
   
   # Run MultiCOCA without parallel processing
   else {

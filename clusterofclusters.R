@@ -21,6 +21,9 @@ clusterofclusters <- function(moc,                                              
   {   # Install relevant packages
       library(parallel)
   
+      # Install relevant functions 
+      library("numCores.R")
+  
       # Set random seed 
       if(!is.null(random_seed)){
         set.seed(random_seed)
@@ -35,11 +38,132 @@ clusterofclusters <- function(moc,                                              
         stop("Parameter 'k' is required. Please specify a value or range for 'k'.")
       }
       
+      n_cores <- numCores()
+      
       # Run COCA with parallel processing
       if (parallel_process) {
-        
-          if (length(k) != 1 & choiceKmethod == "silhouette") {
-            
+        # Detect OS for parallel backend
+        os_type <- .Platform$OS.type
+        if (os_type != "windows") {
+            if (length(k) != 1 & choiceKmethod == "silhouette") {
+              
+              # Run the parallelized operation using parLapply
+              results <- parallel::mclapply(k, function(i) {
+                
+                ### Step 1: Compute consensus matrix for each k
+                cm <- coca::consensusCluster(moc, i, B = N, pItem, clMethod = ccClMethod,
+                                             dist = ccDistHC, maxIterKM = max.iter)
+                
+                
+                
+                ### Step 2. Use hierarchical clustering on the consensus matrix
+                dist_mat <- stats::as.dist(1 - cm)
+                hc <- stats::hclust(dist_mat, method = hclustMethod)
+                labels <- stats::cutree(hc, i)
+                
+                # Return results per k
+                return(list(k = i, consensusMatrix = cm, clusterLabels = labels))
+              }, mc.cores = n_cores)
+              
+              # Combine results for silhouette evaluation
+              consensusArray <- array(NA, dim = c(nrow(moc), nrow(moc), length(k)))
+              clLabels <- matrix(NA, nrow = length(k), ncol = nrow(moc))
+              
+              for (j in seq_along(k)) {
+                consensusArray[, , j] <- results[[j]]$consensusMatrix
+                clLabels[j, ] <- results[[j]]$clusterLabels
+              }
+              
+              consensusMatrix <- consensusArray
+              K <- coca::maximiseSilhouette(consensusMatrix, clLabels, max(k), savePNG,
+                                            fileName, widestGap = widestGap, dunns = dunns,
+                                            dunn2s = dunn2s)$K
+              
+              # return(K)
+              
+            } else if (length(k) != 1 & choiceKmethod == "AUC") {
+              
+              # Run the parallelized operation using parLapply
+              results <- mclapply(k, function(i) {
+                
+                ### Step 1. Compute the consensus matrix ###
+                cm <- coca::consensusCluster(moc, i, B = N, pItem, clMethod = ccClMethod,
+                                             dist = ccDistHC, maxIterKM = max.iter)
+                ### Step 2. Compute area under the curve ###
+                auc <- computeAUC(cm)
+                
+                return(list(k = i, consensusMatrix = cm, auc = auc))
+              })
+              
+              # Collect AUC values and consensus matrices
+              areaUnderTheCurve <- sapply(results, function(res) res$auc)
+              consensusArray <- array(NA, dim = c(nrow(moc), nrow(moc), length(k)))
+              
+              for (j in seq_along(k)) {
+                consensusArray[, , j] <- results[[j]]$consensusMatrix
+              }
+              
+              # Step 3: Pick K using AUC
+              K <- coca::chooseKusingAUC(areaUnderTheCurve, savePNG, fileName)$K
+              consensusMatrix <- consensusArray
+              #  return(K)
+              
+            } else if (length(k) != 1) {
+              stop("Method to choose number of clusters has not been recognised.
+                 Please make sure that it is either `silhouette` or `AUC`.")
+            } 
+            else if (length(k) == 1) {
+              consensusMatrix <- NULL
+              K <- k
+            }
+          }
+        else {
+            if (length(k) != 1 & choiceKmethod == "silhouette") {
+              
+              # Create a cluster with available cores
+              cl <- makeCluster(min(length(k), detectCores() - 1))
+              
+              # Export necessary variables and functions to the cluster
+              clusterExport(cl, ls(envir = environment()), envir = environment())
+              
+              # Run the parallelized operation using parLapply
+              results <- parLapply(cl, k, function(i) {
+                
+                ### Step 1: Compute consensus matrix for each k
+                cm <- coca::consensusCluster(moc, i, B = N, pItem, clMethod = ccClMethod,
+                                   dist = ccDistHC, maxIterKM = max.iter)
+                
+  
+                
+                ### Step 2. Use hierarchical clustering on the consensus matrix
+                dist_mat <- stats::as.dist(1 - cm)
+                hc <- stats::hclust(dist_mat, method = hclustMethod)
+                labels <- stats::cutree(hc, i)
+                
+                # Return results per k
+                return(list(k = i, consensusMatrix = cm, clusterLabels = labels))
+              })
+              
+              stopCluster(cl)
+              
+              # Combine results for silhouette evaluation
+              consensusArray <- array(NA, dim = c(nrow(moc), nrow(moc), length(k)))
+              clLabels <- matrix(NA, nrow = length(k), ncol = nrow(moc))
+              
+              for (j in seq_along(k)) {
+                consensusArray[, , j] <- results[[j]]$consensusMatrix
+                clLabels[j, ] <- results[[j]]$clusterLabels
+              }
+              
+              consensusMatrix <- consensusArray
+              K <- coca::maximiseSilhouette(consensusMatrix, clLabels, max(k), savePNG,
+                                      fileName, widestGap = widestGap, dunns = dunns,
+                                      dunn2s = dunn2s)$K
+              
+          # return(K)
+          
+          } else if (length(k) != 1 & choiceKmethod == "AUC") {
+             
             # Create a cluster with available cores
             cl <- makeCluster(min(length(k), detectCores() - 1))
             
@@ -48,83 +172,40 @@ clusterofclusters <- function(moc,                                              
             
             # Run the parallelized operation using parLapply
             results <- parLapply(cl, k, function(i) {
-              
-              ### Step 1: Compute consensus matrix for each k
-              cm <- coca::consensusCluster(moc, i, B = N, pItem, clMethod = ccClMethod,
-                                 dist = ccDistHC, maxIterKM = max.iter)
-              
-
-              
-              ### Step 2. Use hierarchical clustering on the consensus matrix
-              dist_mat <- stats::as.dist(1 - cm)
-              hc <- stats::hclust(dist_mat, method = hclustMethod)
-              labels <- stats::cutree(hc, i)
-              
-              # Return results per k
-              return(list(k = i, consensusMatrix = cm, clusterLabels = labels))
-            })
+          
+               ### Step 1. Compute the consensus matrix ###
+               cm <- coca::consensusCluster(moc, i, B = N, pItem, clMethod = ccClMethod,
+                                  dist = ccDistHC, maxIterKM = max.iter)
+               ### Step 2. Compute area under the curve ###
+               auc <- computeAUC(cm)
+               
+               return(list(k = i, consensusMatrix = cm, auc = auc))
+             })
             
             stopCluster(cl)
             
-            # Combine results for silhouette evaluation
+            # Collect AUC values and consensus matrices
+            areaUnderTheCurve <- sapply(results, function(res) res$auc)
             consensusArray <- array(NA, dim = c(nrow(moc), nrow(moc), length(k)))
-            clLabels <- matrix(NA, nrow = length(k), ncol = nrow(moc))
             
             for (j in seq_along(k)) {
               consensusArray[, , j] <- results[[j]]$consensusMatrix
-              clLabels[j, ] <- results[[j]]$clusterLabels
             }
             
-            consensusMatrix <- consensusArray
-            K <- coca::maximiseSilhouette(consensusMatrix, clLabels, max(k), savePNG,
-                                    fileName, widestGap = widestGap, dunns = dunns,
-                                    dunn2s = dunn2s)$K
-            
-        # return(K)
-        
-        } else if (length(k) != 1 & choiceKmethod == "AUC") {
-           
-          # Create a cluster with available cores
-          cl <- makeCluster(min(length(k), detectCores() - 1))
-          
-          # Export necessary variables and functions to the cluster
-          clusterExport(cl, ls(envir = environment()), envir = environment())
-          
-          # Run the parallelized operation using parLapply
-          results <- parLapply(cl, k, function(i) {
-        
-             ### Step 1. Compute the consensus matrix ###
-             cm <- coca::consensusCluster(moc, i, B = N, pItem, clMethod = ccClMethod,
-                                dist = ccDistHC, maxIterKM = max.iter)
-             ### Step 2. Compute area under the curve ###
-             auc <- computeAUC(cm)
+             # Step 3: Pick K using AUC
+             K <- coca::chooseKusingAUC(areaUnderTheCurve, savePNG, fileName)$K
+             consensusMatrix <- consensusArray
+          #  return(K)
              
-             return(list(k = i, consensusMatrix = cm, auc = auc))
-           })
-          
-          stopCluster(cl)
-          
-          # Collect AUC values and consensus matrices
-          areaUnderTheCurve <- sapply(results, function(res) res$auc)
-          consensusArray <- array(NA, dim = c(nrow(moc), nrow(moc), length(k)))
-          
-          for (j in seq_along(k)) {
-            consensusArray[, , j] <- results[[j]]$consensusMatrix
-          }
-          
-           # Step 3: Pick K using AUC
-           K <- coca::chooseKusingAUC(areaUnderTheCurve, savePNG, fileName)$K
-           consensusMatrix <- consensusArray
-        #  return(K)
-           
-        } else if (length(k) != 1) {
-            stop("Method to choose number of clusters has not been recognised.
-               Please make sure that it is either `silhouette` or `AUC`.")
-         } 
-          else if (length(k) == 1) {
-           consensusMatrix <- NULL
-           K <- k
-          }
+          } else if (length(k) != 1) {
+              stop("Method to choose number of clusters has not been recognised.
+                 Please make sure that it is either `silhouette` or `AUC`.")
+           } 
+            else if (length(k) == 1) {
+             consensusMatrix <- NULL
+             K <- k
+            }
+        }
       }
         
         # Run COCA without parallel processing
