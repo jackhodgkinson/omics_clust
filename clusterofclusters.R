@@ -22,7 +22,7 @@ clusterofclusters <- function(moc,                                              
       library(parallel)
   
       # Install relevant functions 
-      library("numCores.R")
+      source("numCores.R")
   
       # Set random seed 
       if(!is.null(random_seed)){

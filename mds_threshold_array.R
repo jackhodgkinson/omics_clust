@@ -4,7 +4,6 @@ graphics.off()
 
 # Load packages
 library(mclust)
-library(NbClust)
 library(tidyverse)
 library(parallel)
 library(otrimle)

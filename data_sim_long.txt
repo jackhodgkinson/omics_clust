@@ -1,0 +1,6751 @@
+Simulation of Longitudinal Data 
+data2250.csv 
+Simulation: 1, Seed: 4881
+
+data2250.csv 
+Simulation: 1, Seed: 4882
+
+data2250.csv 
+Simulation: 1, Seed: 4883
+
+data2250.csv 
+Simulation: 1, Seed: 4884
+
+data2250.csv 
+Simulation: 1, Seed: 4885
+
+data2250.csv 
+Simulation: 1, Seed: 4886
+
+data2250.csv 
+Simulation: 1, Seed: 4887
+
+data2250.csv 
+Simulation: 1, Seed: 4888
+
+data2250.csv 
+Simulation: 1, Seed: 4889
+
+data2250.csv 
+Simulation: 1, Seed: 4890
+
+data2250.csv 
+Simulation: 1, Seed: 4891
+
+data2250.csv 
+Simulation: 1, Seed: 4892
+
+data2250.csv 
+Simulation: 1, Seed: 4893
+
+data2250.csv 
+Simulation: 1, Seed: 4894
+
+data2250.csv 
+Simulation: 1, Seed: 4895
+
+data2250.csv 
+Simulation: 1, Seed: 4896
+
+data2250.csv 
+Simulation: 1, Seed: 4897
+
+data2250.csv 
+Simulation: 1, Seed: 4898
+
+data2250.csv 
+Simulation: 1, Seed: 4899
+
+data2250.csv 
+Simulation: 1, Seed: 4900
+
+data2250.csv 
+Simulation: 1, Seed: 4901
+
+data2250.csv 
+Simulation: 1, Seed: 4902
+
+data2250.csv 
+Simulation: 1, Seed: 4903
+
+data2250.csv 
+Simulation: 1, Seed: 4904
+
+data2250.csv 
+Simulation: 1, Seed: 4905
+
+data2250.csv 
+Simulation: 1, Seed: 4906
+
+data2250.csv 
+Simulation: 1, Seed: 4907
+
+data2250.csv 
+Simulation: 1, Seed: 4908
+
+data2250.csv 
+Simulation: 1, Seed: 4909
+
+data2250.csv 
+Simulation: 1, Seed: 4910
+
+data2250.csv 
+Simulation: 1, Seed: 4911
+
+data2250.csv 
+Simulation: 1, Seed: 4912
+
+data2250.csv 
+Simulation: 1, Seed: 4913
+
+data2250.csv 
+Simulation: 1, Seed: 4914
+
+data2250.csv 
+Simulation: 1, Seed: 4915
+
+data2250.csv 
+Simulation: 1, Seed: 4916
+
+data2250.csv 
+Simulation: 1, Seed: 4917
+
+data2250.csv 
+Simulation: 1, Seed: 4918
+
+data2250.csv 
+Simulation: 1, Seed: 4919
+
+data2250.csv 
+Simulation: 1, Seed: 4920
+
+data2250.csv 
+Simulation: 1, Seed: 4921
+
+data2250.csv 
+Simulation: 1, Seed: 4922
+
+data2250.csv 
+Simulation: 1, Seed: 4923
+
+data2250.csv 
+Simulation: 1, Seed: 4924
+
+data2250.csv 
+Simulation: 1, Seed: 4925
+
+data2250.csv 
+Simulation: 2, Seed: 4926
+
+data2250.csv 
+Simulation: 2, Seed: 4927
+
+data2250.csv 
+Simulation: 2, Seed: 4928
+
+data2250.csv 
+Simulation: 2, Seed: 4929
+
+data2250.csv 
+Simulation: 2, Seed: 4930
+
+data2250.csv 
+Simulation: 2, Seed: 4931
+
+data2250.csv 
+Simulation: 2, Seed: 4932
+
+data2250.csv 
+Simulation: 2, Seed: 4933
+
+data2250.csv 
+Simulation: 2, Seed: 4934
+
+data2250.csv 
+Simulation: 2, Seed: 4935
+
+data2250.csv 
+Simulation: 2, Seed: 4936
+
+data2250.csv 
+Simulation: 2, Seed: 4937
+
+data2250.csv 
+Simulation: 2, Seed: 4938
+
+data2250.csv 
+Simulation: 2, Seed: 4939
+
+data2250.csv 
+Simulation: 2, Seed: 4940
+
+data2250.csv 
+Simulation: 2, Seed: 4941
+
+data2250.csv 
+Simulation: 2, Seed: 4942
+
+data2250.csv 
+Simulation: 2, Seed: 4943
+
+data2250.csv 
+Simulation: 2, Seed: 4944
+
+data2250.csv 
+Simulation: 2, Seed: 4945
+
+data2250.csv 
+Simulation: 2, Seed: 4946
+
+data2250.csv 
+Simulation: 2, Seed: 4947
+
+data2250.csv 
+Simulation: 2, Seed: 4948
+
+data2250.csv 
+Simulation: 2, Seed: 4949
+
+data2250.csv 
+Simulation: 2, Seed: 4950
+
+data2250.csv 
+Simulation: 2, Seed: 4951
+
+data2250.csv 
+Simulation: 2, Seed: 4952
+
+data2250.csv 
+Simulation: 2, Seed: 4953
+
+data2250.csv 
+Simulation: 2, Seed: 4954
+
+data2250.csv 
+Simulation: 2, Seed: 4955
+
+data2250.csv 
+Simulation: 2, Seed: 4956
+
+data2250.csv 
+Simulation: 2, Seed: 4957
+
+data2250.csv 
+Simulation: 2, Seed: 4958
+
+data2250.csv 
+Simulation: 2, Seed: 4959
+
+data2250.csv 
+Simulation: 2, Seed: 4960
+
+data2250.csv 
+Simulation: 2, Seed: 4961
+
+data2250.csv 
+Simulation: 2, Seed: 4962
+
+data2250.csv 
+Simulation: 2, Seed: 4963
+
+data2250.csv 
+Simulation: 2, Seed: 4964
+
+data2250.csv 
+Simulation: 2, Seed: 4965
+
+data2250.csv 
+Simulation: 2, Seed: 4966
+
+data2250.csv 
+Simulation: 2, Seed: 4967
+
+data2250.csv 
+Simulation: 2, Seed: 4968
+
+data2250.csv 
+Simulation: 2, Seed: 4969
+
+data2250.csv 
+Simulation: 2, Seed: 4970
+
+data2250.csv 
+Simulation: 3, Seed: 4971
+
+data2250.csv 
+Simulation: 3, Seed: 4972
+
+data2250.csv 
+Simulation: 3, Seed: 4973
+
+data2250.csv 
+Simulation: 3, Seed: 4974
+
+data2250.csv 
+Simulation: 3, Seed: 4975
+
+data2250.csv 
+Simulation: 3, Seed: 4976
+
+data2250.csv 
+Simulation: 3, Seed: 4977
+
+data2250.csv 
+Simulation: 3, Seed: 4978
+
+data2250.csv 
+Simulation: 3, Seed: 4979
+
+data2250.csv 
+Simulation: 3, Seed: 4980
+
+data2250.csv 
+Simulation: 3, Seed: 4981
+
+data2250.csv 
+Simulation: 3, Seed: 4982
+
+data2250.csv 
+Simulation: 3, Seed: 4983
+
+data2250.csv 
+Simulation: 3, Seed: 4984
+
+data2250.csv 
+Simulation: 3, Seed: 4985
+
+data2250.csv 
+Simulation: 3, Seed: 4986
+
+data2250.csv 
+Simulation: 3, Seed: 4987
+
+data2250.csv 
+Simulation: 3, Seed: 4988
+
+data2250.csv 
+Simulation: 3, Seed: 4989
+
+data2250.csv 
+Simulation: 3, Seed: 4990
+
+data2250.csv 
+Simulation: 3, Seed: 4991
+
+data2250.csv 
+Simulation: 3, Seed: 4992
+
+data2250.csv 
+Simulation: 3, Seed: 4993
+
+data2250.csv 
+Simulation: 3, Seed: 4994
+
+data2250.csv 
+Simulation: 3, Seed: 4995
+
+data2250.csv 
+Simulation: 3, Seed: 4996
+
+data2250.csv 
+Simulation: 3, Seed: 4997
+
+data2250.csv 
+Simulation: 3, Seed: 4998
+
+data2250.csv 
+Simulation: 3, Seed: 4999
+
+data2250.csv 
+Simulation: 3, Seed: 5000
+
+data2250.csv 
+Simulation: 3, Seed: 5001
+
+data2250.csv 
+Simulation: 3, Seed: 5002
+
+data2250.csv 
+Simulation: 3, Seed: 5003
+
+data2250.csv 
+Simulation: 3, Seed: 5004
+
+data2250.csv 
+Simulation: 3, Seed: 5005
+
+data2250.csv 
+Simulation: 3, Seed: 5006
+
+data2250.csv 
+Simulation: 3, Seed: 5007
+
+data2250.csv 
+Simulation: 3, Seed: 5008
+
+data2250.csv 
+Simulation: 3, Seed: 5009
+
+data2250.csv 
+Simulation: 3, Seed: 5010
+
+data2250.csv 
+Simulation: 3, Seed: 5011
+
+data2250.csv 
+Simulation: 3, Seed: 5012
+
+data2250.csv 
+Simulation: 3, Seed: 5013
+
+data2250.csv 
+Simulation: 3, Seed: 5014
+
+data2250.csv 
+Simulation: 3, Seed: 5015
+
+data2250.csv 
+Simulation: 4, Seed: 5016
+
+data2250.csv 
+Simulation: 4, Seed: 5017
+
+data2250.csv 
+Simulation: 4, Seed: 5018
+
+data2250.csv 
+Simulation: 4, Seed: 5019
+
+data2250.csv 
+Simulation: 4, Seed: 5020
+
+data2250.csv 
+Simulation: 4, Seed: 5021
+
+data2250.csv 
+Simulation: 4, Seed: 5022
+
+data2250.csv 
+Simulation: 4, Seed: 5023
+
+data2250.csv 
+Simulation: 4, Seed: 5024
+
+data2250.csv 
+Simulation: 4, Seed: 5025
+
+data2250.csv 
+Simulation: 4, Seed: 5026
+
+data2250.csv 
+Simulation: 4, Seed: 5027
+
+data2250.csv 
+Simulation: 4, Seed: 5028
+
+data2250.csv 
+Simulation: 4, Seed: 5029
+
+data2250.csv 
+Simulation: 4, Seed: 5030
+
+data2250.csv 
+Simulation: 4, Seed: 5031
+
+data2250.csv 
+Simulation: 4, Seed: 5032
+
+data2250.csv 
+Simulation: 4, Seed: 5033
+
+data2250.csv 
+Simulation: 4, Seed: 5034
+
+data2250.csv 
+Simulation: 4, Seed: 5035
+
+data2250.csv 
+Simulation: 4, Seed: 5036
+
+data2250.csv 
+Simulation: 4, Seed: 5037
+
+data2250.csv 
+Simulation: 4, Seed: 5038
+
+data2250.csv 
+Simulation: 4, Seed: 5039
+
+data2250.csv 
+Simulation: 4, Seed: 5040
+
+data2250.csv 
+Simulation: 4, Seed: 5041
+
+data2250.csv 
+Simulation: 4, Seed: 5042
+
+data2250.csv 
+Simulation: 4, Seed: 5043
+
+data2250.csv 
+Simulation: 4, Seed: 5044
+
+data2250.csv 
+Simulation: 4, Seed: 5045
+
+data2250.csv 
+Simulation: 4, Seed: 5046
+
+data2250.csv 
+Simulation: 4, Seed: 5047
+
+data2250.csv 
+Simulation: 4, Seed: 5048
+
+data2250.csv 
+Simulation: 4, Seed: 5049
+
+data2250.csv 
+Simulation: 4, Seed: 5050
+
+data2250.csv 
+Simulation: 4, Seed: 5051
+
+data2250.csv 
+Simulation: 4, Seed: 5052
+
+data2250.csv 
+Simulation: 4, Seed: 5053
+
+data2250.csv 
+Simulation: 4, Seed: 5054
+
+data2250.csv 
+Simulation: 4, Seed: 5055
+
+data2250.csv 
+Simulation: 4, Seed: 5056
+
+data2250.csv 
+Simulation: 4, Seed: 5057
+
+data2250.csv 
+Simulation: 4, Seed: 5058
+
+data2250.csv 
+Simulation: 4, Seed: 5059
+
+data2250.csv 
+Simulation: 4, Seed: 5060
+
+data2250.csv 
+Simulation: 5, Seed: 5061
+
+data2250.csv 
+Simulation: 5, Seed: 5062
+
+data2250.csv 
+Simulation: 5, Seed: 5063
+
+data2250.csv 
+Simulation: 5, Seed: 5064
+
+data2250.csv 
+Simulation: 5, Seed: 5065
+
+data2250.csv 
+Simulation: 5, Seed: 5066
+
+data2250.csv 
+Simulation: 5, Seed: 5067
+
+data2250.csv 
+Simulation: 5, Seed: 5068
+
+data2250.csv 
+Simulation: 5, Seed: 5069
+
+data2250.csv 
+Simulation: 5, Seed: 5070
+
+data2250.csv 
+Simulation: 5, Seed: 5071
+
+data2250.csv 
+Simulation: 5, Seed: 5072
+
+data2250.csv 
+Simulation: 5, Seed: 5073
+
+data2250.csv 
+Simulation: 5, Seed: 5074
+
+data2250.csv 
+Simulation: 5, Seed: 5075
+
+data2250.csv 
+Simulation: 5, Seed: 5076
+
+data2250.csv 
+Simulation: 5, Seed: 5077
+
+data2250.csv 
+Simulation: 5, Seed: 5078
+
+data2250.csv 
+Simulation: 5, Seed: 5079
+
+data2250.csv 
+Simulation: 5, Seed: 5080
+
+data2250.csv 
+Simulation: 5, Seed: 5081
+
+data2250.csv 
+Simulation: 5, Seed: 5082
+
+data2250.csv 
+Simulation: 5, Seed: 5083
+
+data2250.csv 
+Simulation: 5, Seed: 5084
+
+data2250.csv 
+Simulation: 5, Seed: 5085
+
+data2250.csv 
+Simulation: 5, Seed: 5086
+
+data2250.csv 
+Simulation: 5, Seed: 5087
+
+data2250.csv 
+Simulation: 5, Seed: 5088
+
+data2250.csv 
+Simulation: 5, Seed: 5089
+
+data2250.csv 
+Simulation: 5, Seed: 5090
+
+data2250.csv 
+Simulation: 5, Seed: 5091
+
+data2250.csv 
+Simulation: 5, Seed: 5092
+
+data2250.csv 
+Simulation: 5, Seed: 5093
+
+data2250.csv 
+Simulation: 5, Seed: 5094
+
+data2250.csv 
+Simulation: 5, Seed: 5095
+
+data2250.csv 
+Simulation: 5, Seed: 5096
+
+data2250.csv 
+Simulation: 5, Seed: 5097
+
+data2250.csv 
+Simulation: 5, Seed: 5098
+
+data2250.csv 
+Simulation: 5, Seed: 5099
+
+data2250.csv 
+Simulation: 5, Seed: 5100
+
+data2250.csv 
+Simulation: 5, Seed: 5101
+
+data2250.csv 
+Simulation: 5, Seed: 5102
+
+data2250.csv 
+Simulation: 5, Seed: 5103
+
+data2250.csv 
+Simulation: 5, Seed: 5104
+
+data2250.csv 
+Simulation: 5, Seed: 5105
+
+data2250.csv 
+Simulation: 6, Seed: 5106
+
+data2250.csv 
+Simulation: 6, Seed: 5107
+
+data2250.csv 
+Simulation: 6, Seed: 5108
+
+data2250.csv 
+Simulation: 6, Seed: 5109
+
+data2250.csv 
+Simulation: 6, Seed: 5110
+
+data2250.csv 
+Simulation: 6, Seed: 5111
+
+data2250.csv 
+Simulation: 6, Seed: 5112
+
+data2250.csv 
+Simulation: 6, Seed: 5113
+
+data2250.csv 
+Simulation: 6, Seed: 5114
+
+data2250.csv 
+Simulation: 6, Seed: 5115
+
+data2250.csv 
+Simulation: 6, Seed: 5116
+
+data2250.csv 
+Simulation: 6, Seed: 5117
+
+data2250.csv 
+Simulation: 6, Seed: 5118
+
+data2250.csv 
+Simulation: 6, Seed: 5119
+
+data2250.csv 
+Simulation: 6, Seed: 5120
+
+data2250.csv 
+Simulation: 6, Seed: 5121
+
+data2250.csv 
+Simulation: 6, Seed: 5122
+
+data2250.csv 
+Simulation: 6, Seed: 5123
+
+data2250.csv 
+Simulation: 6, Seed: 5124
+
+data2250.csv 
+Simulation: 6, Seed: 5125
+
+data2250.csv 
+Simulation: 6, Seed: 5126
+
+data2250.csv 
+Simulation: 6, Seed: 5127
+
+data2250.csv 
+Simulation: 6, Seed: 5128
+
+data2250.csv 
+Simulation: 6, Seed: 5129
+
+data2250.csv 
+Simulation: 6, Seed: 5130
+
+data2250.csv 
+Simulation: 6, Seed: 5131
+
+data2250.csv 
+Simulation: 6, Seed: 5132
+
+data2250.csv 
+Simulation: 6, Seed: 5133
+
+data2250.csv 
+Simulation: 6, Seed: 5134
+
+data2250.csv 
+Simulation: 6, Seed: 5135
+
+data2250.csv 
+Simulation: 6, Seed: 5136
+
+data2250.csv 
+Simulation: 6, Seed: 5137
+
+data2250.csv 
+Simulation: 6, Seed: 5138
+
+data2250.csv 
+Simulation: 6, Seed: 5139
+
+data2250.csv 
+Simulation: 6, Seed: 5140
+
+data2250.csv 
+Simulation: 6, Seed: 5141
+
+data2250.csv 
+Simulation: 6, Seed: 5142
+
+data2250.csv 
+Simulation: 6, Seed: 5143
+
+data2250.csv 
+Simulation: 6, Seed: 5144
+
+data2250.csv 
+Simulation: 6, Seed: 5145
+
+data2250.csv 
+Simulation: 6, Seed: 5146
+
+data2250.csv 
+Simulation: 6, Seed: 5147
+
+data2250.csv 
+Simulation: 6, Seed: 5148
+
+data2250.csv 
+Simulation: 6, Seed: 5149
+
+data2250.csv 
+Simulation: 6, Seed: 5150
+
+data2250.csv 
+Simulation: 7, Seed: 5151
+
+data2250.csv 
+Simulation: 7, Seed: 5152
+
+data2250.csv 
+Simulation: 7, Seed: 5153
+
+data2250.csv 
+Simulation: 7, Seed: 5154
+
+data2250.csv 
+Simulation: 7, Seed: 5155
+
+data2250.csv 
+Simulation: 7, Seed: 5156
+
+data2250.csv 
+Simulation: 7, Seed: 5157
+
+data2250.csv 
+Simulation: 7, Seed: 5158
+
+data2250.csv 
+Simulation: 7, Seed: 5159
+
+data2250.csv 
+Simulation: 7, Seed: 5160
+
+data2250.csv 
+Simulation: 7, Seed: 5161
+
+data2250.csv 
+Simulation: 7, Seed: 5162
+
+data2250.csv 
+Simulation: 7, Seed: 5163
+
+data2250.csv 
+Simulation: 7, Seed: 5164
+
+data2250.csv 
+Simulation: 7, Seed: 5165
+
+data2250.csv 
+Simulation: 7, Seed: 5166
+
+data2250.csv 
+Simulation: 7, Seed: 5167
+
+data2250.csv 
+Simulation: 7, Seed: 5168
+
+data2250.csv 
+Simulation: 7, Seed: 5169
+
+data2250.csv 
+Simulation: 7, Seed: 5170
+
+data2250.csv 
+Simulation: 7, Seed: 5171
+
+data2250.csv 
+Simulation: 7, Seed: 5172
+
+data2250.csv 
+Simulation: 7, Seed: 5173
+
+data2250.csv 
+Simulation: 7, Seed: 5174
+
+data2250.csv 
+Simulation: 7, Seed: 5175
+
+data2250.csv 
+Simulation: 7, Seed: 5176
+
+data2250.csv 
+Simulation: 7, Seed: 5177
+
+data2250.csv 
+Simulation: 7, Seed: 5178
+
+data2250.csv 
+Simulation: 7, Seed: 5179
+
+data2250.csv 
+Simulation: 7, Seed: 5180
+
+data2250.csv 
+Simulation: 7, Seed: 5181
+
+data2250.csv 
+Simulation: 7, Seed: 5182
+
+data2250.csv 
+Simulation: 7, Seed: 5183
+
+data2250.csv 
+Simulation: 7, Seed: 5184
+
+data2250.csv 
+Simulation: 7, Seed: 5185
+
+data2250.csv 
+Simulation: 7, Seed: 5186
+
+data2250.csv 
+Simulation: 7, Seed: 5187
+
+data2250.csv 
+Simulation: 7, Seed: 5188
+
+data2250.csv 
+Simulation: 7, Seed: 5189
+
+data2250.csv 
+Simulation: 7, Seed: 5190
+
+data2250.csv 
+Simulation: 7, Seed: 5191
+
+data2250.csv 
+Simulation: 7, Seed: 5192
+
+data2250.csv 
+Simulation: 7, Seed: 5193
+
+data2250.csv 
+Simulation: 7, Seed: 5194
+
+data2250.csv 
+Simulation: 7, Seed: 5195
+
+data2250.csv 
+Simulation: 8, Seed: 5196
+
+data2250.csv 
+Simulation: 8, Seed: 5197
+
+data2250.csv 
+Simulation: 8, Seed: 5198
+
+data2250.csv 
+Simulation: 8, Seed: 5199
+
+data2250.csv 
+Simulation: 8, Seed: 5200
+
+data2250.csv 
+Simulation: 8, Seed: 5201
+
+data2250.csv 
+Simulation: 8, Seed: 5202
+
+data2250.csv 
+Simulation: 8, Seed: 5203
+
+data2250.csv 
+Simulation: 8, Seed: 5204
+
+data2250.csv 
+Simulation: 8, Seed: 5205
+
+data2250.csv 
+Simulation: 8, Seed: 5206
+
+data2250.csv 
+Simulation: 8, Seed: 5207
+
+data2250.csv 
+Simulation: 8, Seed: 5208
+
+data2250.csv 
+Simulation: 8, Seed: 5209
+
+data2250.csv 
+Simulation: 8, Seed: 5210
+
+data2250.csv 
+Simulation: 8, Seed: 5211
+
+data2250.csv 
+Simulation: 8, Seed: 5212
+
+data2250.csv 
+Simulation: 8, Seed: 5213
+
+data2250.csv 
+Simulation: 8, Seed: 5214
+
+data2250.csv 
+Simulation: 8, Seed: 5215
+
+data2250.csv 
+Simulation: 8, Seed: 5216
+
+data2250.csv 
+Simulation: 8, Seed: 5217
+
+data2250.csv 
+Simulation: 8, Seed: 5218
+
+data2250.csv 
+Simulation: 8, Seed: 5219
+
+data2250.csv 
+Simulation: 8, Seed: 5220
+
+data2250.csv 
+Simulation: 8, Seed: 5221
+
+data2250.csv 
+Simulation: 8, Seed: 5222
+
+data2250.csv 
+Simulation: 8, Seed: 5223
+
+data2250.csv 
+Simulation: 8, Seed: 5224
+
+data2250.csv 
+Simulation: 8, Seed: 5225
+
+data2250.csv 
+Simulation: 8, Seed: 5226
+
+data2250.csv 
+Simulation: 8, Seed: 5227
+
+data2250.csv 
+Simulation: 8, Seed: 5228
+
+data2250.csv 
+Simulation: 8, Seed: 5229
+
+data2250.csv 
+Simulation: 8, Seed: 5230
+
+data2250.csv 
+Simulation: 8, Seed: 5231
+
+data2250.csv 
+Simulation: 8, Seed: 5232
+
+data2250.csv 
+Simulation: 8, Seed: 5233
+
+data2250.csv 
+Simulation: 8, Seed: 5234
+
+data2250.csv 
+Simulation: 8, Seed: 5235
+
+data2250.csv 
+Simulation: 8, Seed: 5236
+
+data2250.csv 
+Simulation: 8, Seed: 5237
+
+data2250.csv 
+Simulation: 8, Seed: 5238
+
+data2250.csv 
+Simulation: 8, Seed: 5239
+
+data2250.csv 
+Simulation: 8, Seed: 5240
+
+data2250.csv 
+Simulation: 9, Seed: 5241
+
+data2250.csv 
+Simulation: 9, Seed: 5242
+
+data2250.csv 
+Simulation: 9, Seed: 5243
+
+data2250.csv 
+Simulation: 9, Seed: 5244
+
+data2250.csv 
+Simulation: 9, Seed: 5245
+
+data2250.csv 
+Simulation: 9, Seed: 5246
+
+data2250.csv 
+Simulation: 9, Seed: 5247
+
+data2250.csv 
+Simulation: 9, Seed: 5248
+
+data2250.csv 
+Simulation: 9, Seed: 5249
+
+data2250.csv 
+Simulation: 9, Seed: 5250
+
+data2250.csv 
+Simulation: 9, Seed: 5251
+
+data2250.csv 
+Simulation: 9, Seed: 5252
+
+data2250.csv 
+Simulation: 9, Seed: 5253
+
+data2250.csv 
+Simulation: 9, Seed: 5254
+
+data2250.csv 
+Simulation: 9, Seed: 5255
+
+data2250.csv 
+Simulation: 9, Seed: 5256
+
+data2250.csv 
+Simulation: 9, Seed: 5257
+
+data2250.csv 
+Simulation: 9, Seed: 5258
+
+data2250.csv 
+Simulation: 9, Seed: 5259
+
+data2250.csv 
+Simulation: 9, Seed: 5260
+
+data2250.csv 
+Simulation: 9, Seed: 5261
+
+data2250.csv 
+Simulation: 9, Seed: 5262
+
+data2250.csv 
+Simulation: 9, Seed: 5263
+
+data2250.csv 
+Simulation: 9, Seed: 5264
+
+data2250.csv 
+Simulation: 9, Seed: 5265
+
+data2250.csv 
+Simulation: 9, Seed: 5266
+
+data2250.csv 
+Simulation: 9, Seed: 5267
+
+data2250.csv 
+Simulation: 9, Seed: 5268
+
+data2250.csv 
+Simulation: 9, Seed: 5269
+
+data2250.csv 
+Simulation: 9, Seed: 5270
+
+data2250.csv 
+Simulation: 9, Seed: 5271
+
+data2250.csv 
+Simulation: 9, Seed: 5272
+
+data2250.csv 
+Simulation: 9, Seed: 5273
+
+data2250.csv 
+Simulation: 9, Seed: 5274
+
+data2250.csv 
+Simulation: 9, Seed: 5275
+
+data2250.csv 
+Simulation: 9, Seed: 5276
+
+data2250.csv 
+Simulation: 9, Seed: 5277
+
+data2250.csv 
+Simulation: 9, Seed: 5278
+
+data2250.csv 
+Simulation: 9, Seed: 5279
+
+data2250.csv 
+Simulation: 9, Seed: 5280
+
+data2250.csv 
+Simulation: 9, Seed: 5281
+
+data2250.csv 
+Simulation: 9, Seed: 5282
+
+data2250.csv 
+Simulation: 9, Seed: 5283
+
+data2250.csv 
+Simulation: 9, Seed: 5284
+
+data2250.csv 
+Simulation: 9, Seed: 5285
+
+data2250.csv 
+Simulation: 10, Seed: 5286
+
+data2250.csv 
+Simulation: 10, Seed: 5287
+
+data2250.csv 
+Simulation: 10, Seed: 5288
+
+data2250.csv 
+Simulation: 10, Seed: 5289
+
+data2250.csv 
+Simulation: 10, Seed: 5290
+
+data2250.csv 
+Simulation: 10, Seed: 5291
+
+data2250.csv 
+Simulation: 10, Seed: 5292
+
+data2250.csv 
+Simulation: 10, Seed: 5293
+
+data2250.csv 
+Simulation: 10, Seed: 5294
+
+data2250.csv 
+Simulation: 10, Seed: 5295
+
+data2250.csv 
+Simulation: 10, Seed: 5296
+
+data2250.csv 
+Simulation: 10, Seed: 5297
+
+data2250.csv 
+Simulation: 10, Seed: 5298
+
+data2250.csv 
+Simulation: 10, Seed: 5299
+
+data2250.csv 
+Simulation: 10, Seed: 5300
+
+data2250.csv 
+Simulation: 10, Seed: 5301
+
+data2250.csv 
+Simulation: 10, Seed: 5302
+
+data2250.csv 
+Simulation: 10, Seed: 5303
+
+data2250.csv 
+Simulation: 10, Seed: 5304
+
+data2250.csv 
+Simulation: 10, Seed: 5305
+
+data2250.csv 
+Simulation: 10, Seed: 5306
+
+data2250.csv 
+Simulation: 10, Seed: 5307
+
+data2250.csv 
+Simulation: 10, Seed: 5308
+
+data2250.csv 
+Simulation: 10, Seed: 5309
+
+data2250.csv 
+Simulation: 10, Seed: 5310
+
+data2250.csv 
+Simulation: 10, Seed: 5311
+
+data2250.csv 
+Simulation: 10, Seed: 5312
+
+data2250.csv 
+Simulation: 10, Seed: 5313
+
+data2250.csv 
+Simulation: 10, Seed: 5314
+
+data2250.csv 
+Simulation: 10, Seed: 5315
+
+data2250.csv 
+Simulation: 10, Seed: 5316
+
+data2250.csv 
+Simulation: 10, Seed: 5317
+
+data2250.csv 
+Simulation: 10, Seed: 5318
+
+data2250.csv 
+Simulation: 10, Seed: 5319
+
+data2250.csv 
+Simulation: 10, Seed: 5320
+
+data2250.csv 
+Simulation: 10, Seed: 5321
+
+data2250.csv 
+Simulation: 10, Seed: 5322
+
+data2250.csv 
+Simulation: 10, Seed: 5323
+
+data2250.csv 
+Simulation: 10, Seed: 5324
+
+data2250.csv 
+Simulation: 10, Seed: 5325
+
+data2250.csv 
+Simulation: 10, Seed: 5326
+
+data2250.csv 
+Simulation: 10, Seed: 5327
+
+data2250.csv 
+Simulation: 10, Seed: 5328
+
+data2250.csv 
+Simulation: 10, Seed: 5329
+
+data2250.csv 
+Simulation: 10, Seed: 5330
+
+data2250.csv 
+Simulation: 11, Seed: 5331
+
+data2250.csv 
+Simulation: 11, Seed: 5332
+
+data2250.csv 
+Simulation: 11, Seed: 5333
+
+data2250.csv 
+Simulation: 11, Seed: 5334
+
+data2250.csv 
+Simulation: 11, Seed: 5335
+
+data2250.csv 
+Simulation: 11, Seed: 5336
+
+data2250.csv 
+Simulation: 11, Seed: 5337
+
+data2250.csv 
+Simulation: 11, Seed: 5338
+
+data2250.csv 
+Simulation: 11, Seed: 5339
+
+data2250.csv 
+Simulation: 11, Seed: 5340
+
+data2250.csv 
+Simulation: 11, Seed: 5341
+
+data2250.csv 
+Simulation: 11, Seed: 5342
+
+data2250.csv 
+Simulation: 11, Seed: 5343
+
+data2250.csv 
+Simulation: 11, Seed: 5344
+
+data2250.csv 
+Simulation: 11, Seed: 5345
+
+data2250.csv 
+Simulation: 11, Seed: 5346
+
+data2250.csv 
+Simulation: 11, Seed: 5347
+
+data2250.csv 
+Simulation: 11, Seed: 5348
+
+data2250.csv 
+Simulation: 11, Seed: 5349
+
+data2250.csv 
+Simulation: 11, Seed: 5350
+
+data2250.csv 
+Simulation: 11, Seed: 5351
+
+data2250.csv 
+Simulation: 11, Seed: 5352
+
+data2250.csv 
+Simulation: 11, Seed: 5353
+
+data2250.csv 
+Simulation: 11, Seed: 5354
+
+data2250.csv 
+Simulation: 11, Seed: 5355
+
+data2250.csv 
+Simulation: 11, Seed: 5356
+
+data2250.csv 
+Simulation: 11, Seed: 5357
+
+data2250.csv 
+Simulation: 11, Seed: 5358
+
+data2250.csv 
+Simulation: 11, Seed: 5359
+
+data2250.csv 
+Simulation: 11, Seed: 5360
+
+data2250.csv 
+Simulation: 11, Seed: 5361
+
+data2250.csv 
+Simulation: 11, Seed: 5362
+
+data2250.csv 
+Simulation: 11, Seed: 5363
+
+data2250.csv 
+Simulation: 11, Seed: 5364
+
+data2250.csv 
+Simulation: 11, Seed: 5365
+
+data2250.csv 
+Simulation: 11, Seed: 5366
+
+data2250.csv 
+Simulation: 11, Seed: 5367
+
+data2250.csv 
+Simulation: 11, Seed: 5368
+
+data2250.csv 
+Simulation: 11, Seed: 5369
+
+data2250.csv 
+Simulation: 11, Seed: 5370
+
+data2250.csv 
+Simulation: 11, Seed: 5371
+
+data2250.csv 
+Simulation: 11, Seed: 5372
+
+data2250.csv 
+Simulation: 11, Seed: 5373
+
+data2250.csv 
+Simulation: 11, Seed: 5374
+
+data2250.csv 
+Simulation: 11, Seed: 5375
+
+data2250.csv 
+Simulation: 12, Seed: 5376
+
+data2250.csv 
+Simulation: 12, Seed: 5377
+
+data2250.csv 
+Simulation: 12, Seed: 5378
+
+data2250.csv 
+Simulation: 12, Seed: 5379
+
+data2250.csv 
+Simulation: 12, Seed: 5380
+
+data2250.csv 
+Simulation: 12, Seed: 5381
+
+data2250.csv 
+Simulation: 12, Seed: 5382
+
+data2250.csv 
+Simulation: 12, Seed: 5383
+
+data2250.csv 
+Simulation: 12, Seed: 5384
+
+data2250.csv 
+Simulation: 12, Seed: 5385
+
+data2250.csv 
+Simulation: 12, Seed: 5386
+
+data2250.csv 
+Simulation: 12, Seed: 5387
+
+data2250.csv 
+Simulation: 12, Seed: 5388
+
+data2250.csv 
+Simulation: 12, Seed: 5389
+
+data2250.csv 
+Simulation: 12, Seed: 5390
+
+data2250.csv 
+Simulation: 12, Seed: 5391
+
+data2250.csv 
+Simulation: 12, Seed: 5392
+
+data2250.csv 
+Simulation: 12, Seed: 5393
+
+data2250.csv 
+Simulation: 12, Seed: 5394
+
+data2250.csv 
+Simulation: 12, Seed: 5395
+
+data2250.csv 
+Simulation: 12, Seed: 5396
+
+data2250.csv 
+Simulation: 12, Seed: 5397
+
+data2250.csv 
+Simulation: 12, Seed: 5398
+
+data2250.csv 
+Simulation: 12, Seed: 5399
+
+data2250.csv 
+Simulation: 12, Seed: 5400
+
+data2250.csv 
+Simulation: 12, Seed: 5401
+
+data2250.csv 
+Simulation: 12, Seed: 5402
+
+data2250.csv 
+Simulation: 12, Seed: 5403
+
+data2250.csv 
+Simulation: 12, Seed: 5404
+
+data2250.csv 
+Simulation: 12, Seed: 5405
+
+data2250.csv 
+Simulation: 12, Seed: 5406
+
+data2250.csv 
+Simulation: 12, Seed: 5407
+
+data2250.csv 
+Simulation: 12, Seed: 5408
+
+data2250.csv 
+Simulation: 12, Seed: 5409
+
+data2250.csv 
+Simulation: 12, Seed: 5410
+
+data2250.csv 
+Simulation: 12, Seed: 5411
+
+data2250.csv 
+Simulation: 12, Seed: 5412
+
+data2250.csv 
+Simulation: 12, Seed: 5413
+
+data2250.csv 
+Simulation: 12, Seed: 5414
+
+data2250.csv 
+Simulation: 12, Seed: 5415
+
+data2250.csv 
+Simulation: 12, Seed: 5416
+
+data2250.csv 
+Simulation: 12, Seed: 5417
+
+data2250.csv 
+Simulation: 12, Seed: 5418
+
+data2250.csv 
+Simulation: 12, Seed: 5419
+
+data2250.csv 
+Simulation: 12, Seed: 5420
+
+data2250.csv 
+Simulation: 13, Seed: 5421
+
+data2250.csv 
+Simulation: 13, Seed: 5422
+
+data2250.csv 
+Simulation: 13, Seed: 5423
+
+data2250.csv 
+Simulation: 13, Seed: 5424
+
+data2250.csv 
+Simulation: 13, Seed: 5425
+
+data2250.csv 
+Simulation: 13, Seed: 5426
+
+data2250.csv 
+Simulation: 13, Seed: 5427
+
+data2250.csv 
+Simulation: 13, Seed: 5428
+
+data2250.csv 
+Simulation: 13, Seed: 5429
+
+data2250.csv 
+Simulation: 13, Seed: 5430
+
+data2250.csv 
+Simulation: 13, Seed: 5431
+
+data2250.csv 
+Simulation: 13, Seed: 5432
+
+data2250.csv 
+Simulation: 13, Seed: 5433
+
+data2250.csv 
+Simulation: 13, Seed: 5434
+
+data2250.csv 
+Simulation: 13, Seed: 5435
+
+data2250.csv 
+Simulation: 13, Seed: 5436
+
+data2250.csv 
+Simulation: 13, Seed: 5437
+
+data2250.csv 
+Simulation: 13, Seed: 5438
+
+data2250.csv 
+Simulation: 13, Seed: 5439
+
+data2250.csv 
+Simulation: 13, Seed: 5440
+
+data2250.csv 
+Simulation: 13, Seed: 5441
+
+data2250.csv 
+Simulation: 13, Seed: 5442
+
+data2250.csv 
+Simulation: 13, Seed: 5443
+
+data2250.csv 
+Simulation: 13, Seed: 5444
+
+data2250.csv 
+Simulation: 13, Seed: 5445
+
+data2250.csv 
+Simulation: 13, Seed: 5446
+
+data2250.csv 
+Simulation: 13, Seed: 5447
+
+data2250.csv 
+Simulation: 13, Seed: 5448
+
+data2250.csv 
+Simulation: 13, Seed: 5449
+
+data2250.csv 
+Simulation: 13, Seed: 5450
+
+data2250.csv 
+Simulation: 13, Seed: 5451
+
+data2250.csv 
+Simulation: 13, Seed: 5452
+
+data2250.csv 
+Simulation: 13, Seed: 5453
+
+data2250.csv 
+Simulation: 13, Seed: 5454
+
+data2250.csv 
+Simulation: 13, Seed: 5455
+
+data2250.csv 
+Simulation: 13, Seed: 5456
+
+data2250.csv 
+Simulation: 13, Seed: 5457
+
+data2250.csv 
+Simulation: 13, Seed: 5458
+
+data2250.csv 
+Simulation: 13, Seed: 5459
+
+data2250.csv 
+Simulation: 13, Seed: 5460
+
+data2250.csv 
+Simulation: 13, Seed: 5461
+
+data2250.csv 
+Simulation: 13, Seed: 5462
+
+data2250.csv 
+Simulation: 13, Seed: 5463
+
+data2250.csv 
+Simulation: 13, Seed: 5464
+
+data2250.csv 
+Simulation: 13, Seed: 5465
+
+data2250.csv 
+Simulation: 14, Seed: 5466
+
+data2250.csv 
+Simulation: 14, Seed: 5467
+
+data2250.csv 
+Simulation: 14, Seed: 5468
+
+data2250.csv 
+Simulation: 14, Seed: 5469
+
+data2250.csv 
+Simulation: 14, Seed: 5470
+
+data2250.csv 
+Simulation: 14, Seed: 5471
+
+data2250.csv 
+Simulation: 14, Seed: 5472
+
+data2250.csv 
+Simulation: 14, Seed: 5473
+
+data2250.csv 
+Simulation: 14, Seed: 5474
+
+data2250.csv 
+Simulation: 14, Seed: 5475
+
+data2250.csv 
+Simulation: 14, Seed: 5476
+
+data2250.csv 
+Simulation: 14, Seed: 5477
+
+data2250.csv 
+Simulation: 14, Seed: 5478
+
+data2250.csv 
+Simulation: 14, Seed: 5479
+
+data2250.csv 
+Simulation: 14, Seed: 5480
+
+data2250.csv 
+Simulation: 14, Seed: 5481
+
+data2250.csv 
+Simulation: 14, Seed: 5482
+
+data2250.csv 
+Simulation: 14, Seed: 5483
+
+data2250.csv 
+Simulation: 14, Seed: 5484
+
+data2250.csv 
+Simulation: 14, Seed: 5485
+
+data2250.csv 
+Simulation: 14, Seed: 5486
+
+data2250.csv 
+Simulation: 14, Seed: 5487
+
+data2250.csv 
+Simulation: 14, Seed: 5488
+
+data2250.csv 
+Simulation: 14, Seed: 5489
+
+data2250.csv 
+Simulation: 14, Seed: 5490
+
+data2250.csv 
+Simulation: 14, Seed: 5491
+
+data2250.csv 
+Simulation: 14, Seed: 5492
+
+data2250.csv 
+Simulation: 14, Seed: 5493
+
+data2250.csv 
+Simulation: 14, Seed: 5494
+
+data2250.csv 
+Simulation: 14, Seed: 5495
+
+data2250.csv 
+Simulation: 14, Seed: 5496
+
+data2250.csv 
+Simulation: 14, Seed: 5497
+
+data2250.csv 
+Simulation: 14, Seed: 5498
+
+data2250.csv 
+Simulation: 14, Seed: 5499
+
+data2250.csv 
+Simulation: 14, Seed: 5500
+
+data2250.csv 
+Simulation: 14, Seed: 5501
+
+data2250.csv 
+Simulation: 14, Seed: 5502
+
+data2250.csv 
+Simulation: 14, Seed: 5503
+
+data2250.csv 
+Simulation: 14, Seed: 5504
+
+data2250.csv 
+Simulation: 14, Seed: 5505
+
+data2250.csv 
+Simulation: 14, Seed: 5506
+
+data2250.csv 
+Simulation: 14, Seed: 5507
+
+data2250.csv 
+Simulation: 14, Seed: 5508
+
+data2250.csv 
+Simulation: 14, Seed: 5509
+
+data2250.csv 
+Simulation: 14, Seed: 5510
+
+data2250.csv 
+Simulation: 15, Seed: 5511
+
+data2250.csv 
+Simulation: 15, Seed: 5512
+
+data2250.csv 
+Simulation: 15, Seed: 5513
+
+data2250.csv 
+Simulation: 15, Seed: 5514
+
+data2250.csv 
+Simulation: 15, Seed: 5515
+
+data2250.csv 
+Simulation: 15, Seed: 5516
+
+data2250.csv 
+Simulation: 15, Seed: 5517
+
+data2250.csv 
+Simulation: 15, Seed: 5518
+
+data2250.csv 
+Simulation: 15, Seed: 5519
+
+data2250.csv 
+Simulation: 15, Seed: 5520
+
+data2250.csv 
+Simulation: 15, Seed: 5521
+
+data2250.csv 
+Simulation: 15, Seed: 5522
+
+data2250.csv 
+Simulation: 15, Seed: 5523
+
+data2250.csv 
+Simulation: 15, Seed: 5524
+
+data2250.csv 
+Simulation: 15, Seed: 5525
+
+data2250.csv 
+Simulation: 15, Seed: 5526
+
+data2250.csv 
+Simulation: 15, Seed: 5527
+
+data2250.csv 
+Simulation: 15, Seed: 5528
+
+data2250.csv 
+Simulation: 15, Seed: 5529
+
+data2250.csv 
+Simulation: 15, Seed: 5530
+
+data2250.csv 
+Simulation: 15, Seed: 5531
+
+data2250.csv 
+Simulation: 15, Seed: 5532
+
+data2250.csv 
+Simulation: 15, Seed: 5533
+
+data2250.csv 
+Simulation: 15, Seed: 5534
+
+data2250.csv 
+Simulation: 15, Seed: 5535
+
+data2250.csv 
+Simulation: 15, Seed: 5536
+
+data2250.csv 
+Simulation: 15, Seed: 5537
+
+data2250.csv 
+Simulation: 15, Seed: 5538
+
+data2250.csv 
+Simulation: 15, Seed: 5539
+
+data2250.csv 
+Simulation: 15, Seed: 5540
+
+data2250.csv 
+Simulation: 15, Seed: 5541
+
+data2250.csv 
+Simulation: 15, Seed: 5542
+
+data2250.csv 
+Simulation: 15, Seed: 5543
+
+data2250.csv 
+Simulation: 15, Seed: 5544
+
+data2250.csv 
+Simulation: 15, Seed: 5545
+
+data2250.csv 
+Simulation: 15, Seed: 5546
+
+data2250.csv 
+Simulation: 15, Seed: 5547
+
+data2250.csv 
+Simulation: 15, Seed: 5548
+
+data2250.csv 
+Simulation: 15, Seed: 5549
+
+data2250.csv 
+Simulation: 15, Seed: 5550
+
+data2250.csv 
+Simulation: 15, Seed: 5551
+
+data2250.csv 
+Simulation: 15, Seed: 5552
+
+data2250.csv 
+Simulation: 15, Seed: 5553
+
+data2250.csv 
+Simulation: 15, Seed: 5554
+
+data2250.csv 
+Simulation: 15, Seed: 5555
+
+data2250.csv 
+Simulation: 16, Seed: 5556
+
+data2250.csv 
+Simulation: 16, Seed: 5557
+
+data2250.csv 
+Simulation: 16, Seed: 5558
+
+data2250.csv 
+Simulation: 16, Seed: 5559
+
+data2250.csv 
+Simulation: 16, Seed: 5560
+
+data2250.csv 
+Simulation: 16, Seed: 5561
+
+data2250.csv 
+Simulation: 16, Seed: 5562
+
+data2250.csv 
+Simulation: 16, Seed: 5563
+
+data2250.csv 
+Simulation: 16, Seed: 5564
+
+data2250.csv 
+Simulation: 16, Seed: 5565
+
+data2250.csv 
+Simulation: 16, Seed: 5566
+
+data2250.csv 
+Simulation: 16, Seed: 5567
+
+data2250.csv 
+Simulation: 16, Seed: 5568
+
+data2250.csv 
+Simulation: 16, Seed: 5569
+
+data2250.csv 
+Simulation: 16, Seed: 5570
+
+data2250.csv 
+Simulation: 16, Seed: 5571
+
+data2250.csv 
+Simulation: 16, Seed: 5572
+
+data2250.csv 
+Simulation: 16, Seed: 5573
+
+data2250.csv 
+Simulation: 16, Seed: 5574
+
+data2250.csv 
+Simulation: 16, Seed: 5575
+
+data2250.csv 
+Simulation: 16, Seed: 5576
+
+data2250.csv 
+Simulation: 16, Seed: 5577
+
+data2250.csv 
+Simulation: 16, Seed: 5578
+
+data2250.csv 
+Simulation: 16, Seed: 5579
+
+data2250.csv 
+Simulation: 16, Seed: 5580
+
+data2250.csv 
+Simulation: 16, Seed: 5581
+
+data2250.csv 
+Simulation: 16, Seed: 5582
+
+data2250.csv 
+Simulation: 16, Seed: 5583
+
+data2250.csv 
+Simulation: 16, Seed: 5584
+
+data2250.csv 
+Simulation: 16, Seed: 5585
+
+data2250.csv 
+Simulation: 16, Seed: 5586
+
+data2250.csv 
+Simulation: 16, Seed: 5587
+
+data2250.csv 
+Simulation: 16, Seed: 5588
+
+data2250.csv 
+Simulation: 16, Seed: 5589
+
+data2250.csv 
+Simulation: 16, Seed: 5590
+
+data2250.csv 
+Simulation: 16, Seed: 5591
+
+data2250.csv 
+Simulation: 16, Seed: 5592
+
+data2250.csv 
+Simulation: 16, Seed: 5593
+
+data2250.csv 
+Simulation: 16, Seed: 5594
+
+data2250.csv 
+Simulation: 16, Seed: 5595
+
+data2250.csv 
+Simulation: 16, Seed: 5596
+
+data2250.csv 
+Simulation: 16, Seed: 5597
+
+data2250.csv 
+Simulation: 16, Seed: 5598
+
+data2250.csv 
+Simulation: 16, Seed: 5599
+
+data2250.csv 
+Simulation: 16, Seed: 5600
+
+data2250.csv 
+Simulation: 17, Seed: 5601
+
+data2250.csv 
+Simulation: 17, Seed: 5602
+
+data2250.csv 
+Simulation: 17, Seed: 5603
+
+data2250.csv 
+Simulation: 17, Seed: 5604
+
+data2250.csv 
+Simulation: 17, Seed: 5605
+
+data2250.csv 
+Simulation: 17, Seed: 5606
+
+data2250.csv 
+Simulation: 17, Seed: 5607
+
+data2250.csv 
+Simulation: 17, Seed: 5608
+
+data2250.csv 
+Simulation: 17, Seed: 5609
+
+data2250.csv 
+Simulation: 17, Seed: 5610
+
+data2250.csv 
+Simulation: 17, Seed: 5611
+
+data2250.csv 
+Simulation: 17, Seed: 5612
+
+data2250.csv 
+Simulation: 17, Seed: 5613
+
+data2250.csv 
+Simulation: 17, Seed: 5614
+
+data2250.csv 
+Simulation: 17, Seed: 5615
+
+data2250.csv 
+Simulation: 17, Seed: 5616
+
+data2250.csv 
+Simulation: 17, Seed: 5617
+
+data2250.csv 
+Simulation: 17, Seed: 5618
+
+data2250.csv 
+Simulation: 17, Seed: 5619
+
+data2250.csv 
+Simulation: 17, Seed: 5620
+
+data2250.csv 
+Simulation: 17, Seed: 5621
+
+data2250.csv 
+Simulation: 17, Seed: 5622
+
+data2250.csv 
+Simulation: 17, Seed: 5623
+
+data2250.csv 
+Simulation: 17, Seed: 5624
+
+data2250.csv 
+Simulation: 17, Seed: 5625
+
+data2250.csv 
+Simulation: 17, Seed: 5626
+
+data2250.csv 
+Simulation: 17, Seed: 5627
+
+data2250.csv 
+Simulation: 17, Seed: 5628
+
+data2250.csv 
+Simulation: 17, Seed: 5629
+
+data2250.csv 
+Simulation: 17, Seed: 5630
+
+data2250.csv 
+Simulation: 17, Seed: 5631
+
+data2250.csv 
+Simulation: 17, Seed: 5632
+
+data2250.csv 
+Simulation: 17, Seed: 5633
+
+data2250.csv 
+Simulation: 17, Seed: 5634
+
+data2250.csv 
+Simulation: 17, Seed: 5635
+
+data2250.csv 
+Simulation: 17, Seed: 5636
+
+data2250.csv 
+Simulation: 17, Seed: 5637
+
+data2250.csv 
+Simulation: 17, Seed: 5638
+
+data2250.csv 
+Simulation: 17, Seed: 5639
+
+data2250.csv 
+Simulation: 17, Seed: 5640
+
+data2250.csv 
+Simulation: 17, Seed: 5641
+
+data2250.csv 
+Simulation: 17, Seed: 5642
+
+data2250.csv 
+Simulation: 17, Seed: 5643
+
+data2250.csv 
+Simulation: 17, Seed: 5644
+
+data2250.csv 
+Simulation: 17, Seed: 5645
+
+data2250.csv 
+Simulation: 18, Seed: 5646
+
+data2250.csv 
+Simulation: 18, Seed: 5647
+
+data2250.csv 
+Simulation: 18, Seed: 5648
+
+data2250.csv 
+Simulation: 18, Seed: 5649
+
+data2250.csv 
+Simulation: 18, Seed: 5650
+
+data2250.csv 
+Simulation: 18, Seed: 5651
+
+data2250.csv 
+Simulation: 18, Seed: 5652
+
+data2250.csv 
+Simulation: 18, Seed: 5653
+
+data2250.csv 
+Simulation: 18, Seed: 5654
+
+data2250.csv 
+Simulation: 18, Seed: 5655
+
+data2250.csv 
+Simulation: 18, Seed: 5656
+
+data2250.csv 
+Simulation: 18, Seed: 5657
+
+data2250.csv 
+Simulation: 18, Seed: 5658
+
+data2250.csv 
+Simulation: 18, Seed: 5659
+
+data2250.csv 
+Simulation: 18, Seed: 5660
+
+data2250.csv 
+Simulation: 18, Seed: 5661
+
+data2250.csv 
+Simulation: 18, Seed: 5662
+
+data2250.csv 
+Simulation: 18, Seed: 5663
+
+data2250.csv 
+Simulation: 18, Seed: 5664
+
+data2250.csv 
+Simulation: 18, Seed: 5665
+
+data2250.csv 
+Simulation: 18, Seed: 5666
+
+data2250.csv 
+Simulation: 18, Seed: 5667
+
+data2250.csv 
+Simulation: 18, Seed: 5668
+
+data2250.csv 
+Simulation: 18, Seed: 5669
+
+data2250.csv 
+Simulation: 18, Seed: 5670
+
+data2250.csv 
+Simulation: 18, Seed: 5671
+
+data2250.csv 
+Simulation: 18, Seed: 5672
+
+data2250.csv 
+Simulation: 18, Seed: 5673
+
+data2250.csv 
+Simulation: 18, Seed: 5674
+
+data2250.csv 
+Simulation: 18, Seed: 5675
+
+data2250.csv 
+Simulation: 18, Seed: 5676
+
+data2250.csv 
+Simulation: 18, Seed: 5677
+
+data2250.csv 
+Simulation: 18, Seed: 5678
+
+data2250.csv 
+Simulation: 18, Seed: 5679
+
+data2250.csv 
+Simulation: 18, Seed: 5680
+
+data2250.csv 
+Simulation: 18, Seed: 5681
+
+data2250.csv 
+Simulation: 18, Seed: 5682
+
+data2250.csv 
+Simulation: 18, Seed: 5683
+
+data2250.csv 
+Simulation: 18, Seed: 5684
+
+data2250.csv 
+Simulation: 18, Seed: 5685
+
+data2250.csv 
+Simulation: 18, Seed: 5686
+
+data2250.csv 
+Simulation: 18, Seed: 5687
+
+data2250.csv 
+Simulation: 18, Seed: 5688
+
+data2250.csv 
+Simulation: 18, Seed: 5689
+
+data2250.csv 
+Simulation: 18, Seed: 5690
+
+data2250.csv 
+Simulation: 19, Seed: 5691
+
+data2250.csv 
+Simulation: 19, Seed: 5692
+
+data2250.csv 
+Simulation: 19, Seed: 5693
+
+data2250.csv 
+Simulation: 19, Seed: 5694
+
+data2250.csv 
+Simulation: 19, Seed: 5695
+
+data2250.csv 
+Simulation: 19, Seed: 5696
+
+data2250.csv 
+Simulation: 19, Seed: 5697
+
+data2250.csv 
+Simulation: 19, Seed: 5698
+
+data2250.csv 
+Simulation: 19, Seed: 5699
+
+data2250.csv 
+Simulation: 19, Seed: 5700
+
+data2250.csv 
+Simulation: 19, Seed: 5701
+
+data2250.csv 
+Simulation: 19, Seed: 5702
+
+data2250.csv 
+Simulation: 19, Seed: 5703
+
+data2250.csv 
+Simulation: 19, Seed: 5704
+
+data2250.csv 
+Simulation: 19, Seed: 5705
+
+data2250.csv 
+Simulation: 19, Seed: 5706
+
+data2250.csv 
+Simulation: 19, Seed: 5707
+
+data2250.csv 
+Simulation: 19, Seed: 5708
+
+data2250.csv 
+Simulation: 19, Seed: 5709
+
+data2250.csv 
+Simulation: 19, Seed: 5710
+
+data2250.csv 
+Simulation: 19, Seed: 5711
+
+data2250.csv 
+Simulation: 19, Seed: 5712
+
+data2250.csv 
+Simulation: 19, Seed: 5713
+
+data2250.csv 
+Simulation: 19, Seed: 5714
+
+data2250.csv 
+Simulation: 19, Seed: 5715
+
+data2250.csv 
+Simulation: 19, Seed: 5716
+
+data2250.csv 
+Simulation: 19, Seed: 5717
+
+data2250.csv 
+Simulation: 19, Seed: 5718
+
+data2250.csv 
+Simulation: 19, Seed: 5719
+
+data2250.csv 
+Simulation: 19, Seed: 5720
+
+data2250.csv 
+Simulation: 19, Seed: 5721
+
+data2250.csv 
+Simulation: 19, Seed: 5722
+
+data2250.csv 
+Simulation: 19, Seed: 5723
+
+data2250.csv 
+Simulation: 19, Seed: 5724
+
+data2250.csv 
+Simulation: 19, Seed: 5725
+
+data2250.csv 
+Simulation: 19, Seed: 5726
+
+data2250.csv 
+Simulation: 19, Seed: 5727
+
+data2250.csv 
+Simulation: 19, Seed: 5728
+
+data2250.csv 
+Simulation: 19, Seed: 5729
+
+data2250.csv 
+Simulation: 19, Seed: 5730
+
+data2250.csv 
+Simulation: 19, Seed: 5731
+
+data2250.csv 
+Simulation: 19, Seed: 5732
+
+data2250.csv 
+Simulation: 19, Seed: 5733
+
+data2250.csv 
+Simulation: 19, Seed: 5734
+
+data2250.csv 
+Simulation: 19, Seed: 5735
+
+data2250.csv 
+Simulation: 20, Seed: 5736
+
+data2250.csv 
+Simulation: 20, Seed: 5737
+
+data2250.csv 
+Simulation: 20, Seed: 5738
+
+data2250.csv 
+Simulation: 20, Seed: 5739
+
+data2250.csv 
+Simulation: 20, Seed: 5740
+
+data2250.csv 
+Simulation: 20, Seed: 5741
+
+data2250.csv 
+Simulation: 20, Seed: 5742
+
+data2250.csv 
+Simulation: 20, Seed: 5743
+
+data2250.csv 
+Simulation: 20, Seed: 5744
+
+data2250.csv 
+Simulation: 20, Seed: 5745
+
+data2250.csv 
+Simulation: 20, Seed: 5746
+
+data2250.csv 
+Simulation: 20, Seed: 5747
+
+data2250.csv 
+Simulation: 20, Seed: 5748
+
+data2250.csv 
+Simulation: 20, Seed: 5749
+
+data2250.csv 
+Simulation: 20, Seed: 5750
+
+data2250.csv 
+Simulation: 20, Seed: 5751
+
+data2250.csv 
+Simulation: 20, Seed: 5752
+
+data2250.csv 
+Simulation: 20, Seed: 5753
+
+data2250.csv 
+Simulation: 20, Seed: 5754
+
+data2250.csv 
+Simulation: 20, Seed: 5755
+
+data2250.csv 
+Simulation: 20, Seed: 5756
+
+data2250.csv 
+Simulation: 20, Seed: 5757
+
+data2250.csv 
+Simulation: 20, Seed: 5758
+
+data2250.csv 
+Simulation: 20, Seed: 5759
+
+data2250.csv 
+Simulation: 20, Seed: 5760
+
+data2250.csv 
+Simulation: 20, Seed: 5761
+
+data2250.csv 
+Simulation: 20, Seed: 5762
+
+data2250.csv 
+Simulation: 20, Seed: 5763
+
+data2250.csv 
+Simulation: 20, Seed: 5764
+
+data2250.csv 
+Simulation: 20, Seed: 5765
+
+data2250.csv 
+Simulation: 20, Seed: 5766
+
+data2250.csv 
+Simulation: 20, Seed: 5767
+
+data2250.csv 
+Simulation: 20, Seed: 5768
+
+data2250.csv 
+Simulation: 20, Seed: 5769
+
+data2250.csv 
+Simulation: 20, Seed: 5770
+
+data2250.csv 
+Simulation: 20, Seed: 5771
+
+data2250.csv 
+Simulation: 20, Seed: 5772
+
+data2250.csv 
+Simulation: 20, Seed: 5773
+
+data2250.csv 
+Simulation: 20, Seed: 5774
+
+data2250.csv 
+Simulation: 20, Seed: 5775
+
+data2250.csv 
+Simulation: 20, Seed: 5776
+
+data2250.csv 
+Simulation: 20, Seed: 5777
+
+data2250.csv 
+Simulation: 20, Seed: 5778
+
+data2250.csv 
+Simulation: 20, Seed: 5779
+
+data2250.csv 
+Simulation: 20, Seed: 5780
+
+data2250.csv 
+Simulation: 21, Seed: 5781
+
+data2250.csv 
+Simulation: 21, Seed: 5782
+
+data2250.csv 
+Simulation: 21, Seed: 5783
+
+data2250.csv 
+Simulation: 21, Seed: 5784
+
+data2250.csv 
+Simulation: 21, Seed: 5785
+
+data2250.csv 
+Simulation: 21, Seed: 5786
+
+data2250.csv 
+Simulation: 21, Seed: 5787
+
+data2250.csv 
+Simulation: 21, Seed: 5788
+
+data2250.csv 
+Simulation: 21, Seed: 5789
+
+data2250.csv 
+Simulation: 21, Seed: 5790
+
+data2250.csv 
+Simulation: 21, Seed: 5791
+
+data2250.csv 
+Simulation: 21, Seed: 5792
+
+data2250.csv 
+Simulation: 21, Seed: 5793
+
+data2250.csv 
+Simulation: 21, Seed: 5794
+
+data2250.csv 
+Simulation: 21, Seed: 5795
+
+data2250.csv 
+Simulation: 21, Seed: 5796
+
+data2250.csv 
+Simulation: 21, Seed: 5797
+
+data2250.csv 
+Simulation: 21, Seed: 5798
+
+data2250.csv 
+Simulation: 21, Seed: 5799
+
+data2250.csv 
+Simulation: 21, Seed: 5800
+
+data2250.csv 
+Simulation: 21, Seed: 5801
+
+data2250.csv 
+Simulation: 21, Seed: 5802
+
+data2250.csv 
+Simulation: 21, Seed: 5803
+
+data2250.csv 
+Simulation: 21, Seed: 5804
+
+data2250.csv 
+Simulation: 21, Seed: 5805
+
+data2250.csv 
+Simulation: 21, Seed: 5806
+
+data2250.csv 
+Simulation: 21, Seed: 5807
+
+data2250.csv 
+Simulation: 21, Seed: 5808
+
+data2250.csv 
+Simulation: 21, Seed: 5809
+
+data2250.csv 
+Simulation: 21, Seed: 5810
+
+data2250.csv 
+Simulation: 21, Seed: 5811
+
+data2250.csv 
+Simulation: 21, Seed: 5812
+
+data2250.csv 
+Simulation: 21, Seed: 5813
+
+data2250.csv 
+Simulation: 21, Seed: 5814
+
+data2250.csv 
+Simulation: 21, Seed: 5815
+
+data2250.csv 
+Simulation: 21, Seed: 5816
+
+data2250.csv 
+Simulation: 21, Seed: 5817
+
+data2250.csv 
+Simulation: 21, Seed: 5818
+
+data2250.csv 
+Simulation: 21, Seed: 5819
+
+data2250.csv 
+Simulation: 21, Seed: 5820
+
+data2250.csv 
+Simulation: 21, Seed: 5821
+
+data2250.csv 
+Simulation: 21, Seed: 5822
+
+data2250.csv 
+Simulation: 21, Seed: 5823
+
+data2250.csv 
+Simulation: 21, Seed: 5824
+
+data2250.csv 
+Simulation: 21, Seed: 5825
+
+data2250.csv 
+Simulation: 22, Seed: 5826
+
+data2250.csv 
+Simulation: 22, Seed: 5827
+
+data2250.csv 
+Simulation: 22, Seed: 5828
+
+data2250.csv 
+Simulation: 22, Seed: 5829
+
+data2250.csv 
+Simulation: 22, Seed: 5830
+
+data2250.csv 
+Simulation: 22, Seed: 5831
+
+data2250.csv 
+Simulation: 22, Seed: 5832
+
+data2250.csv 
+Simulation: 22, Seed: 5833
+
+data2250.csv 
+Simulation: 22, Seed: 5834
+
+data2250.csv 
+Simulation: 22, Seed: 5835
+
+data2250.csv 
+Simulation: 22, Seed: 5836
+
+data2250.csv 
+Simulation: 22, Seed: 5837
+
+data2250.csv 
+Simulation: 22, Seed: 5838
+
+data2250.csv 
+Simulation: 22, Seed: 5839
+
+data2250.csv 
+Simulation: 22, Seed: 5840
+
+data2250.csv 
+Simulation: 22, Seed: 5841
+
+data2250.csv 
+Simulation: 22, Seed: 5842
+
+data2250.csv 
+Simulation: 22, Seed: 5843
+
+data2250.csv 
+Simulation: 22, Seed: 5844
+
+data2250.csv 
+Simulation: 22, Seed: 5845
+
+data2250.csv 
+Simulation: 22, Seed: 5846
+
+data2250.csv 
+Simulation: 22, Seed: 5847
+
+data2250.csv 
+Simulation: 22, Seed: 5848
+
+data2250.csv 
+Simulation: 22, Seed: 5849
+
+data2250.csv 
+Simulation: 22, Seed: 5850
+
+data2250.csv 
+Simulation: 22, Seed: 5851
+
+data2250.csv 
+Simulation: 22, Seed: 5852
+
+data2250.csv 
+Simulation: 22, Seed: 5853
+
+data2250.csv 
+Simulation: 22, Seed: 5854
+
+data2250.csv 
+Simulation: 22, Seed: 5855
+
+data2250.csv 
+Simulation: 22, Seed: 5856
+
+data2250.csv 
+Simulation: 22, Seed: 5857
+
+data2250.csv 
+Simulation: 22, Seed: 5858
+
+data2250.csv 
+Simulation: 22, Seed: 5859
+
+data2250.csv 
+Simulation: 22, Seed: 5860
+
+data2250.csv 
+Simulation: 22, Seed: 5861
+
+data2250.csv 
+Simulation: 22, Seed: 5862
+
+data2250.csv 
+Simulation: 22, Seed: 5863
+
+data2250.csv 
+Simulation: 22, Seed: 5864
+
+data2250.csv 
+Simulation: 22, Seed: 5865
+
+data2250.csv 
+Simulation: 22, Seed: 5866
+
+data2250.csv 
+Simulation: 22, Seed: 5867
+
+data2250.csv 
+Simulation: 22, Seed: 5868
+
+data2250.csv 
+Simulation: 22, Seed: 5869
+
+data2250.csv 
+Simulation: 22, Seed: 5870
+
+data2250.csv 
+Simulation: 23, Seed: 5871
+
+data2250.csv 
+Simulation: 23, Seed: 5872
+
+data2250.csv 
+Simulation: 23, Seed: 5873
+
+data2250.csv 
+Simulation: 23, Seed: 5874
+
+data2250.csv 
+Simulation: 23, Seed: 5875
+
+data2250.csv 
+Simulation: 23, Seed: 5876
+
+data2250.csv 
+Simulation: 23, Seed: 5877
+
+data2250.csv 
+Simulation: 23, Seed: 5878
+
+data2250.csv 
+Simulation: 23, Seed: 5879
+
+data2250.csv 
+Simulation: 23, Seed: 5880
+
+data2250.csv 
+Simulation: 23, Seed: 5881
+
+data2250.csv 
+Simulation: 23, Seed: 5882
+
+data2250.csv 
+Simulation: 23, Seed: 5883
+
+data2250.csv 
+Simulation: 23, Seed: 5884
+
+data2250.csv 
+Simulation: 23, Seed: 5885
+
+data2250.csv 
+Simulation: 23, Seed: 5886
+
+data2250.csv 
+Simulation: 23, Seed: 5887
+
+data2250.csv 
+Simulation: 23, Seed: 5888
+
+data2250.csv 
+Simulation: 23, Seed: 5889
+
+data2250.csv 
+Simulation: 23, Seed: 5890
+
+data2250.csv 
+Simulation: 23, Seed: 5891
+
+data2250.csv 
+Simulation: 23, Seed: 5892
+
+data2250.csv 
+Simulation: 23, Seed: 5893
+
+data2250.csv 
+Simulation: 23, Seed: 5894
+
+data2250.csv 
+Simulation: 23, Seed: 5895
+
+data2250.csv 
+Simulation: 23, Seed: 5896
+
+data2250.csv 
+Simulation: 23, Seed: 5897
+
+data2250.csv 
+Simulation: 23, Seed: 5898
+
+data2250.csv 
+Simulation: 23, Seed: 5899
+
+data2250.csv 
+Simulation: 23, Seed: 5900
+
+data2250.csv 
+Simulation: 23, Seed: 5901
+
+data2250.csv 
+Simulation: 23, Seed: 5902
+
+data2250.csv 
+Simulation: 23, Seed: 5903
+
+data2250.csv 
+Simulation: 23, Seed: 5904
+
+data2250.csv 
+Simulation: 23, Seed: 5905
+
+data2250.csv 
+Simulation: 23, Seed: 5906
+
+data2250.csv 
+Simulation: 23, Seed: 5907
+
+data2250.csv 
+Simulation: 23, Seed: 5908
+
+data2250.csv 
+Simulation: 23, Seed: 5909
+
+data2250.csv 
+Simulation: 23, Seed: 5910
+
+data2250.csv 
+Simulation: 23, Seed: 5911
+
+data2250.csv 
+Simulation: 23, Seed: 5912
+
+data2250.csv 
+Simulation: 23, Seed: 5913
+
+data2250.csv 
+Simulation: 23, Seed: 5914
+
+data2250.csv 
+Simulation: 23, Seed: 5915
+
+data2250.csv 
+Simulation: 24, Seed: 5916
+
+data2250.csv 
+Simulation: 24, Seed: 5917
+
+data2250.csv 
+Simulation: 24, Seed: 5918
+
+data2250.csv 
+Simulation: 24, Seed: 5919
+
+data2250.csv 
+Simulation: 24, Seed: 5920
+
+data2250.csv 
+Simulation: 24, Seed: 5921
+
+data2250.csv 
+Simulation: 24, Seed: 5922
+
+data2250.csv 
+Simulation: 24, Seed: 5923
+
+data2250.csv 
+Simulation: 24, Seed: 5924
+
+data2250.csv 
+Simulation: 24, Seed: 5925
+
+data2250.csv 
+Simulation: 24, Seed: 5926
+
+data2250.csv 
+Simulation: 24, Seed: 5927
+
+data2250.csv 
+Simulation: 24, Seed: 5928
+
+data2250.csv 
+Simulation: 24, Seed: 5929
+
+data2250.csv 
+Simulation: 24, Seed: 5930
+
+data2250.csv 
+Simulation: 24, Seed: 5931
+
+data2250.csv 
+Simulation: 24, Seed: 5932
+
+data2250.csv 
+Simulation: 24, Seed: 5933
+
+data2250.csv 
+Simulation: 24, Seed: 5934
+
+data2250.csv 
+Simulation: 24, Seed: 5935
+
+data2250.csv 
+Simulation: 24, Seed: 5936
+
+data2250.csv 
+Simulation: 24, Seed: 5937
+
+data2250.csv 
+Simulation: 24, Seed: 5938
+
+data2250.csv 
+Simulation: 24, Seed: 5939
+
+data2250.csv 
+Simulation: 24, Seed: 5940
+
+data2250.csv 
+Simulation: 24, Seed: 5941
+
+data2250.csv 
+Simulation: 24, Seed: 5942
+
+data2250.csv 
+Simulation: 24, Seed: 5943
+
+data2250.csv 
+Simulation: 24, Seed: 5944
+
+data2250.csv 
+Simulation: 24, Seed: 5945
+
+data2250.csv 
+Simulation: 24, Seed: 5946
+
+data2250.csv 
+Simulation: 24, Seed: 5947
+
+data2250.csv 
+Simulation: 24, Seed: 5948
+
+data2250.csv 
+Simulation: 24, Seed: 5949
+
+data2250.csv 
+Simulation: 24, Seed: 5950
+
+data2250.csv 
+Simulation: 24, Seed: 5951
+
+data2250.csv 
+Simulation: 24, Seed: 5952
+
+data2250.csv 
+Simulation: 24, Seed: 5953
+
+data2250.csv 
+Simulation: 24, Seed: 5954
+
+data2250.csv 
+Simulation: 24, Seed: 5955
+
+data2250.csv 
+Simulation: 24, Seed: 5956
+
+data2250.csv 
+Simulation: 24, Seed: 5957
+
+data2250.csv 
+Simulation: 24, Seed: 5958
+
+data2250.csv 
+Simulation: 24, Seed: 5959
+
+data2250.csv 
+Simulation: 24, Seed: 5960
+
+data2250.csv 
+Simulation: 25, Seed: 5961
+
+data2250.csv 
+Simulation: 25, Seed: 5962
+
+data2250.csv 
+Simulation: 25, Seed: 5963
+
+data2250.csv 
+Simulation: 25, Seed: 5964
+
+data2250.csv 
+Simulation: 25, Seed: 5965
+
+data2250.csv 
+Simulation: 25, Seed: 5966
+
+data2250.csv 
+Simulation: 25, Seed: 5967
+
+data2250.csv 
+Simulation: 25, Seed: 5968
+
+data2250.csv 
+Simulation: 25, Seed: 5969
+
+data2250.csv 
+Simulation: 25, Seed: 5970
+
+data2250.csv 
+Simulation: 25, Seed: 5971
+
+data2250.csv 
+Simulation: 25, Seed: 5972
+
+data2250.csv 
+Simulation: 25, Seed: 5973
+
+data2250.csv 
+Simulation: 25, Seed: 5974
+
+data2250.csv 
+Simulation: 25, Seed: 5975
+
+data2250.csv 
+Simulation: 25, Seed: 5976
+
+data2250.csv 
+Simulation: 25, Seed: 5977
+
+data2250.csv 
+Simulation: 25, Seed: 5978
+
+data2250.csv 
+Simulation: 25, Seed: 5979
+
+data2250.csv 
+Simulation: 25, Seed: 5980
+
+data2250.csv 
+Simulation: 25, Seed: 5981
+
+data2250.csv 
+Simulation: 25, Seed: 5982
+
+data2250.csv 
+Simulation: 25, Seed: 5983
+
+data2250.csv 
+Simulation: 25, Seed: 5984
+
+data2250.csv 
+Simulation: 25, Seed: 5985
+
+data2250.csv 
+Simulation: 25, Seed: 5986
+
+data2250.csv 
+Simulation: 25, Seed: 5987
+
+data2250.csv 
+Simulation: 25, Seed: 5988
+
+data2250.csv 
+Simulation: 25, Seed: 5989
+
+data2250.csv 
+Simulation: 25, Seed: 5990
+
+data2250.csv 
+Simulation: 25, Seed: 5991
+
+data2250.csv 
+Simulation: 25, Seed: 5992
+
+data2250.csv 
+Simulation: 25, Seed: 5993
+
+data2250.csv 
+Simulation: 25, Seed: 5994
+
+data2250.csv 
+Simulation: 25, Seed: 5995
+
+data2250.csv 
+Simulation: 25, Seed: 5996
+
+data2250.csv 
+Simulation: 25, Seed: 5997
+
+data2250.csv 
+Simulation: 25, Seed: 5998
+
+data2250.csv 
+Simulation: 25, Seed: 5999
+
+data2250.csv 
+Simulation: 25, Seed: 6000
+
+data2250.csv 
+Simulation: 25, Seed: 6001
+
+data2250.csv 
+Simulation: 25, Seed: 6002
+
+data2250.csv 
+Simulation: 25, Seed: 6003
+
+data2250.csv 
+Simulation: 25, Seed: 6004
+
+data2250.csv 
+Simulation: 25, Seed: 6005
+
+data2250.csv 
+Simulation: 26, Seed: 6006
+
+data2250.csv 
+Simulation: 26, Seed: 6007
+
+data2250.csv 
+Simulation: 26, Seed: 6008
+
+data2250.csv 
+Simulation: 26, Seed: 6009
+
+data2250.csv 
+Simulation: 26, Seed: 6010
+
+data2250.csv 
+Simulation: 26, Seed: 6011
+
+data2250.csv 
+Simulation: 26, Seed: 6012
+
+data2250.csv 
+Simulation: 26, Seed: 6013
+
+data2250.csv 
+Simulation: 26, Seed: 6014
+
+data2250.csv 
+Simulation: 26, Seed: 6015
+
+data2250.csv 
+Simulation: 26, Seed: 6016
+
+data2250.csv 
+Simulation: 26, Seed: 6017
+
+data2250.csv 
+Simulation: 26, Seed: 6018
+
+data2250.csv 
+Simulation: 26, Seed: 6019
+
+data2250.csv 
+Simulation: 26, Seed: 6020
+
+data2250.csv 
+Simulation: 26, Seed: 6021
+
+data2250.csv 
+Simulation: 26, Seed: 6022
+
+data2250.csv 
+Simulation: 26, Seed: 6023
+
+data2250.csv 
+Simulation: 26, Seed: 6024
+
+data2250.csv 
+Simulation: 26, Seed: 6025
+
+data2250.csv 
+Simulation: 26, Seed: 6026
+
+data2250.csv 
+Simulation: 26, Seed: 6027
+
+data2250.csv 
+Simulation: 26, Seed: 6028
+
+data2250.csv 
+Simulation: 26, Seed: 6029
+
+data2250.csv 
+Simulation: 26, Seed: 6030
+
+data2250.csv 
+Simulation: 26, Seed: 6031
+
+data2250.csv 
+Simulation: 26, Seed: 6032
+
+data2250.csv 
+Simulation: 26, Seed: 6033
+
+data2250.csv 
+Simulation: 26, Seed: 6034
+
+data2250.csv 
+Simulation: 26, Seed: 6035
+
+data2250.csv 
+Simulation: 26, Seed: 6036
+
+data2250.csv 
+Simulation: 26, Seed: 6037
+
+data2250.csv 
+Simulation: 26, Seed: 6038
+
+data2250.csv 
+Simulation: 26, Seed: 6039
+
+data2250.csv 
+Simulation: 26, Seed: 6040
+
+data2250.csv 
+Simulation: 26, Seed: 6041
+
+data2250.csv 
+Simulation: 26, Seed: 6042
+
+data2250.csv 
+Simulation: 26, Seed: 6043
+
+data2250.csv 
+Simulation: 26, Seed: 6044
+
+data2250.csv 
+Simulation: 26, Seed: 6045
+
+data2250.csv 
+Simulation: 26, Seed: 6046
+
+data2250.csv 
+Simulation: 26, Seed: 6047
+
+data2250.csv 
+Simulation: 26, Seed: 6048
+
+data2250.csv 
+Simulation: 26, Seed: 6049
+
+data2250.csv 
+Simulation: 26, Seed: 6050
+
+data2250.csv 
+Simulation: 27, Seed: 6051
+
+data2250.csv 
+Simulation: 27, Seed: 6052
+
+data2250.csv 
+Simulation: 27, Seed: 6053
+
+data2250.csv 
+Simulation: 27, Seed: 6054
+
+data2250.csv 
+Simulation: 27, Seed: 6055
+
+data2250.csv 
+Simulation: 27, Seed: 6056
+
+data2250.csv 
+Simulation: 27, Seed: 6057
+
+data2250.csv 
+Simulation: 27, Seed: 6058
+
+data2250.csv 
+Simulation: 27, Seed: 6059
+
+data2250.csv 
+Simulation: 27, Seed: 6060
+
+data2250.csv 
+Simulation: 27, Seed: 6061
+
+data2250.csv 
+Simulation: 27, Seed: 6062
+
+data2250.csv 
+Simulation: 27, Seed: 6063
+
+data2250.csv 
+Simulation: 27, Seed: 6064
+
+data2250.csv 
+Simulation: 27, Seed: 6065
+
+data2250.csv 
+Simulation: 27, Seed: 6066
+
+data2250.csv 
+Simulation: 27, Seed: 6067
+
+data2250.csv 
+Simulation: 27, Seed: 6068
+
+data2250.csv 
+Simulation: 27, Seed: 6069
+
+data2250.csv 
+Simulation: 27, Seed: 6070
+
+data2250.csv 
+Simulation: 27, Seed: 6071
+
+data2250.csv 
+Simulation: 27, Seed: 6072
+
+data2250.csv 
+Simulation: 27, Seed: 6073
+
+data2250.csv 
+Simulation: 27, Seed: 6074
+
+data2250.csv 
+Simulation: 27, Seed: 6075
+
+data2250.csv 
+Simulation: 27, Seed: 6076
+
+data2250.csv 
+Simulation: 27, Seed: 6077
+
+data2250.csv 
+Simulation: 27, Seed: 6078
+
+data2250.csv 
+Simulation: 27, Seed: 6079
+
+data2250.csv 
+Simulation: 27, Seed: 6080
+
+data2250.csv 
+Simulation: 27, Seed: 6081
+
+data2250.csv 
+Simulation: 27, Seed: 6082
+
+data2250.csv 
+Simulation: 27, Seed: 6083
+
+data2250.csv 
+Simulation: 27, Seed: 6084
+
+data2250.csv 
+Simulation: 27, Seed: 6085
+
+data2250.csv 
+Simulation: 27, Seed: 6086
+
+data2250.csv 
+Simulation: 27, Seed: 6087
+
+data2250.csv 
+Simulation: 27, Seed: 6088
+
+data2250.csv 
+Simulation: 27, Seed: 6089
+
+data2250.csv 
+Simulation: 27, Seed: 6090
+
+data2250.csv 
+Simulation: 27, Seed: 6091
+
+data2250.csv 
+Simulation: 27, Seed: 6092
+
+data2250.csv 
+Simulation: 27, Seed: 6093
+
+data2250.csv 
+Simulation: 27, Seed: 6094
+
+data2250.csv 
+Simulation: 27, Seed: 6095
+
+data2250.csv 
+Simulation: 28, Seed: 6096
+
+data2250.csv 
+Simulation: 28, Seed: 6097
+
+data2250.csv 
+Simulation: 28, Seed: 6098
+
+data2250.csv 
+Simulation: 28, Seed: 6099
+
+data2250.csv 
+Simulation: 28, Seed: 6100
+
+data2250.csv 
+Simulation: 28, Seed: 6101
+
+data2250.csv 
+Simulation: 28, Seed: 6102
+
+data2250.csv 
+Simulation: 28, Seed: 6103
+
+data2250.csv 
+Simulation: 28, Seed: 6104
+
+data2250.csv 
+Simulation: 28, Seed: 6105
+
+data2250.csv 
+Simulation: 28, Seed: 6106
+
+data2250.csv 
+Simulation: 28, Seed: 6107
+
+data2250.csv 
+Simulation: 28, Seed: 6108
+
+data2250.csv 
+Simulation: 28, Seed: 6109
+
+data2250.csv 
+Simulation: 28, Seed: 6110
+
+data2250.csv 
+Simulation: 28, Seed: 6111
+
+data2250.csv 
+Simulation: 28, Seed: 6112
+
+data2250.csv 
+Simulation: 28, Seed: 6113
+
+data2250.csv 
+Simulation: 28, Seed: 6114
+
+data2250.csv 
+Simulation: 28, Seed: 6115
+
+data2250.csv 
+Simulation: 28, Seed: 6116
+
+data2250.csv 
+Simulation: 28, Seed: 6117
+
+data2250.csv 
+Simulation: 28, Seed: 6118
+
+data2250.csv 
+Simulation: 28, Seed: 6119
+
+data2250.csv 
+Simulation: 28, Seed: 6120
+
+data2250.csv 
+Simulation: 28, Seed: 6121
+
+data2250.csv 
+Simulation: 28, Seed: 6122
+
+data2250.csv 
+Simulation: 28, Seed: 6123
+
+data2250.csv 
+Simulation: 28, Seed: 6124
+
+data2250.csv 
+Simulation: 28, Seed: 6125
+
+data2250.csv 
+Simulation: 28, Seed: 6126
+
+data2250.csv 
+Simulation: 28, Seed: 6127
+
+data2250.csv 
+Simulation: 28, Seed: 6128
+
+data2250.csv 
+Simulation: 28, Seed: 6129
+
+data2250.csv 
+Simulation: 28, Seed: 6130
+
+data2250.csv 
+Simulation: 28, Seed: 6131
+
+data2250.csv 
+Simulation: 28, Seed: 6132
+
+data2250.csv 
+Simulation: 28, Seed: 6133
+
+data2250.csv 
+Simulation: 28, Seed: 6134
+
+data2250.csv 
+Simulation: 28, Seed: 6135
+
+data2250.csv 
+Simulation: 28, Seed: 6136
+
+data2250.csv 
+Simulation: 28, Seed: 6137
+
+data2250.csv 
+Simulation: 28, Seed: 6138
+
+data2250.csv 
+Simulation: 28, Seed: 6139
+
+data2250.csv 
+Simulation: 28, Seed: 6140
+
+data2250.csv 
+Simulation: 29, Seed: 6141
+
+data2250.csv 
+Simulation: 29, Seed: 6142
+
+data2250.csv 
+Simulation: 29, Seed: 6143
+
+data2250.csv 
+Simulation: 29, Seed: 6144
+
+data2250.csv 
+Simulation: 29, Seed: 6145
+
+data2250.csv 
+Simulation: 29, Seed: 6146
+
+data2250.csv 
+Simulation: 29, Seed: 6147
+
+data2250.csv 
+Simulation: 29, Seed: 6148
+
+data2250.csv 
+Simulation: 29, Seed: 6149
+
+data2250.csv 
+Simulation: 29, Seed: 6150
+
+data2250.csv 
+Simulation: 29, Seed: 6151
+
+data2250.csv 
+Simulation: 29, Seed: 6152
+
+data2250.csv 
+Simulation: 29, Seed: 6153
+
+data2250.csv 
+Simulation: 29, Seed: 6154
+
+data2250.csv 
+Simulation: 29, Seed: 6155
+
+data2250.csv 
+Simulation: 29, Seed: 6156
+
+data2250.csv 
+Simulation: 29, Seed: 6157
+
+data2250.csv 
+Simulation: 29, Seed: 6158
+
+data2250.csv 
+Simulation: 29, Seed: 6159
+
+data2250.csv 
+Simulation: 29, Seed: 6160
+
+data2250.csv 
+Simulation: 29, Seed: 6161
+
+data2250.csv 
+Simulation: 29, Seed: 6162
+
+data2250.csv 
+Simulation: 29, Seed: 6163
+
+data2250.csv 
+Simulation: 29, Seed: 6164
+
+data2250.csv 
+Simulation: 29, Seed: 6165
+
+data2250.csv 
+Simulation: 29, Seed: 6166
+
+data2250.csv 
+Simulation: 29, Seed: 6167
+
+data2250.csv 
+Simulation: 29, Seed: 6168
+
+data2250.csv 
+Simulation: 29, Seed: 6169
+
+data2250.csv 
+Simulation: 29, Seed: 6170
+
+data2250.csv 
+Simulation: 29, Seed: 6171
+
+data2250.csv 
+Simulation: 29, Seed: 6172
+
+data2250.csv 
+Simulation: 29, Seed: 6173
+
+data2250.csv 
+Simulation: 29, Seed: 6174
+
+data2250.csv 
+Simulation: 29, Seed: 6175
+
+data2250.csv 
+Simulation: 29, Seed: 6176
+
+data2250.csv 
+Simulation: 29, Seed: 6177
+
+data2250.csv 
+Simulation: 29, Seed: 6178
+
+data2250.csv 
+Simulation: 29, Seed: 6179
+
+data2250.csv 
+Simulation: 29, Seed: 6180
+
+data2250.csv 
+Simulation: 29, Seed: 6181
+
+data2250.csv 
+Simulation: 29, Seed: 6182
+
+data2250.csv 
+Simulation: 29, Seed: 6183
+
+data2250.csv 
+Simulation: 29, Seed: 6184
+
+data2250.csv 
+Simulation: 29, Seed: 6185
+
+data2250.csv 
+Simulation: 30, Seed: 6186
+
+data2250.csv 
+Simulation: 30, Seed: 6187
+
+data2250.csv 
+Simulation: 30, Seed: 6188
+
+data2250.csv 
+Simulation: 30, Seed: 6189
+
+data2250.csv 
+Simulation: 30, Seed: 6190
+
+data2250.csv 
+Simulation: 30, Seed: 6191
+
+data2250.csv 
+Simulation: 30, Seed: 6192
+
+data2250.csv 
+Simulation: 30, Seed: 6193
+
+data2250.csv 
+Simulation: 30, Seed: 6194
+
+data2250.csv 
+Simulation: 30, Seed: 6195
+
+data2250.csv 
+Simulation: 30, Seed: 6196
+
+data2250.csv 
+Simulation: 30, Seed: 6197
+
+data2250.csv 
+Simulation: 30, Seed: 6198
+
+data2250.csv 
+Simulation: 30, Seed: 6199
+
+data2250.csv 
+Simulation: 30, Seed: 6200
+
+data2250.csv 
+Simulation: 30, Seed: 6201
+
+data2250.csv 
+Simulation: 30, Seed: 6202
+
+data2250.csv 
+Simulation: 30, Seed: 6203
+
+data2250.csv 
+Simulation: 30, Seed: 6204
+
+data2250.csv 
+Simulation: 30, Seed: 6205
+
+data2250.csv 
+Simulation: 30, Seed: 6206
+
+data2250.csv 
+Simulation: 30, Seed: 6207
+
+data2250.csv 
+Simulation: 30, Seed: 6208
+
+data2250.csv 
+Simulation: 30, Seed: 6209
+
+data2250.csv 
+Simulation: 30, Seed: 6210
+
+data2250.csv 
+Simulation: 30, Seed: 6211
+
+data2250.csv 
+Simulation: 30, Seed: 6212
+
+data2250.csv 
+Simulation: 30, Seed: 6213
+
+data2250.csv 
+Simulation: 30, Seed: 6214
+
+data2250.csv 
+Simulation: 30, Seed: 6215
+
+data2250.csv 
+Simulation: 30, Seed: 6216
+
+data2250.csv 
+Simulation: 30, Seed: 6217
+
+data2250.csv 
+Simulation: 30, Seed: 6218
+
+data2250.csv 
+Simulation: 30, Seed: 6219
+
+data2250.csv 
+Simulation: 30, Seed: 6220
+
+data2250.csv 
+Simulation: 30, Seed: 6221
+
+data2250.csv 
+Simulation: 30, Seed: 6222
+
+data2250.csv 
+Simulation: 30, Seed: 6223
+
+data2250.csv 
+Simulation: 30, Seed: 6224
+
+data2250.csv 
+Simulation: 30, Seed: 6225
+
+data2250.csv 
+Simulation: 30, Seed: 6226
+
+data2250.csv 
+Simulation: 30, Seed: 6227
+
+data2250.csv 
+Simulation: 30, Seed: 6228
+
+data2250.csv 
+Simulation: 30, Seed: 6229
+
+data2250.csv 
+Simulation: 30, Seed: 6230
+
+data2250.csv 
+Simulation: 31, Seed: 6231
+
+data2250.csv 
+Simulation: 31, Seed: 6232
+
+data2250.csv 
+Simulation: 31, Seed: 6233
+
+data2250.csv 
+Simulation: 31, Seed: 6234
+
+data2250.csv 
+Simulation: 31, Seed: 6235
+
+data2250.csv 
+Simulation: 31, Seed: 6236
+
+data2250.csv 
+Simulation: 31, Seed: 6237
+
+data2250.csv 
+Simulation: 31, Seed: 6238
+
+data2250.csv 
+Simulation: 31, Seed: 6239
+
+data2250.csv 
+Simulation: 31, Seed: 6240
+
+data2250.csv 
+Simulation: 31, Seed: 6241
+
+data2250.csv 
+Simulation: 31, Seed: 6242
+
+data2250.csv 
+Simulation: 31, Seed: 6243
+
+data2250.csv 
+Simulation: 31, Seed: 6244
+
+data2250.csv 
+Simulation: 31, Seed: 6245
+
+data2250.csv 
+Simulation: 31, Seed: 6246
+
+data2250.csv 
+Simulation: 31, Seed: 6247
+
+data2250.csv 
+Simulation: 31, Seed: 6248
+
+data2250.csv 
+Simulation: 31, Seed: 6249
+
+data2250.csv 
+Simulation: 31, Seed: 6250
+
+data2250.csv 
+Simulation: 31, Seed: 6251
+
+data2250.csv 
+Simulation: 31, Seed: 6252
+
+data2250.csv 
+Simulation: 31, Seed: 6253
+
+data2250.csv 
+Simulation: 31, Seed: 6254
+
+data2250.csv 
+Simulation: 31, Seed: 6255
+
+data2250.csv 
+Simulation: 31, Seed: 6256
+
+data2250.csv 
+Simulation: 31, Seed: 6257
+
+data2250.csv 
+Simulation: 31, Seed: 6258
+
+data2250.csv 
+Simulation: 31, Seed: 6259
+
+data2250.csv 
+Simulation: 31, Seed: 6260
+
+data2250.csv 
+Simulation: 31, Seed: 6261
+
+data2250.csv 
+Simulation: 31, Seed: 6262
+
+data2250.csv 
+Simulation: 31, Seed: 6263
+
+data2250.csv 
+Simulation: 31, Seed: 6264
+
+data2250.csv 
+Simulation: 31, Seed: 6265
+
+data2250.csv 
+Simulation: 31, Seed: 6266
+
+data2250.csv 
+Simulation: 31, Seed: 6267
+
+data2250.csv 
+Simulation: 31, Seed: 6268
+
+data2250.csv 
+Simulation: 31, Seed: 6269
+
+data2250.csv 
+Simulation: 31, Seed: 6270
+
+data2250.csv 
+Simulation: 31, Seed: 6271
+
+data2250.csv 
+Simulation: 31, Seed: 6272
+
+data2250.csv 
+Simulation: 31, Seed: 6273
+
+data2250.csv 
+Simulation: 31, Seed: 6274
+
+data2250.csv 
+Simulation: 31, Seed: 6275
+
+data2250.csv 
+Simulation: 32, Seed: 6276
+
+data2250.csv 
+Simulation: 32, Seed: 6277
+
+data2250.csv 
+Simulation: 32, Seed: 6278
+
+data2250.csv 
+Simulation: 32, Seed: 6279
+
+data2250.csv 
+Simulation: 32, Seed: 6280
+
+data2250.csv 
+Simulation: 32, Seed: 6281
+
+data2250.csv 
+Simulation: 32, Seed: 6282
+
+data2250.csv 
+Simulation: 32, Seed: 6283
+
+data2250.csv 
+Simulation: 32, Seed: 6284
+
+data2250.csv 
+Simulation: 32, Seed: 6285
+
+data2250.csv 
+Simulation: 32, Seed: 6286
+
+data2250.csv 
+Simulation: 32, Seed: 6287
+
+data2250.csv 
+Simulation: 32, Seed: 6288
+
+data2250.csv 
+Simulation: 32, Seed: 6289
+
+data2250.csv 
+Simulation: 32, Seed: 6290
+
+data2250.csv 
+Simulation: 32, Seed: 6291
+
+data2250.csv 
+Simulation: 32, Seed: 6292
+
+data2250.csv 
+Simulation: 32, Seed: 6293
+
+data2250.csv 
+Simulation: 32, Seed: 6294
+
+data2250.csv 
+Simulation: 32, Seed: 6295
+
+data2250.csv 
+Simulation: 32, Seed: 6296
+
+data2250.csv 
+Simulation: 32, Seed: 6297
+
+data2250.csv 
+Simulation: 32, Seed: 6298
+
+data2250.csv 
+Simulation: 32, Seed: 6299
+
+data2250.csv 
+Simulation: 32, Seed: 6300
+
+data2250.csv 
+Simulation: 32, Seed: 6301
+
+data2250.csv 
+Simulation: 32, Seed: 6302
+
+data2250.csv 
+Simulation: 32, Seed: 6303
+
+data2250.csv 
+Simulation: 32, Seed: 6304
+
+data2250.csv 
+Simulation: 32, Seed: 6305
+
+data2250.csv 
+Simulation: 32, Seed: 6306
+
+data2250.csv 
+Simulation: 32, Seed: 6307
+
+data2250.csv 
+Simulation: 32, Seed: 6308
+
+data2250.csv 
+Simulation: 32, Seed: 6309
+
+data2250.csv 
+Simulation: 32, Seed: 6310
+
+data2250.csv 
+Simulation: 32, Seed: 6311
+
+data2250.csv 
+Simulation: 32, Seed: 6312
+
+data2250.csv 
+Simulation: 32, Seed: 6313
+
+data2250.csv 
+Simulation: 32, Seed: 6314
+
+data2250.csv 
+Simulation: 32, Seed: 6315
+
+data2250.csv 
+Simulation: 32, Seed: 6316
+
+data2250.csv 
+Simulation: 32, Seed: 6317
+
+data2250.csv 
+Simulation: 32, Seed: 6318
+
+data2250.csv 
+Simulation: 32, Seed: 6319
+
+data2250.csv 
+Simulation: 32, Seed: 6320
+
+data2250.csv 
+Simulation: 33, Seed: 6321
+
+data2250.csv 
+Simulation: 33, Seed: 6322
+
+data2250.csv 
+Simulation: 33, Seed: 6323
+
+data2250.csv 
+Simulation: 33, Seed: 6324
+
+data2250.csv 
+Simulation: 33, Seed: 6325
+
+data2250.csv 
+Simulation: 33, Seed: 6326
+
+data2250.csv 
+Simulation: 33, Seed: 6327
+
+data2250.csv 
+Simulation: 33, Seed: 6328
+
+data2250.csv 
+Simulation: 33, Seed: 6329
+
+data2250.csv 
+Simulation: 33, Seed: 6330
+
+data2250.csv 
+Simulation: 33, Seed: 6331
+
+data2250.csv 
+Simulation: 33, Seed: 6332
+
+data2250.csv 
+Simulation: 33, Seed: 6333
+
+data2250.csv 
+Simulation: 33, Seed: 6334
+
+data2250.csv 
+Simulation: 33, Seed: 6335
+
+data2250.csv 
+Simulation: 33, Seed: 6336
+
+data2250.csv 
+Simulation: 33, Seed: 6337
+
+data2250.csv 
+Simulation: 33, Seed: 6338
+
+data2250.csv 
+Simulation: 33, Seed: 6339
+
+data2250.csv 
+Simulation: 33, Seed: 6340
+
+data2250.csv 
+Simulation: 33, Seed: 6341
+
+data2250.csv 
+Simulation: 33, Seed: 6342
+
+data2250.csv 
+Simulation: 33, Seed: 6343
+
+data2250.csv 
+Simulation: 33, Seed: 6344
+
+data2250.csv 
+Simulation: 33, Seed: 6345
+
+data2250.csv 
+Simulation: 33, Seed: 6346
+
+data2250.csv 
+Simulation: 33, Seed: 6347
+
+data2250.csv 
+Simulation: 33, Seed: 6348
+
+data2250.csv 
+Simulation: 33, Seed: 6349
+
+data2250.csv 
+Simulation: 33, Seed: 6350
+
+data2250.csv 
+Simulation: 33, Seed: 6351
+
+data2250.csv 
+Simulation: 33, Seed: 6352
+
+data2250.csv 
+Simulation: 33, Seed: 6353
+
+data2250.csv 
+Simulation: 33, Seed: 6354
+
+data2250.csv 
+Simulation: 33, Seed: 6355
+
+data2250.csv 
+Simulation: 33, Seed: 6356
+
+data2250.csv 
+Simulation: 33, Seed: 6357
+
+data2250.csv 
+Simulation: 33, Seed: 6358
+
+data2250.csv 
+Simulation: 33, Seed: 6359
+
+data2250.csv 
+Simulation: 33, Seed: 6360
+
+data2250.csv 
+Simulation: 33, Seed: 6361
+
+data2250.csv 
+Simulation: 33, Seed: 6362
+
+data2250.csv 
+Simulation: 33, Seed: 6363
+
+data2250.csv 
+Simulation: 33, Seed: 6364
+
+data2250.csv 
+Simulation: 33, Seed: 6365
+
+data2250.csv 
+Simulation: 34, Seed: 6366
+
+data2250.csv 
+Simulation: 34, Seed: 6367
+
+data2250.csv 
+Simulation: 34, Seed: 6368
+
+data2250.csv 
+Simulation: 34, Seed: 6369
+
+data2250.csv 
+Simulation: 34, Seed: 6370
+
+data2250.csv 
+Simulation: 34, Seed: 6371
+
+data2250.csv 
+Simulation: 34, Seed: 6372
+
+data2250.csv 
+Simulation: 34, Seed: 6373
+
+data2250.csv 
+Simulation: 34, Seed: 6374
+
+data2250.csv 
+Simulation: 34, Seed: 6375
+
+data2250.csv 
+Simulation: 34, Seed: 6376
+
+data2250.csv 
+Simulation: 34, Seed: 6377
+
+data2250.csv 
+Simulation: 34, Seed: 6378
+
+data2250.csv 
+Simulation: 34, Seed: 6379
+
+data2250.csv 
+Simulation: 34, Seed: 6380
+
+data2250.csv 
+Simulation: 34, Seed: 6381
+
+data2250.csv 
+Simulation: 34, Seed: 6382
+
+data2250.csv 
+Simulation: 34, Seed: 6383
+
+data2250.csv 
+Simulation: 34, Seed: 6384
+
+data2250.csv 
+Simulation: 34, Seed: 6385
+
+data2250.csv 
+Simulation: 34, Seed: 6386
+
+data2250.csv 
+Simulation: 34, Seed: 6387
+
+data2250.csv 
+Simulation: 34, Seed: 6388
+
+data2250.csv 
+Simulation: 34, Seed: 6389
+
+data2250.csv 
+Simulation: 34, Seed: 6390
+
+data2250.csv 
+Simulation: 34, Seed: 6391
+
+data2250.csv 
+Simulation: 34, Seed: 6392
+
+data2250.csv 
+Simulation: 34, Seed: 6393
+
+data2250.csv 
+Simulation: 34, Seed: 6394
+
+data2250.csv 
+Simulation: 34, Seed: 6395
+
+data2250.csv 
+Simulation: 34, Seed: 6396
+
+data2250.csv 
+Simulation: 34, Seed: 6397
+
+data2250.csv 
+Simulation: 34, Seed: 6398
+
+data2250.csv 
+Simulation: 34, Seed: 6399
+
+data2250.csv 
+Simulation: 34, Seed: 6400
+
+data2250.csv 
+Simulation: 34, Seed: 6401
+
+data2250.csv 
+Simulation: 34, Seed: 6402
+
+data2250.csv 
+Simulation: 34, Seed: 6403
+
+data2250.csv 
+Simulation: 34, Seed: 6404
+
+data2250.csv 
+Simulation: 34, Seed: 6405
+
+data2250.csv 
+Simulation: 34, Seed: 6406
+
+data2250.csv 
+Simulation: 34, Seed: 6407
+
+data2250.csv 
+Simulation: 34, Seed: 6408
+
+data2250.csv 
+Simulation: 34, Seed: 6409
+
+data2250.csv 
+Simulation: 34, Seed: 6410
+
+data2250.csv 
+Simulation: 35, Seed: 6411
+
+data2250.csv 
+Simulation: 35, Seed: 6412
+
+data2250.csv 
+Simulation: 35, Seed: 6413
+
+data2250.csv 
+Simulation: 35, Seed: 6414
+
+data2250.csv 
+Simulation: 35, Seed: 6415
+
+data2250.csv 
+Simulation: 35, Seed: 6416
+
+data2250.csv 
+Simulation: 35, Seed: 6417
+
+data2250.csv 
+Simulation: 35, Seed: 6418
+
+data2250.csv 
+Simulation: 35, Seed: 6419
+
+data2250.csv 
+Simulation: 35, Seed: 6420
+
+data2250.csv 
+Simulation: 35, Seed: 6421
+
+data2250.csv 
+Simulation: 35, Seed: 6422
+
+data2250.csv 
+Simulation: 35, Seed: 6423
+
+data2250.csv 
+Simulation: 35, Seed: 6424
+
+data2250.csv 
+Simulation: 35, Seed: 6425
+
+data2250.csv 
+Simulation: 35, Seed: 6426
+
+data2250.csv 
+Simulation: 35, Seed: 6427
+
+data2250.csv 
+Simulation: 35, Seed: 6428
+
+data2250.csv 
+Simulation: 35, Seed: 6429
+
+data2250.csv 
+Simulation: 35, Seed: 6430
+
+data2250.csv 
+Simulation: 35, Seed: 6431
+
+data2250.csv 
+Simulation: 35, Seed: 6432
+
+data2250.csv 
+Simulation: 35, Seed: 6433
+
+data2250.csv 
+Simulation: 35, Seed: 6434
+
+data2250.csv 
+Simulation: 35, Seed: 6435
+
+data2250.csv 
+Simulation: 35, Seed: 6436
+
+data2250.csv 
+Simulation: 35, Seed: 6437
+
+data2250.csv 
+Simulation: 35, Seed: 6438
+
+data2250.csv 
+Simulation: 35, Seed: 6439
+
+data2250.csv 
+Simulation: 35, Seed: 6440
+
+data2250.csv 
+Simulation: 35, Seed: 6441
+
+data2250.csv 
+Simulation: 35, Seed: 6442
+
+data2250.csv 
+Simulation: 35, Seed: 6443
+
+data2250.csv 
+Simulation: 35, Seed: 6444
+
+data2250.csv 
+Simulation: 35, Seed: 6445
+
+data2250.csv 
+Simulation: 35, Seed: 6446
+
+data2250.csv 
+Simulation: 35, Seed: 6447
+
+data2250.csv 
+Simulation: 35, Seed: 6448
+
+data2250.csv 
+Simulation: 35, Seed: 6449
+
+data2250.csv 
+Simulation: 35, Seed: 6450
+
+data2250.csv 
+Simulation: 35, Seed: 6451
+
+data2250.csv 
+Simulation: 35, Seed: 6452
+
+data2250.csv 
+Simulation: 35, Seed: 6453
+
+data2250.csv 
+Simulation: 35, Seed: 6454
+
+data2250.csv 
+Simulation: 35, Seed: 6455
+
+data2250.csv 
+Simulation: 36, Seed: 6456
+
+data2250.csv 
+Simulation: 36, Seed: 6457
+
+data2250.csv 
+Simulation: 36, Seed: 6458
+
+data2250.csv 
+Simulation: 36, Seed: 6459
+
+data2250.csv 
+Simulation: 36, Seed: 6460
+
+data2250.csv 
+Simulation: 36, Seed: 6461
+
+data2250.csv 
+Simulation: 36, Seed: 6462
+
+data2250.csv 
+Simulation: 36, Seed: 6463
+
+data2250.csv 
+Simulation: 36, Seed: 6464
+
+data2250.csv 
+Simulation: 36, Seed: 6465
+
+data2250.csv 
+Simulation: 36, Seed: 6466
+
+data2250.csv 
+Simulation: 36, Seed: 6467
+
+data2250.csv 
+Simulation: 36, Seed: 6468
+
+data2250.csv 
+Simulation: 36, Seed: 6469
+
+data2250.csv 
+Simulation: 36, Seed: 6470
+
+data2250.csv 
+Simulation: 36, Seed: 6471
+
+data2250.csv 
+Simulation: 36, Seed: 6472
+
+data2250.csv 
+Simulation: 36, Seed: 6473
+
+data2250.csv 
+Simulation: 36, Seed: 6474
+
+data2250.csv 
+Simulation: 36, Seed: 6475
+
+data2250.csv 
+Simulation: 36, Seed: 6476
+
+data2250.csv 
+Simulation: 36, Seed: 6477
+
+data2250.csv 
+Simulation: 36, Seed: 6478
+
+data2250.csv 
+Simulation: 36, Seed: 6479
+
+data2250.csv 
+Simulation: 36, Seed: 6480
+
+data2250.csv 
+Simulation: 36, Seed: 6481
+
+data2250.csv 
+Simulation: 36, Seed: 6482
+
+data2250.csv 
+Simulation: 36, Seed: 6483
+
+data2250.csv 
+Simulation: 36, Seed: 6484
+
+data2250.csv 
+Simulation: 36, Seed: 6485
+
+data2250.csv 
+Simulation: 36, Seed: 6486
+
+data2250.csv 
+Simulation: 36, Seed: 6487
+
+data2250.csv 
+Simulation: 36, Seed: 6488
+
+data2250.csv 
+Simulation: 36, Seed: 6489
+
+data2250.csv 
+Simulation: 36, Seed: 6490
+
+data2250.csv 
+Simulation: 36, Seed: 6491
+
+data2250.csv 
+Simulation: 36, Seed: 6492
+
+data2250.csv 
+Simulation: 36, Seed: 6493
+
+data2250.csv 
+Simulation: 36, Seed: 6494
+
+data2250.csv 
+Simulation: 36, Seed: 6495
+
+data2250.csv 
+Simulation: 36, Seed: 6496
+
+data2250.csv 
+Simulation: 36, Seed: 6497
+
+data2250.csv 
+Simulation: 36, Seed: 6498
+
+data2250.csv 
+Simulation: 36, Seed: 6499
+
+data2250.csv 
+Simulation: 36, Seed: 6500
+
+data2250.csv 
+Simulation: 37, Seed: 6501
+
+data2250.csv 
+Simulation: 37, Seed: 6502
+
+data2250.csv 
+Simulation: 37, Seed: 6503
+
+data2250.csv 
+Simulation: 37, Seed: 6504
+
+data2250.csv 
+Simulation: 37, Seed: 6505
+
+data2250.csv 
+Simulation: 37, Seed: 6506
+
+data2250.csv 
+Simulation: 37, Seed: 6507
+
+data2250.csv 
+Simulation: 37, Seed: 6508
+
+data2250.csv 
+Simulation: 37, Seed: 6509
+
+data2250.csv 
+Simulation: 37, Seed: 6510
+
+data2250.csv 
+Simulation: 37, Seed: 6511
+
+data2250.csv 
+Simulation: 37, Seed: 6512
+
+data2250.csv 
+Simulation: 37, Seed: 6513
+
+data2250.csv 
+Simulation: 37, Seed: 6514
+
+data2250.csv 
+Simulation: 37, Seed: 6515
+
+data2250.csv 
+Simulation: 37, Seed: 6516
+
+data2250.csv 
+Simulation: 37, Seed: 6517
+
+data2250.csv 
+Simulation: 37, Seed: 6518
+
+data2250.csv 
+Simulation: 37, Seed: 6519
+
+data2250.csv 
+Simulation: 37, Seed: 6520
+
+data2250.csv 
+Simulation: 37, Seed: 6521
+
+data2250.csv 
+Simulation: 37, Seed: 6522
+
+data2250.csv 
+Simulation: 37, Seed: 6523
+
+data2250.csv 
+Simulation: 37, Seed: 6524
+
+data2250.csv 
+Simulation: 37, Seed: 6525
+
+data2250.csv 
+Simulation: 37, Seed: 6526
+
+data2250.csv 
+Simulation: 37, Seed: 6527
+
+data2250.csv 
+Simulation: 37, Seed: 6528
+
+data2250.csv 
+Simulation: 37, Seed: 6529
+
+data2250.csv 
+Simulation: 37, Seed: 6530
+
+data2250.csv 
+Simulation: 37, Seed: 6531
+
+data2250.csv 
+Simulation: 37, Seed: 6532
+
+data2250.csv 
+Simulation: 37, Seed: 6533
+
+data2250.csv 
+Simulation: 37, Seed: 6534
+
+data2250.csv 
+Simulation: 37, Seed: 6535
+
+data2250.csv 
+Simulation: 37, Seed: 6536
+
+data2250.csv 
+Simulation: 37, Seed: 6537
+
+data2250.csv 
+Simulation: 37, Seed: 6538
+
+data2250.csv 
+Simulation: 37, Seed: 6539
+
+data2250.csv 
+Simulation: 37, Seed: 6540
+
+data2250.csv 
+Simulation: 37, Seed: 6541
+
+data2250.csv 
+Simulation: 37, Seed: 6542
+
+data2250.csv 
+Simulation: 37, Seed: 6543
+
+data2250.csv 
+Simulation: 37, Seed: 6544
+
+data2250.csv 
+Simulation: 37, Seed: 6545
+
+data2250.csv 
+Simulation: 38, Seed: 6546
+
+data2250.csv 
+Simulation: 38, Seed: 6547
+
+data2250.csv 
+Simulation: 38, Seed: 6548
+
+data2250.csv 
+Simulation: 38, Seed: 6549
+
+data2250.csv 
+Simulation: 38, Seed: 6550
+
+data2250.csv 
+Simulation: 38, Seed: 6551
+
+data2250.csv 
+Simulation: 38, Seed: 6552
+
+data2250.csv 
+Simulation: 38, Seed: 6553
+
+data2250.csv 
+Simulation: 38, Seed: 6554
+
+data2250.csv 
+Simulation: 38, Seed: 6555
+
+data2250.csv 
+Simulation: 38, Seed: 6556
+
+data2250.csv 
+Simulation: 38, Seed: 6557
+
+data2250.csv 
+Simulation: 38, Seed: 6558
+
+data2250.csv 
+Simulation: 38, Seed: 6559
+
+data2250.csv 
+Simulation: 38, Seed: 6560
+
+data2250.csv 
+Simulation: 38, Seed: 6561
+
+data2250.csv 
+Simulation: 38, Seed: 6562
+
+data2250.csv 
+Simulation: 38, Seed: 6563
+
+data2250.csv 
+Simulation: 38, Seed: 6564
+
+data2250.csv 
+Simulation: 38, Seed: 6565
+
+data2250.csv 
+Simulation: 38, Seed: 6566
+
+data2250.csv 
+Simulation: 38, Seed: 6567
+
+data2250.csv 
+Simulation: 38, Seed: 6568
+
+data2250.csv 
+Simulation: 38, Seed: 6569
+
+data2250.csv 
+Simulation: 38, Seed: 6570
+
+data2250.csv 
+Simulation: 38, Seed: 6571
+
+data2250.csv 
+Simulation: 38, Seed: 6572
+
+data2250.csv 
+Simulation: 38, Seed: 6573
+
+data2250.csv 
+Simulation: 38, Seed: 6574
+
+data2250.csv 
+Simulation: 38, Seed: 6575
+
+data2250.csv 
+Simulation: 38, Seed: 6576
+
+data2250.csv 
+Simulation: 38, Seed: 6577
+
+data2250.csv 
+Simulation: 38, Seed: 6578
+
+data2250.csv 
+Simulation: 38, Seed: 6579
+
+data2250.csv 
+Simulation: 38, Seed: 6580
+
+data2250.csv 
+Simulation: 38, Seed: 6581
+
+data2250.csv 
+Simulation: 38, Seed: 6582
+
+data2250.csv 
+Simulation: 38, Seed: 6583
+
+data2250.csv 
+Simulation: 38, Seed: 6584
+
+data2250.csv 
+Simulation: 38, Seed: 6585
+
+data2250.csv 
+Simulation: 38, Seed: 6586
+
+data2250.csv 
+Simulation: 38, Seed: 6587
+
+data2250.csv 
+Simulation: 38, Seed: 6588
+
+data2250.csv 
+Simulation: 38, Seed: 6589
+
+data2250.csv 
+Simulation: 38, Seed: 6590
+
+data2250.csv 
+Simulation: 39, Seed: 6591
+
+data2250.csv 
+Simulation: 39, Seed: 6592
+
+data2250.csv 
+Simulation: 39, Seed: 6593
+
+data2250.csv 
+Simulation: 39, Seed: 6594
+
+data2250.csv 
+Simulation: 39, Seed: 6595
+
+data2250.csv 
+Simulation: 39, Seed: 6596
+
+data2250.csv 
+Simulation: 39, Seed: 6597
+
+data2250.csv 
+Simulation: 39, Seed: 6598
+
+data2250.csv 
+Simulation: 39, Seed: 6599
+
+data2250.csv 
+Simulation: 39, Seed: 6600
+
+data2250.csv 
+Simulation: 39, Seed: 6601
+
+data2250.csv 
+Simulation: 39, Seed: 6602
+
+data2250.csv 
+Simulation: 39, Seed: 6603
+
+data2250.csv 
+Simulation: 39, Seed: 6604
+
+data2250.csv 
+Simulation: 39, Seed: 6605
+
+data2250.csv 
+Simulation: 39, Seed: 6606
+
+data2250.csv 
+Simulation: 39, Seed: 6607
+
+data2250.csv 
+Simulation: 39, Seed: 6608
+
+data2250.csv 
+Simulation: 39, Seed: 6609
+
+data2250.csv 
+Simulation: 39, Seed: 6610
+
+data2250.csv 
+Simulation: 39, Seed: 6611
+
+data2250.csv 
+Simulation: 39, Seed: 6612
+
+data2250.csv 
+Simulation: 39, Seed: 6613
+
+data2250.csv 
+Simulation: 39, Seed: 6614
+
+data2250.csv 
+Simulation: 39, Seed: 6615
+
+data2250.csv 
+Simulation: 39, Seed: 6616
+
+data2250.csv 
+Simulation: 39, Seed: 6617
+
+data2250.csv 
+Simulation: 39, Seed: 6618
+
+data2250.csv 
+Simulation: 39, Seed: 6619
+
+data2250.csv 
+Simulation: 39, Seed: 6620
+
+data2250.csv 
+Simulation: 39, Seed: 6621
+
+data2250.csv 
+Simulation: 39, Seed: 6622
+
+data2250.csv 
+Simulation: 39, Seed: 6623
+
+data2250.csv 
+Simulation: 39, Seed: 6624
+
+data2250.csv 
+Simulation: 39, Seed: 6625
+
+data2250.csv 
+Simulation: 39, Seed: 6626
+
+data2250.csv 
+Simulation: 39, Seed: 6627
+
+data2250.csv 
+Simulation: 39, Seed: 6628
+
+data2250.csv 
+Simulation: 39, Seed: 6629
+
+data2250.csv 
+Simulation: 39, Seed: 6630
+
+data2250.csv 
+Simulation: 39, Seed: 6631
+
+data2250.csv 
+Simulation: 39, Seed: 6632
+
+data2250.csv 
+Simulation: 39, Seed: 6633
+
+data2250.csv 
+Simulation: 39, Seed: 6634
+
+data2250.csv 
+Simulation: 39, Seed: 6635
+
+data2250.csv 
+Simulation: 40, Seed: 6636
+
+data2250.csv 
+Simulation: 40, Seed: 6637
+
+data2250.csv 
+Simulation: 40, Seed: 6638
+
+data2250.csv 
+Simulation: 40, Seed: 6639
+
+data2250.csv 
+Simulation: 40, Seed: 6640
+
+data2250.csv 
+Simulation: 40, Seed: 6641
+
+data2250.csv 
+Simulation: 40, Seed: 6642
+
+data2250.csv 
+Simulation: 40, Seed: 6643
+
+data2250.csv 
+Simulation: 40, Seed: 6644
+
+data2250.csv 
+Simulation: 40, Seed: 6645
+
+data2250.csv 
+Simulation: 40, Seed: 6646
+
+data2250.csv 
+Simulation: 40, Seed: 6647
+
+data2250.csv 
+Simulation: 40, Seed: 6648
+
+data2250.csv 
+Simulation: 40, Seed: 6649
+
+data2250.csv 
+Simulation: 40, Seed: 6650
+
+data2250.csv 
+Simulation: 40, Seed: 6651
+
+data2250.csv 
+Simulation: 40, Seed: 6652
+
+data2250.csv 
+Simulation: 40, Seed: 6653
+
+data2250.csv 
+Simulation: 40, Seed: 6654
+
+data2250.csv 
+Simulation: 40, Seed: 6655
+
+data2250.csv 
+Simulation: 40, Seed: 6656
+
+data2250.csv 
+Simulation: 40, Seed: 6657
+
+data2250.csv 
+Simulation: 40, Seed: 6658
+
+data2250.csv 
+Simulation: 40, Seed: 6659
+
+data2250.csv 
+Simulation: 40, Seed: 6660
+
+data2250.csv 
+Simulation: 40, Seed: 6661
+
+data2250.csv 
+Simulation: 40, Seed: 6662
+
+data2250.csv 
+Simulation: 40, Seed: 6663
+
+data2250.csv 
+Simulation: 40, Seed: 6664
+
+data2250.csv 
+Simulation: 40, Seed: 6665
+
+data2250.csv 
+Simulation: 40, Seed: 6666
+
+data2250.csv 
+Simulation: 40, Seed: 6667
+
+data2250.csv 
+Simulation: 40, Seed: 6668
+
+data2250.csv 
+Simulation: 40, Seed: 6669
+
+data2250.csv 
+Simulation: 40, Seed: 6670
+
+data2250.csv 
+Simulation: 40, Seed: 6671
+
+data2250.csv 
+Simulation: 40, Seed: 6672
+
+data2250.csv 
+Simulation: 40, Seed: 6673
+
+data2250.csv 
+Simulation: 40, Seed: 6674
+
+data2250.csv 
+Simulation: 40, Seed: 6675
+
+data2250.csv 
+Simulation: 40, Seed: 6676
+
+data2250.csv 
+Simulation: 40, Seed: 6677
+
+data2250.csv 
+Simulation: 40, Seed: 6678
+
+data2250.csv 
+Simulation: 40, Seed: 6679
+
+data2250.csv 
+Simulation: 40, Seed: 6680
+
+data2250.csv 
+Simulation: 41, Seed: 6681
+
+data2250.csv 
+Simulation: 41, Seed: 6682
+
+data2250.csv 
+Simulation: 41, Seed: 6683
+
+data2250.csv 
+Simulation: 41, Seed: 6684
+
+data2250.csv 
+Simulation: 41, Seed: 6685
+
+data2250.csv 
+Simulation: 41, Seed: 6686
+
+data2250.csv 
+Simulation: 41, Seed: 6687
+
+data2250.csv 
+Simulation: 41, Seed: 6688
+
+data2250.csv 
+Simulation: 41, Seed: 6689
+
+data2250.csv 
+Simulation: 41, Seed: 6690
+
+data2250.csv 
+Simulation: 41, Seed: 6691
+
+data2250.csv 
+Simulation: 41, Seed: 6692
+
+data2250.csv 
+Simulation: 41, Seed: 6693
+
+data2250.csv 
+Simulation: 41, Seed: 6694
+
+data2250.csv 
+Simulation: 41, Seed: 6695
+
+data2250.csv 
+Simulation: 41, Seed: 6696
+
+data2250.csv 
+Simulation: 41, Seed: 6697
+
+data2250.csv 
+Simulation: 41, Seed: 6698
+
+data2250.csv 
+Simulation: 41, Seed: 6699
+
+data2250.csv 
+Simulation: 41, Seed: 6700
+
+data2250.csv 
+Simulation: 41, Seed: 6701
+
+data2250.csv 
+Simulation: 41, Seed: 6702
+
+data2250.csv 
+Simulation: 41, Seed: 6703
+
+data2250.csv 
+Simulation: 41, Seed: 6704
+
+data2250.csv 
+Simulation: 41, Seed: 6705
+
+data2250.csv 
+Simulation: 41, Seed: 6706
+
+data2250.csv 
+Simulation: 41, Seed: 6707
+
+data2250.csv 
+Simulation: 41, Seed: 6708
+
+data2250.csv 
+Simulation: 41, Seed: 6709
+
+data2250.csv 
+Simulation: 41, Seed: 6710
+
+data2250.csv 
+Simulation: 41, Seed: 6711
+
+data2250.csv 
+Simulation: 41, Seed: 6712
+
+data2250.csv 
+Simulation: 41, Seed: 6713
+
+data2250.csv 
+Simulation: 41, Seed: 6714
+
+data2250.csv 
+Simulation: 41, Seed: 6715
+
+data2250.csv 
+Simulation: 41, Seed: 6716
+
+data2250.csv 
+Simulation: 41, Seed: 6717
+
+data2250.csv 
+Simulation: 41, Seed: 6718
+
+data2250.csv 
+Simulation: 41, Seed: 6719
+
+data2250.csv 
+Simulation: 41, Seed: 6720
+
+data2250.csv 
+Simulation: 41, Seed: 6721
+
+data2250.csv 
+Simulation: 41, Seed: 6722
+
+data2250.csv 
+Simulation: 41, Seed: 6723
+
+data2250.csv 
+Simulation: 41, Seed: 6724
+
+data2250.csv 
+Simulation: 41, Seed: 6725
+
+data2250.csv 
+Simulation: 42, Seed: 6726
+
+data2250.csv 
+Simulation: 42, Seed: 6727
+
+data2250.csv 
+Simulation: 42, Seed: 6728
+
+data2250.csv 
+Simulation: 42, Seed: 6729
+
+data2250.csv 
+Simulation: 42, Seed: 6730
+
+data2250.csv 
+Simulation: 42, Seed: 6731
+
+data2250.csv 
+Simulation: 42, Seed: 6732
+
+data2250.csv 
+Simulation: 42, Seed: 6733
+
+data2250.csv 
+Simulation: 42, Seed: 6734
+
+data2250.csv 
+Simulation: 42, Seed: 6735
+
+data2250.csv 
+Simulation: 42, Seed: 6736
+
+data2250.csv 
+Simulation: 42, Seed: 6737
+
+data2250.csv 
+Simulation: 42, Seed: 6738
+
+data2250.csv 
+Simulation: 42, Seed: 6739
+
+data2250.csv 
+Simulation: 42, Seed: 6740
+
+data2250.csv 
+Simulation: 42, Seed: 6741
+
+data2250.csv 
+Simulation: 42, Seed: 6742
+
+data2250.csv 
+Simulation: 42, Seed: 6743
+
+data2250.csv 
+Simulation: 42, Seed: 6744
+
+data2250.csv 
+Simulation: 42, Seed: 6745
+
+data2250.csv 
+Simulation: 42, Seed: 6746
+
+data2250.csv 
+Simulation: 42, Seed: 6747
+
+data2250.csv 
+Simulation: 42, Seed: 6748
+
+data2250.csv 
+Simulation: 42, Seed: 6749
+
+data2250.csv 
+Simulation: 42, Seed: 6750
+
+data2250.csv 
+Simulation: 42, Seed: 6751
+
+data2250.csv 
+Simulation: 42, Seed: 6752
+
+data2250.csv 
+Simulation: 42, Seed: 6753
+
+data2250.csv 
+Simulation: 42, Seed: 6754
+
+data2250.csv 
+Simulation: 42, Seed: 6755
+
+data2250.csv 
+Simulation: 42, Seed: 6756
+
+data2250.csv 
+Simulation: 42, Seed: 6757
+
+data2250.csv 
+Simulation: 42, Seed: 6758
+
+data2250.csv 
+Simulation: 42, Seed: 6759
+
+data2250.csv 
+Simulation: 42, Seed: 6760
+
+data2250.csv 
+Simulation: 42, Seed: 6761
+
+data2250.csv 
+Simulation: 42, Seed: 6762
+
+data2250.csv 
+Simulation: 42, Seed: 6763
+
+data2250.csv 
+Simulation: 42, Seed: 6764
+
+data2250.csv 
+Simulation: 42, Seed: 6765
+
+data2250.csv 
+Simulation: 42, Seed: 6766
+
+data2250.csv 
+Simulation: 42, Seed: 6767
+
+data2250.csv 
+Simulation: 42, Seed: 6768
+
+data2250.csv 
+Simulation: 42, Seed: 6769
+
+data2250.csv 
+Simulation: 42, Seed: 6770
+
+data2250.csv 
+Simulation: 43, Seed: 6771
+
+data2250.csv 
+Simulation: 43, Seed: 6772
+
+data2250.csv 
+Simulation: 43, Seed: 6773
+
+data2250.csv 
+Simulation: 43, Seed: 6774
+
+data2250.csv 
+Simulation: 43, Seed: 6775
+
+data2250.csv 
+Simulation: 43, Seed: 6776
+
+data2250.csv 
+Simulation: 43, Seed: 6777
+
+data2250.csv 
+Simulation: 43, Seed: 6778
+
+data2250.csv 
+Simulation: 43, Seed: 6779
+
+data2250.csv 
+Simulation: 43, Seed: 6780
+
+data2250.csv 
+Simulation: 43, Seed: 6781
+
+data2250.csv 
+Simulation: 43, Seed: 6782
+
+data2250.csv 
+Simulation: 43, Seed: 6783
+
+data2250.csv 
+Simulation: 43, Seed: 6784
+
+data2250.csv 
+Simulation: 43, Seed: 6785
+
+data2250.csv 
+Simulation: 43, Seed: 6786
+
+data2250.csv 
+Simulation: 43, Seed: 6787
+
+data2250.csv 
+Simulation: 43, Seed: 6788
+
+data2250.csv 
+Simulation: 43, Seed: 6789
+
+data2250.csv 
+Simulation: 43, Seed: 6790
+
+data2250.csv 
+Simulation: 43, Seed: 6791
+
+data2250.csv 
+Simulation: 43, Seed: 6792
+
+data2250.csv 
+Simulation: 43, Seed: 6793
+
+data2250.csv 
+Simulation: 43, Seed: 6794
+
+data2250.csv 
+Simulation: 43, Seed: 6795
+
+data2250.csv 
+Simulation: 43, Seed: 6796
+
+data2250.csv 
+Simulation: 43, Seed: 6797
+
+data2250.csv 
+Simulation: 43, Seed: 6798
+
+data2250.csv 
+Simulation: 43, Seed: 6799
+
+data2250.csv 
+Simulation: 43, Seed: 6800
+
+data2250.csv 
+Simulation: 43, Seed: 6801
+
+data2250.csv 
+Simulation: 43, Seed: 6802
+
+data2250.csv 
+Simulation: 43, Seed: 6803
+
+data2250.csv 
+Simulation: 43, Seed: 6804
+
+data2250.csv 
+Simulation: 43, Seed: 6805
+
+data2250.csv 
+Simulation: 43, Seed: 6806
+
+data2250.csv 
+Simulation: 43, Seed: 6807
+
+data2250.csv 
+Simulation: 43, Seed: 6808
+
+data2250.csv 
+Simulation: 43, Seed: 6809
+
+data2250.csv 
+Simulation: 43, Seed: 6810
+
+data2250.csv 
+Simulation: 43, Seed: 6811
+
+data2250.csv 
+Simulation: 43, Seed: 6812
+
+data2250.csv 
+Simulation: 43, Seed: 6813
+
+data2250.csv 
+Simulation: 43, Seed: 6814
+
+data2250.csv 
+Simulation: 43, Seed: 6815
+
+data2250.csv 
+Simulation: 44, Seed: 6816
+
+data2250.csv 
+Simulation: 44, Seed: 6817
+
+data2250.csv 
+Simulation: 44, Seed: 6818
+
+data2250.csv 
+Simulation: 44, Seed: 6819
+
+data2250.csv 
+Simulation: 44, Seed: 6820
+
+data2250.csv 
+Simulation: 44, Seed: 6821
+
+data2250.csv 
+Simulation: 44, Seed: 6822
+
+data2250.csv 
+Simulation: 44, Seed: 6823
+
+data2250.csv 
+Simulation: 44, Seed: 6824
+
+data2250.csv 
+Simulation: 44, Seed: 6825
+
+data2250.csv 
+Simulation: 44, Seed: 6826
+
+data2250.csv 
+Simulation: 44, Seed: 6827
+
+data2250.csv 
+Simulation: 44, Seed: 6828
+
+data2250.csv 
+Simulation: 44, Seed: 6829
+
+data2250.csv 
+Simulation: 44, Seed: 6830
+
+data2250.csv 
+Simulation: 44, Seed: 6831
+
+data2250.csv 
+Simulation: 44, Seed: 6832
+
+data2250.csv 
+Simulation: 44, Seed: 6833
+
+data2250.csv 
+Simulation: 44, Seed: 6834
+
+data2250.csv 
+Simulation: 44, Seed: 6835
+
+data2250.csv 
+Simulation: 44, Seed: 6836
+
+data2250.csv 
+Simulation: 44, Seed: 6837
+
+data2250.csv 
+Simulation: 44, Seed: 6838
+
+data2250.csv 
+Simulation: 44, Seed: 6839
+
+data2250.csv 
+Simulation: 44, Seed: 6840
+
+data2250.csv 
+Simulation: 44, Seed: 6841
+
+data2250.csv 
+Simulation: 44, Seed: 6842
+
+data2250.csv 
+Simulation: 44, Seed: 6843
+
+data2250.csv 
+Simulation: 44, Seed: 6844
+
+data2250.csv 
+Simulation: 44, Seed: 6845
+
+data2250.csv 
+Simulation: 44, Seed: 6846
+
+data2250.csv 
+Simulation: 44, Seed: 6847
+
+data2250.csv 
+Simulation: 44, Seed: 6848
+
+data2250.csv 
+Simulation: 44, Seed: 6849
+
+data2250.csv 
+Simulation: 44, Seed: 6850
+
+data2250.csv 
+Simulation: 44, Seed: 6851
+
+data2250.csv 
+Simulation: 44, Seed: 6852
+
+data2250.csv 
+Simulation: 44, Seed: 6853
+
+data2250.csv 
+Simulation: 44, Seed: 6854
+
+data2250.csv 
+Simulation: 44, Seed: 6855
+
+data2250.csv 
+Simulation: 44, Seed: 6856
+
+data2250.csv 
+Simulation: 44, Seed: 6857
+
+data2250.csv 
+Simulation: 44, Seed: 6858
+
+data2250.csv 
+Simulation: 44, Seed: 6859
+
+data2250.csv 
+Simulation: 44, Seed: 6860
+
+data2250.csv 
+Simulation: 45, Seed: 6861
+
+data2250.csv 
+Simulation: 45, Seed: 6862
+
+data2250.csv 
+Simulation: 45, Seed: 6863
+
+data2250.csv 
+Simulation: 45, Seed: 6864
+
+data2250.csv 
+Simulation: 45, Seed: 6865
+
+data2250.csv 
+Simulation: 45, Seed: 6866
+
+data2250.csv 
+Simulation: 45, Seed: 6867
+
+data2250.csv 
+Simulation: 45, Seed: 6868
+
+data2250.csv 
+Simulation: 45, Seed: 6869
+
+data2250.csv 
+Simulation: 45, Seed: 6870
+
+data2250.csv 
+Simulation: 45, Seed: 6871
+
+data2250.csv 
+Simulation: 45, Seed: 6872
+
+data2250.csv 
+Simulation: 45, Seed: 6873
+
+data2250.csv 
+Simulation: 45, Seed: 6874
+
+data2250.csv 
+Simulation: 45, Seed: 6875
+
+data2250.csv 
+Simulation: 45, Seed: 6876
+
+data2250.csv 
+Simulation: 45, Seed: 6877
+
+data2250.csv 
+Simulation: 45, Seed: 6878
+
+data2250.csv 
+Simulation: 45, Seed: 6879
+
+data2250.csv 
+Simulation: 45, Seed: 6880
+
+data2250.csv 
+Simulation: 45, Seed: 6881
+
+data2250.csv 
+Simulation: 45, Seed: 6882
+
+data2250.csv 
+Simulation: 45, Seed: 6883
+
+data2250.csv 
+Simulation: 45, Seed: 6884
+
+data2250.csv 
+Simulation: 45, Seed: 6885
+
+data2250.csv 
+Simulation: 45, Seed: 6886
+
+data2250.csv 
+Simulation: 45, Seed: 6887
+
+data2250.csv 
+Simulation: 45, Seed: 6888
+
+data2250.csv 
+Simulation: 45, Seed: 6889
+
+data2250.csv 
+Simulation: 45, Seed: 6890
+
+data2250.csv 
+Simulation: 45, Seed: 6891
+
+data2250.csv 
+Simulation: 45, Seed: 6892
+
+data2250.csv 
+Simulation: 45, Seed: 6893
+
+data2250.csv 
+Simulation: 45, Seed: 6894
+
+data2250.csv 
+Simulation: 45, Seed: 6895
+
+data2250.csv 
+Simulation: 45, Seed: 6896
+
+data2250.csv 
+Simulation: 45, Seed: 6897
+
+data2250.csv 
+Simulation: 45, Seed: 6898
+
+data2250.csv 
+Simulation: 45, Seed: 6899
+
+data2250.csv 
+Simulation: 45, Seed: 6900
+
+data2250.csv 
+Simulation: 45, Seed: 6901
+
+data2250.csv 
+Simulation: 45, Seed: 6902
+
+data2250.csv 
+Simulation: 45, Seed: 6903
+
+data2250.csv 
+Simulation: 45, Seed: 6904
+
+data2250.csv 
+Simulation: 45, Seed: 6905
+
+data2250.csv 
+Simulation: 46, Seed: 6906
+
+data2250.csv 
+Simulation: 46, Seed: 6907
+
+data2250.csv 
+Simulation: 46, Seed: 6908
+
+data2250.csv 
+Simulation: 46, Seed: 6909
+
+data2250.csv 
+Simulation: 46, Seed: 6910
+
+data2250.csv 
+Simulation: 46, Seed: 6911
+
+data2250.csv 
+Simulation: 46, Seed: 6912
+
+data2250.csv 
+Simulation: 46, Seed: 6913
+
+data2250.csv 
+Simulation: 46, Seed: 6914
+
+data2250.csv 
+Simulation: 46, Seed: 6915
+
+data2250.csv 
+Simulation: 46, Seed: 6916
+
+data2250.csv 
+Simulation: 46, Seed: 6917
+
+data2250.csv 
+Simulation: 46, Seed: 6918
+
+data2250.csv 
+Simulation: 46, Seed: 6919
+
+data2250.csv 
+Simulation: 46, Seed: 6920
+
+data2250.csv 
+Simulation: 46, Seed: 6921
+
+data2250.csv 
+Simulation: 46, Seed: 6922
+
+data2250.csv 
+Simulation: 46, Seed: 6923
+
+data2250.csv 
+Simulation: 46, Seed: 6924
+
+data2250.csv 
+Simulation: 46, Seed: 6925
+
+data2250.csv 
+Simulation: 46, Seed: 6926
+
+data2250.csv 
+Simulation: 46, Seed: 6927
+
+data2250.csv 
+Simulation: 46, Seed: 6928
+
+data2250.csv 
+Simulation: 46, Seed: 6929
+
+data2250.csv 
+Simulation: 46, Seed: 6930
+
+data2250.csv 
+Simulation: 46, Seed: 6931
+
+data2250.csv 
+Simulation: 46, Seed: 6932
+
+data2250.csv 
+Simulation: 46, Seed: 6933
+
+data2250.csv 
+Simulation: 46, Seed: 6934
+
+data2250.csv 
+Simulation: 46, Seed: 6935
+
+data2250.csv 
+Simulation: 46, Seed: 6936
+
+data2250.csv 
+Simulation: 46, Seed: 6937
+
+data2250.csv 
+Simulation: 46, Seed: 6938
+
+data2250.csv 
+Simulation: 46, Seed: 6939
+
+data2250.csv 
+Simulation: 46, Seed: 6940
+
+data2250.csv 
+Simulation: 46, Seed: 6941
+
+data2250.csv 
+Simulation: 46, Seed: 6942
+
+data2250.csv 
+Simulation: 46, Seed: 6943
+
+data2250.csv 
+Simulation: 46, Seed: 6944
+
+data2250.csv 
+Simulation: 46, Seed: 6945
+
+data2250.csv 
+Simulation: 46, Seed: 6946
+
+data2250.csv 
+Simulation: 46, Seed: 6947
+
+data2250.csv 
+Simulation: 46, Seed: 6948
+
+data2250.csv 
+Simulation: 46, Seed: 6949
+
+data2250.csv 
+Simulation: 46, Seed: 6950
+
+data2250.csv 
+Simulation: 47, Seed: 6951
+
+data2250.csv 
+Simulation: 47, Seed: 6952
+
+data2250.csv 
+Simulation: 47, Seed: 6953
+
+data2250.csv 
+Simulation: 47, Seed: 6954
+
+data2250.csv 
+Simulation: 47, Seed: 6955
+
+data2250.csv 
+Simulation: 47, Seed: 6956
+
+data2250.csv 
+Simulation: 47, Seed: 6957
+
+data2250.csv 
+Simulation: 47, Seed: 6958
+
+data2250.csv 
+Simulation: 47, Seed: 6959
+
+data2250.csv 
+Simulation: 47, Seed: 6960
+
+data2250.csv 
+Simulation: 47, Seed: 6961
+
+data2250.csv 
+Simulation: 47, Seed: 6962
+
+data2250.csv 
+Simulation: 47, Seed: 6963
+
+data2250.csv 
+Simulation: 47, Seed: 6964
+
+data2250.csv 
+Simulation: 47, Seed: 6965
+
+data2250.csv 
+Simulation: 47, Seed: 6966
+
+data2250.csv 
+Simulation: 47, Seed: 6967
+
+data2250.csv 
+Simulation: 47, Seed: 6968
+
+data2250.csv 
+Simulation: 47, Seed: 6969
+
+data2250.csv 
+Simulation: 47, Seed: 6970
+
+data2250.csv 
+Simulation: 47, Seed: 6971
+
+data2250.csv 
+Simulation: 47, Seed: 6972
+
+data2250.csv 
+Simulation: 47, Seed: 6973
+
+data2250.csv 
+Simulation: 47, Seed: 6974
+
+data2250.csv 
+Simulation: 47, Seed: 6975
+
+data2250.csv 
+Simulation: 47, Seed: 6976
+
+data2250.csv 
+Simulation: 47, Seed: 6977
+
+data2250.csv 
+Simulation: 47, Seed: 6978
+
+data2250.csv 
+Simulation: 47, Seed: 6979
+
+data2250.csv 
+Simulation: 47, Seed: 6980
+
+data2250.csv 
+Simulation: 47, Seed: 6981
+
+data2250.csv 
+Simulation: 47, Seed: 6982
+
+data2250.csv 
+Simulation: 47, Seed: 6983
+
+data2250.csv 
+Simulation: 47, Seed: 6984
+
+data2250.csv 
+Simulation: 47, Seed: 6985
+
+data2250.csv 
+Simulation: 47, Seed: 6986
+
+data2250.csv 
+Simulation: 47, Seed: 6987
+
+data2250.csv 
+Simulation: 47, Seed: 6988
+
+data2250.csv 
+Simulation: 47, Seed: 6989
+
+data2250.csv 
+Simulation: 47, Seed: 6990
+
+data2250.csv 
+Simulation: 47, Seed: 6991
+
+data2250.csv 
+Simulation: 47, Seed: 6992
+
+data2250.csv 
+Simulation: 47, Seed: 6993
+
+data2250.csv 
+Simulation: 47, Seed: 6994
+
+data2250.csv 
+Simulation: 47, Seed: 6995
+
+data2250.csv 
+Simulation: 48, Seed: 6996
+
+data2250.csv 
+Simulation: 48, Seed: 6997
+
+data2250.csv 
+Simulation: 48, Seed: 6998
+
+data2250.csv 
+Simulation: 48, Seed: 6999
+
+data2250.csv 
+Simulation: 48, Seed: 7000
+
+data2250.csv 
+Simulation: 48, Seed: 7001
+
+data2250.csv 
+Simulation: 48, Seed: 7002
+
+data2250.csv 
+Simulation: 48, Seed: 7003
+
+data2250.csv 
+Simulation: 48, Seed: 7004
+
+data2250.csv 
+Simulation: 48, Seed: 7005
+
+data2250.csv 
+Simulation: 48, Seed: 7006
+
+data2250.csv 
+Simulation: 48, Seed: 7007
+
+data2250.csv 
+Simulation: 48, Seed: 7008
+
+data2250.csv 
+Simulation: 48, Seed: 7009
+
+data2250.csv 
+Simulation: 48, Seed: 7010
+
+data2250.csv 
+Simulation: 48, Seed: 7011
+
+data2250.csv 
+Simulation: 48, Seed: 7012
+
+data2250.csv 
+Simulation: 48, Seed: 7013
+
+data2250.csv 
+Simulation: 48, Seed: 7014
+
+data2250.csv 
+Simulation: 48, Seed: 7015
+
+data2250.csv 
+Simulation: 48, Seed: 7016
+
+data2250.csv 
+Simulation: 48, Seed: 7017
+
+data2250.csv 
+Simulation: 48, Seed: 7018
+
+data2250.csv 
+Simulation: 48, Seed: 7019
+
+data2250.csv 
+Simulation: 48, Seed: 7020
+
+data2250.csv 
+Simulation: 48, Seed: 7021
+
+data2250.csv 
+Simulation: 48, Seed: 7022
+
+data2250.csv 
+Simulation: 48, Seed: 7023
+
+data2250.csv 
+Simulation: 48, Seed: 7024
+
+data2250.csv 
+Simulation: 48, Seed: 7025
+
+data2250.csv 
+Simulation: 48, Seed: 7026
+
+data2250.csv 
+Simulation: 48, Seed: 7027
+
+data2250.csv 
+Simulation: 48, Seed: 7028
+
+data2250.csv 
+Simulation: 48, Seed: 7029
+
+data2250.csv 
+Simulation: 48, Seed: 7030
+
+data2250.csv 
+Simulation: 48, Seed: 7031
+
+data2250.csv 
+Simulation: 48, Seed: 7032
+
+data2250.csv 
+Simulation: 48, Seed: 7033
+
+data2250.csv 
+Simulation: 48, Seed: 7034
+
+data2250.csv 
+Simulation: 48, Seed: 7035
+
+data2250.csv 
+Simulation: 48, Seed: 7036
+
+data2250.csv 
+Simulation: 48, Seed: 7037
+
+data2250.csv 
+Simulation: 48, Seed: 7038
+
+data2250.csv 
+Simulation: 48, Seed: 7039
+
+data2250.csv 
+Simulation: 48, Seed: 7040
+
+data2250.csv 
+Simulation: 49, Seed: 7041
+
+data2250.csv 
+Simulation: 49, Seed: 7042
+
+data2250.csv 
+Simulation: 49, Seed: 7043
+
+data2250.csv 
+Simulation: 49, Seed: 7044
+
+data2250.csv 
+Simulation: 49, Seed: 7045
+
+data2250.csv 
+Simulation: 49, Seed: 7046
+
+data2250.csv 
+Simulation: 49, Seed: 7047
+
+data2250.csv 
+Simulation: 49, Seed: 7048
+
+data2250.csv 
+Simulation: 49, Seed: 7049
+
+data2250.csv 
+Simulation: 49, Seed: 7050
+
+data2250.csv 
+Simulation: 49, Seed: 7051
+
+data2250.csv 
+Simulation: 49, Seed: 7052
+
+data2250.csv 
+Simulation: 49, Seed: 7053
+
+data2250.csv 
+Simulation: 49, Seed: 7054
+
+data2250.csv 
+Simulation: 49, Seed: 7055
+
+data2250.csv 
+Simulation: 49, Seed: 7056
+
+data2250.csv 
+Simulation: 49, Seed: 7057
+
+data2250.csv 
+Simulation: 49, Seed: 7058
+
+data2250.csv 
+Simulation: 49, Seed: 7059
+
+data2250.csv 
+Simulation: 49, Seed: 7060
+
+data2250.csv 
+Simulation: 49, Seed: 7061
+
+data2250.csv 
+Simulation: 49, Seed: 7062
+
+data2250.csv 
+Simulation: 49, Seed: 7063
+
+data2250.csv 
+Simulation: 49, Seed: 7064
+
+data2250.csv 
+Simulation: 49, Seed: 7065
+
+data2250.csv 
+Simulation: 49, Seed: 7066
+
+data2250.csv 
+Simulation: 49, Seed: 7067
+
+data2250.csv 
+Simulation: 49, Seed: 7068
+
+data2250.csv 
+Simulation: 49, Seed: 7069
+
+data2250.csv 
+Simulation: 49, Seed: 7070
+
+data2250.csv 
+Simulation: 49, Seed: 7071
+
+data2250.csv 
+Simulation: 49, Seed: 7072
+
+data2250.csv 
+Simulation: 49, Seed: 7073
+
+data2250.csv 
+Simulation: 49, Seed: 7074
+
+data2250.csv 
+Simulation: 49, Seed: 7075
+
+data2250.csv 
+Simulation: 49, Seed: 7076
+
+data2250.csv 
+Simulation: 49, Seed: 7077
+
+data2250.csv 
+Simulation: 49, Seed: 7078
+
+data2250.csv 
+Simulation: 49, Seed: 7079
+
+data2250.csv 
+Simulation: 49, Seed: 7080
+
+data2250.csv 
+Simulation: 49, Seed: 7081
+
+data2250.csv 
+Simulation: 49, Seed: 7082
+
+data2250.csv 
+Simulation: 49, Seed: 7083
+
+data2250.csv 
+Simulation: 49, Seed: 7084
+
+data2250.csv 
+Simulation: 49, Seed: 7085
+
+data2250.csv 
+Simulation: 50, Seed: 7086
+
+data2250.csv 
+Simulation: 50, Seed: 7087
+
+data2250.csv 
+Simulation: 50, Seed: 7088
+
+data2250.csv 
+Simulation: 50, Seed: 7089
+
+data2250.csv 
+Simulation: 50, Seed: 7090
+
+data2250.csv 
+Simulation: 50, Seed: 7091
+
+data2250.csv 
+Simulation: 50, Seed: 7092
+
+data2250.csv 
+Simulation: 50, Seed: 7093
+
+data2250.csv 
+Simulation: 50, Seed: 7094
+
+data2250.csv 
+Simulation: 50, Seed: 7095
+
+data2250.csv 
+Simulation: 50, Seed: 7096
+
+data2250.csv 
+Simulation: 50, Seed: 7097
+
+data2250.csv 
+Simulation: 50, Seed: 7098
+
+data2250.csv 
+Simulation: 50, Seed: 7099
+
+data2250.csv 
+Simulation: 50, Seed: 7100
+
+data2250.csv 
+Simulation: 50, Seed: 7101
+
+data2250.csv 
+Simulation: 50, Seed: 7102
+
+data2250.csv 
+Simulation: 50, Seed: 7103
+
+data2250.csv 
+Simulation: 50, Seed: 7104
+
+data2250.csv 
+Simulation: 50, Seed: 7105
+
+data2250.csv 
+Simulation: 50, Seed: 7106
+
+data2250.csv 
+Simulation: 50, Seed: 7107
+
+data2250.csv 
+Simulation: 50, Seed: 7108
+
+data2250.csv 
+Simulation: 50, Seed: 7109
+
+data2250.csv 
+Simulation: 50, Seed: 7110
+
+data2250.csv 
+Simulation: 50, Seed: 7111
+
+data2250.csv 
+Simulation: 50, Seed: 7112
+
+data2250.csv 
+Simulation: 50, Seed: 7113
+
+data2250.csv 
+Simulation: 50, Seed: 7114
+
+data2250.csv 
+Simulation: 50, Seed: 7115
+
+data2250.csv 
+Simulation: 50, Seed: 7116
+
+data2250.csv 
+Simulation: 50, Seed: 7117
+
+data2250.csv 
+Simulation: 50, Seed: 7118
+
+data2250.csv 
+Simulation: 50, Seed: 7119
+
+data2250.csv 
+Simulation: 50, Seed: 7120
+
+data2250.csv 
+Simulation: 50, Seed: 7121
+
+data2250.csv 
+Simulation: 50, Seed: 7122
+
+data2250.csv 
+Simulation: 50, Seed: 7123
+
+data2250.csv 
+Simulation: 50, Seed: 7124
+
+data2250.csv 
+Simulation: 50, Seed: 7125
+
+data2250.csv 
+Simulation: 50, Seed: 7126
+
+data2250.csv 
+Simulation: 50, Seed: 7127
+
+data2250.csv 
+Simulation: 50, Seed: 7128
+
+data2250.csv 
+Simulation: 50, Seed: 7129
+
+data2250.csv 
+Simulation: 50, Seed: 7130
+

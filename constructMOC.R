@@ -1,8 +1,4 @@
 # constructMOC.R
-# Load numCores.R
-source("numCores.R")
-
-# Function
 constructMOC <- function(classification,           # Input as data frame or list of data frames.
                          ID = NULL,                # ID column for participants
                          parallel_process = FALSE  # Use parallel processsing. Default is TRUE.
@@ -11,6 +7,9 @@ constructMOC <- function(classification,           # Input as data frame or list
   {
     # Load relevant libraries
     library(parallel)
+  
+    # Load relevant source functions 
+    source("numCores.R")
   
     # Check if input is a matrix when not a list
     if (!is.list(classification) && is.matrix(classification)) {
@@ -44,6 +43,9 @@ constructMOC <- function(classification,           # Input as data frame or list
         }
       }
       
+      # Generate number of cores 
+      n_cores <- numCores()
+      
       # With parallel processing
       if (parallel_process) {
       
@@ -73,7 +75,7 @@ constructMOC <- function(classification,           # Input as data frame or list
         
         } else {
           moc <- mclapply(1:length(classification), function(i) {
-            data[[i]] <- as.data.frame(sapply(classification[[i]], as.factor))
+            classification[[i]] <- as.data.frame(sapply(classification[[i]], as.factor))
             m <- do.call(cbind, lapply(classification[[i]], function(x) model.matrix(~ x - 1)))
             m <- as.matrix(m)
             colnames(m) <- NULL

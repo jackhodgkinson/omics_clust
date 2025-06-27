@@ -17,7 +17,7 @@ source("numCores.R")
 # Simulated data 
 seed <- 4881
 set.seed(seed)
-N_col <- 18
+N_col <- 10
 
 # Create empty results dataframe
 results <- data.frame(Parameter.ID = numeric(),
@@ -35,9 +35,9 @@ parallel_process <- TRUE
   
 # Specify parameters 
 params <- list(
-  cluster1 = list(mean = rnorm(N_col, mean = -5, sd = 0.1), cov = diag(runif(N_col, 0.5, 1.5))),
-  cluster2 = list(mean = rnorm(N_col, mean = 0,  sd = 0.1), cov = diag(runif(N_col, 0.5, 1.5))),
-  cluster3 = list(mean = rnorm(N_col, mean = 5,  sd = 0.1), cov = diag(runif(N_col, 0.5, 1.5)))
+  cluster1 = list(mean = rnorm(N_col, mean = -1.5, sd = 0.1), cov = diag(N_col)),
+  cluster2 = list(mean = rnorm(N_col, mean = 0,    sd = 0.1), cov = diag(N_col)),
+  cluster3 = list(mean = rnorm(N_col, mean = 1.5,  sd = 0.1), cov = diag(N_col))
 )
 
 # Get cores
@@ -126,7 +126,10 @@ sim_matrix <- do.call(cbind, sim_mat)
 pheatmap::pheatmap(sim_matrix)
 
 # Convert to dissimilarity matrix
-dissim_matrix <- 1 - sim_matrix
+dissim_matrix <- (1 - sim_matrix) + abs(matrix(rnorm(N_col*N_col, 0, 0.001), N_col , N_col))
+# add noise for easier separation in MDS subspace.
+
+#dissim_matrix <- dissim_matrix2 
 dist_mat <- as.dist(dissim_matrix)
 
 # Perform MDS on the distance matrix
@@ -149,12 +152,14 @@ ggplot(mds, aes(x = mds[,1], y = mds[,2])) +
        title = "2D Multi-dimensional scaling plot of dissimilarity matrix")
 
 # Fit Gaussian and Gaussian Mixture (2 components) to MDS
-models <- c("EII","VII","EEI","VEI","EVI","VVI","EEE",
-            "VEE","EVE","VVE","EEV","VEV","EVV","VVV")
-for (m in models) {
+#for (m in models) {
   start_time <- Sys.time()
-  test <- mclust::mclustBootstrapLRT(mds, modelName = m, nboot = 1000, level = 0.95, maxG = 1)
-  if (test$p.value < 0.05) g = 2:N_col else g = 1
+  test <- mclust::mclustBootstrapLRT(mds, modelName = "VII", nboot = 1000, level = 0.95, maxG = 1)
+  if (test$p.value < 0.05) {
+    g = 2:N_col 
+  } else {
+    g = 1
+    }
   test2 <- mclust::Mclust(mds, G = g)
   plot(test2, "classification")
   end_time <- Sys.time()
@@ -183,7 +188,7 @@ for (m in models) {
       RunTime = "NA"
     ))
   }
-}
+#}
 
 # OTRIMLE
 otrimle_result <- tryCatch({

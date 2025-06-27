@@ -12,7 +12,6 @@ source("optimal_hclust.R")
 source("constructMOC.R")
 source("clusterofclusters.R")
 source("multicoca.R")
-source("groupARI.R")
 
 # Simulate data 
 # Initialise parameters

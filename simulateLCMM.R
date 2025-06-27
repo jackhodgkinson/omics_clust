@@ -28,6 +28,9 @@ simulateLCMM <- function(subject_data = NULL,                                   
   source("numCores.R")
 
   # ==== PARAMETER VALIDATION ====
+  if(length(cluster_params) != n_clust) {
+    stop("Length of cluster parameters must match n_clust")
+  }
   if (is.null(timepoints)) {
     if (is.null(subject_data)) {
       stop("`timepoints` must be specified if `subject_data` is NULL.")
