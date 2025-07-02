@@ -28,6 +28,10 @@ simulateLCMM <- function(subject_data = NULL,                                   
   library(parallel)
   source("numCores.R")
   
+  # ==== SET SEED FOR REPRODUCIBILITY ==== 
+  RNGkind("L'Ecuyer-CMRG")
+  set.seed(random_seed)
+  
   # ==== PARAMETER VALIDATION ====
   if(length(cluster_params) != n_clust) {
     stop("Length of cluster parameters must match n_clust")
@@ -361,7 +365,6 @@ simulateLCMM <- function(subject_data = NULL,                                   
   }
   
   # ==== CLUSTER LABELS ====
-  set.seed(random_seed)
   indiv_clust <- if (is.null(cluster_labels)) {
     if (!equal_clust) {
       sample(seq_len(n_clust), size = n_indiv, replace = TRUE,
@@ -374,7 +377,7 @@ simulateLCMM <- function(subject_data = NULL,                                   
   indiv_clust_long <- rep(NA_integer_, nrow(data_hlme))
   subject_ids <- data_hlme[[ID]]
   for (i in seq_along(indiv_clust)) {
-    subj_id <- i  # Assuming Subject_ID = 1:n_indiv
+    subj_id <- i  
     rows_subj <- which(subject_ids == subj_id)
     indiv_clust_long[rows_subj] <- indiv_clust[i]
   }
@@ -454,7 +457,7 @@ simulateLCMM <- function(subject_data = NULL,                                   
     }
     
     sim_cluster <- function(k, subject_data_local, params_local, ID_local, TimeVar_local, indiv_clust_local, n_col_local) {
-      
+        
       # Get parameters for the cluster and see how many fixed and random effects components 
       param <- params_local[[paste0("cluster", k)]]
       n_re <- nrow(param$random_cov)
@@ -502,7 +505,7 @@ simulateLCMM <- function(subject_data = NULL,                                   
             fe_contrib <- param$fixed_params[[1]][col_idx] + param$fixed_params[[2]][col_idx]*time_vals + param$fixed_params[[3]][col_idx]*time_vals^2
           }
           
-          resid_noise <- rnorm(1, 0, param$resid_sd[col_idx])
+          resid_noise <- rnorm(1, 0, param$resid_sd)
           
           fe_contrib + re_contrib + resid_noise
           
@@ -521,7 +524,7 @@ simulateLCMM <- function(subject_data = NULL,                                   
       
       if (os_type == "windows") {
         clus <- parallel::makeCluster(n_cores)
-        # Export needed variables and libraries
+        parallel::clusterSetRNGStream(clus, iseed = random_seed)  # sets streams per worker
         parallel::clusterExport(clus, varlist = c("params", "subject_data", "ID", "TimeVar", "indiv_clust", "n_col", "sim_cluster"), envir = environment())
         parallel::clusterEvalQ(clus, library(MASS))
         sim_results <- parallel::parLapply(
@@ -559,9 +562,7 @@ simulateLCMM <- function(subject_data = NULL,                                   
   # ==== RUN SIMULATION ====
   sim_data <- sim_longitud_data(cluster_params, data_hlme, ID, TimeVar,
                                 indiv_clust, n_col, parallel_proc = parallel_process)
-  
-  # DEBUGGED UP TO HERE! 
-  
+
   # ==== GENERATE VIEWS ====
   # Initialise empty group vector
   group <- NULL
@@ -602,8 +603,7 @@ simulateLCMM <- function(subject_data = NULL,                                   
       name <- names(group_list)[i]
       group_df <- group_list[[name]]
       
-      permute_col <- function(data, ID, TimeVar, cluster, random_seed) {
-        set.seed(random_seed)
+      permute_col <- function(data, ID, TimeVar, cluster) {
         clust_data <- as.data.frame(cbind(unique(data[[ID]]), cluster))
         colnames(clust_data)[1] <- ID
         data_clust <- data %>%
@@ -639,11 +639,8 @@ simulateLCMM <- function(subject_data = NULL,                                   
         
         return(data2)
       }
-      
-      
-      
-      seed <- random_seed + i
-      group_permute[[name]] <- permute_col(group_df, ID, TimeVar, indiv_clust, seed)
+    
+      group_permute[[name]] <- permute_col(group_df, ID, TimeVar, indiv_clust)
       names(group_permute[[name]])[names(group_permute[[name]]) == "cluster"] <- paste0(name, "_clusterID")
     }
     
