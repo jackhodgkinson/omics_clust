@@ -152,7 +152,7 @@ ggplot(mds, aes(x = mds[,1], y = mds[,2])) +
        title = "2D Multi-dimensional scaling plot of dissimilarity matrix")
 
 # Fit Gaussian and Gaussian Mixture (2 components) to MDS
-#for (m in models) {
+for (m in models) {
   start_time <- Sys.time()
   test <- mclust::mclustBootstrapLRT(mds, modelName = "VII", nboot = 1000, level = 0.95, maxG = 1)
   if (test$p.value < 0.05) {

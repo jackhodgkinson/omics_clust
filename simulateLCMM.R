@@ -26,7 +26,7 @@ simulateLCMM <- function(subject_data = NULL,                                   
   # ==== PACAKGES ==== 
   library(MASS)
   library(parallel)
-  source("~/thesis/r functions/numCores.R")
+  source("numCores.R")
   
   # ==== PARAMETER VALIDATION ====
   if(length(cluster_params) != n_clust) {
@@ -84,7 +84,7 @@ simulateLCMM <- function(subject_data = NULL,                                   
       if (!Time %in% colnames(subject_data)) {
         stop(paste0("`Time` column '", Time, "' not found in subject_data."))
       }
-      TimeVar <- Time
+      TimeVar <- Time 
     }
     
     # Validate number of unique IDs matches n_indiv
@@ -141,6 +141,8 @@ simulateLCMM <- function(subject_data = NULL,                                   
       Subject_ID = rep(1:n_indiv, each = length(timepoints)),
       Time = rep(timepoints, times = n_indiv)
     )
+    ID <- "Subject_ID"
+    TimeVar <- "Time"
   } else {
     
     
@@ -150,9 +152,8 @@ simulateLCMM <- function(subject_data = NULL,                                   
     }
     
     # Check Time column presence
-    if (!Time %in% colnames(subject_data)) {
-      stop(paste0("`Time` column '", Time, "' not found in subject_data."))
-      TimeVar <- Time
+    if (!TimeVar %in% colnames(subject_data)) {
+      stop(paste0("`Time` column '", TimeVar, "' not found in subject_data."))
     }
     
     data_hlme <- subject_data
@@ -350,10 +351,8 @@ simulateLCMM <- function(subject_data = NULL,                                   
       
       if (length(timepoint_sd) == 1) {
         sd_vals <- rep(timepoint_sd, length(non_missing_idx))
-      } else if (length(timepoint_sd) == length(non_missing_idx)) {
+      } else if (length(timepoint_sd) == length(timepoints)) {
         sd_vals <- timepoint_sd
-      } else {
-        stop("`timepoint_sd` must be a scalar or a vector matching the number of non-missing timepoints.")
       }
       
       data_hlme$Time[non_missing_idx] <- data_hlme$Time[non_missing_idx] +
@@ -385,6 +384,7 @@ simulateLCMM <- function(subject_data = NULL,                                   
   
   n_cores <- numCores()
   sim_longitud_data <- function(params, subject_data, ID, TimeVar, indiv_clust, n_col, parallel_proc = parallel_process) {
+    
     # ==== Parameter validation ====
     if (!is.list(params) || length(params) == 0) {
       stop("params must be a non-empty list of cluster parameter lists.")
@@ -398,13 +398,24 @@ simulateLCMM <- function(subject_data = NULL,                                   
       
       p <- params[[cluster_name]]
       
-      if (!("fixed_intercept" %in% names(p)) || length(p$fixed_intercept) != n_col) {
-        stop(paste(cluster_name, ": fixed_intercept must be vector of length", n_col))
-      }
-      if (!("fixed_slope" %in% names(p)) || length(p$fixed_slope) != n_col) {
-        stop(paste(cluster_name, ": fixed_slope must be vector of length", n_col))
+      # Validate fixed_params (a list of vectors)
+      if (!("fixed_params" %in% names(p)) || !is.list(p$fixed_params)) {
+        stop(paste(cluster_name, ": fixed_params must be a list"))
       }
       
+      n_params <- length(p$fixed_params)
+      if (n_params == 0) {
+        stop(paste(cluster_name, ": fixed_params cannot be empty"))
+      }
+      
+      # Check each fixed_params element length = n_col
+      for (i in seq_len(n_params)) {
+        if (length(p$fixed_params[[i]]) != n_col) {
+          stop(paste(cluster_name, ": fixed_params element", i, "must be vector of length", n_col))
+        }
+      }
+      
+      # Validate resid_sd vector
       if (!("resid_sd" %in% names(p)) || length(p$resid_sd) != n_col) {
         stop(paste(cluster_name, ": resid_sd must be vector of length", n_col))
       }
@@ -412,6 +423,7 @@ simulateLCMM <- function(subject_data = NULL,                                   
         stop(paste(cluster_name, ": resid_sd values must be non-negative"))
       }
       
+      # Validate random_cov matrix
       if (!("random_cov" %in% names(p)) || !is.matrix(p$random_cov)) {
         stop(paste(cluster_name, ": random_cov must be a matrix"))
       }
@@ -423,11 +435,13 @@ simulateLCMM <- function(subject_data = NULL,                                   
       if (!isSymmetric(p$random_cov)) {
         stop(paste(cluster_name, ": random_cov must be symmetric"))
       }
+      
       eigenvalues <- eigen(p$random_cov, symmetric = TRUE)$values
-      if (any(eigenvalues <= 0)) {
-        stop(paste(cluster_name, ": random_cov must be positive definite"))
+      if (any(eigenvalues < 0)) {
+        stop(paste(cluster_name, ": random_cov must be positive semi-definite"))
       }
     }
+    
     
     # Ensure indiv_clust has names matching subject IDs
     if (is.null(names(indiv_clust))) {
@@ -440,36 +454,61 @@ simulateLCMM <- function(subject_data = NULL,                                   
     }
     
     sim_cluster <- function(k, subject_data_local, params_local, ID_local, TimeVar_local, indiv_clust_local, n_col_local) {
+      
+      # Get parameters for the cluster and see how many fixed and random effects components 
       param <- params_local[[paste0("cluster", k)]]
       n_re <- nrow(param$random_cov)
+      n_fe <- length(param$fixed_params)
       
+      # See which subjects are being simulated based on cluster ID 
       cluster_subjects <- names(indiv_clust_local)[indiv_clust_local == k]
       if (length(cluster_subjects) == 0) return(NULL)
       
+      # Initialise simulation matrix 
       sim_mat <- matrix(NA, nrow = nrow(subject_data_local), ncol = n_col_local)
       
+      # Loop over each subject in the cluster
       for (subj_id in cluster_subjects) {
+        
+        # Gather information for each of the subjects in teh cluster
         subject_rows <- which((subject_data_local[[ID_local]] == subj_id) & (!is.na(subject_data_local[[TimeVar_local]])))
         if (length(subject_rows) == 0) next
         
+        # Specify time variables
         time_vals <- subject_data_local[[TimeVar_local]][subject_rows]
         
+        # Drawn random effects vector for this subject
         b_i <- MASS::mvrnorm(1, mu = rep(0, n_re), Sigma = param$random_cov)
         
-        outcome_mat <- sapply(seq_len(n_col_local), function(col_idx) {
-          fixed_int <- param$fixed_intercept[col_idx]
-          fixed_slo <- param$fixed_slope[col_idx]
-          resid_sd <- param$resid_sd[col_idx]
+        # Simulate outcome for each column
+        outcome <- sapply(seq_len(n_col_local), function(col_idx) {
           
-          b_i_col <- c(rnorm(1, 0, sqrt(param$random_cov[1,1])),
-                       if (n_re >= 2) rnorm(1, 0, sqrt(param$random_cov[2,2])) else NULL)
-          re_contrib <- b_i_col[1] + if (n_re >= 2) b_i_col[2] * time_vals else 0
+          re_contrib <- b_i[1]  # intercept
           
-          mu_vec <- fixed_int + fixed_slo * time_vals + re_contrib
-          rnorm(length(time_vals), mean = mu_vec, sd = resid_sd)
+          if (n_re >= 2) {
+            re_contrib <- re_contrib + b_i[2] * time_vals  # slope
+          }
+          if (n_re >= 3) {
+            re_contrib <- re_contrib + b_i[3] * time_vals^2  # quadratic term
+          }
+        
+          if (n_fe >= 1) {
+            fe_contrib <- param$fixed_params[[1]][col_idx]
+          }
+          if (n_fe >= 2) {
+            fe_contrib <- param$fixed_params[[1]][col_idx] + param$fixed_params[[2]][col_idx]*time_vals
+          }
+          if (n_fe >= 3) {
+            fe_contrib <- param$fixed_params[[1]][col_idx] + param$fixed_params[[2]][col_idx]*time_vals + param$fixed_params[[3]][col_idx]*time_vals^2
+          }
+          
+          resid_noise <- rnorm(1, 0, param$resid_sd[col_idx])
+          
+          fe_contrib + re_contrib + resid_noise
+          
         })
         
-        sim_mat[subject_rows, ] <- outcome_mat
+        sim_mat[subject_rows, ] <- outcome
       }
       
       sim_mat
@@ -521,6 +560,8 @@ simulateLCMM <- function(subject_data = NULL,                                   
   sim_data <- sim_longitud_data(cluster_params, data_hlme, ID, TimeVar,
                                 indiv_clust, n_col, parallel_proc = parallel_process)
   
+  # DEBUGGED UP TO HERE! 
+  
   # ==== GENERATE VIEWS ====
   # Initialise empty group vector
   group <- NULL
@@ -548,7 +589,7 @@ simulateLCMM <- function(subject_data = NULL,                                   
     unique_groups <- unique(group)
     for (g in unique_groups[-length(unique_groups)]) {  # Exclude last group
       view <- split_data[, group == g, drop = FALSE]
-      view <- cbind(sim_data[, c(ID, Time)], view)
+      view <- cbind(sim_data[, c(ID, TimeVar), drop = FALSE], view)
       name <- paste0("Group", g)
       group_list[[name]] <- view
     }
@@ -561,10 +602,10 @@ simulateLCMM <- function(subject_data = NULL,                                   
       name <- names(group_list)[i]
       group_df <- group_list[[name]]
       
-      permute_col <- function(data, ID, cluster, random_seed) {
+      permute_col <- function(data, ID, TimeVar, cluster, random_seed) {
         set.seed(random_seed)
-        clust_data <- as.data.frame(cbind(cluster, unique(data[[ID]])))
-        colnames(clust_data)[2] <- ID
+        clust_data <- as.data.frame(cbind(unique(data[[ID]]), cluster))
+        colnames(clust_data)[1] <- ID
         data_clust <- data %>%
           left_join(clust_data, by = ID)
         
@@ -602,7 +643,7 @@ simulateLCMM <- function(subject_data = NULL,                                   
       
       
       seed <- random_seed + i
-      group_permute[[name]] <- permute_col(group_df, ID, indiv_clust, seed)
+      group_permute[[name]] <- permute_col(group_df, ID, TimeVar, indiv_clust, seed)
       names(group_permute[[name]])[names(group_permute[[name]]) == "cluster"] <- paste0(name, "_clusterID")
     }
     
@@ -624,7 +665,7 @@ simulateLCMM <- function(subject_data = NULL,                                   
     named_non_perm <- setNames(list(non_perm_data_clust), name)
     dfs <- c(named_non_perm, group_permute)
     dfs <- lapply(dfs, function(df) {
-      df[order(df[[ID]], df$Time), ]
+      df[order(df[[ID]], df[[TimeVar]]), ]
     })
     
     # Join all dataframes avoiding duplication of ID and Time

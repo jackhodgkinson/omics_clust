@@ -7,49 +7,34 @@ library(tidyverse)
 source("simulateLCMM.R")
 
 # Initialise parameters
-n_groups <- 3
-n_clust <- 3
-N_col <- 33
-n_indiv <- 923
-timepoints <- c(12.7, 20.4, 28.3, 36.2)
-timepoints_sd  <- c(0.842, 0.485, 0.419, 0.394)
+n_groups <- 2
+n_clust <- 2
+n_col <- 10
+n_indiv <- 419
+timepoints <- c(-1.26, -0.345, 0.590, 1.53)
+timepoints_sd  <- c(0.101, 0.0545, 0.0517, 0.0478)
 seed <- 4881
 
 # Cluster specific params 
 params <- list(
   cluster1 = list(
-    fixed_intercept = rnorm(N_col, 8, 1),
-    fixed_slope = runif(N_col, -0.1, 0.1),
-    random_intercept = runif(N_col, 0.1, 0.5),
-    random_slope = runif(N_col, 0.02, 0.15),
-    random_cov = matrix(c(mean(runif(N_col, 0.1, 0.5))^2, 0, 0, mean(runif(N_col, 0.02, 0.15))^2), 
+    fixed_params = list(rnorm(n_col, 4.5, 0.2), rnorm(n_col, -0.1, 0.1), rnorm(n_col, -0.1, 0.1)),
+    random_cov = matrix(c(mean(rnorm(n_col, 0.1, 0.05))^2, 0, 0, mean(rnorm(n_col, 0.02, 0.05))^2), 
                         nrow = 2, byrow = TRUE),
-    resid_sd = runif(N_col, 0.1, 0.3)
+    resid_sd = rnorm(n_col, 0.5, 0.25)
   ),
   cluster2 = list(
-    fixed_intercept = rnorm(N_col, 0, 0.75),
-    fixed_slope = runif(N_col, -0.1, 0.1),
-    random_intercept = runif(N_col, 0.15, 0.6),
-    random_slope = runif(N_col, 0.02, 0.08),
-    random_cov = matrix(c(mean(runif(N_col, 0.15, 0.6))^2, 0, 0, mean(runif(N_col, 0.02, 0.08))^2), 
+    fixed_params = list(rnorm(n_col, -4.5, 0.4), rnorm(n_col, -0.1, 0.1), rnorm(n_col, -0.1, 0.1)),
+    random_cov = matrix(c(mean(rnorm(n_col, 0.15, 0.6))^2, 0, 0, mean(rnorm(n_col, 0.02, 0.08))^2), 
                         nrow = 2, byrow = TRUE),
-    resid_sd = runif(N_col, 0.15, 0.25)
-  ),
-  cluster3 = list(
-    fixed_intercept = rnorm(N_col, -8, 0.6),
-    fixed_slope = runif(N_col, -0.1, 0.1),
-    random_intercept = runif(N_col, 0.05, 0.4),
-    random_slope = runif(N_col, 0.04, 0.09),
-    random_cov = matrix(c(mean(runif(N_col, 0.05, 0.4))^2, 0, 0, mean(runif(N_col, 0.04, 0.09))^2), 
-                        nrow = 2, byrow = TRUE),
-    resid_sd = runif(N_col, 0.21, 0.27)
+    resid_sd = rnorm(n_col, 0.3, 0.1)
   )
 )
 
-# ==== Simulating with Subjects ====
+# ==== Simulating without Subjects ====
 # Generate data
-sim_data <- simulateLCMM(subject_data = NULL, ID = NULL, timepoints, n_clust, n_groups, params, 
-                        n_indiv, n_col = N_col, 39192, timepoint_noise = TRUE, timepoint_sd = 1, cluster_labels = NULL, 
+sim_data <- simulateLCMM(subject_data = NULL, ID = NULL, Time = NULL, timepoints, n_clust, n_groups, params, 
+                        n_indiv, n_col, 4881, timepoint_noise = TRUE, timepoint_sd = timepoints_sd, cluster_labels = NULL, 
                         equal_clust = FALSE)
 
 # Gather the data
@@ -59,7 +44,7 @@ group <- sim_data$`Group ID`
 
 # Plot the data
 subjects <- unique(sim_dat$Subject_ID)
-colnames(sim_dat)[-(1:2)] <- paste0("Protein", seq_len(N_col))
+colnames(sim_dat)[-(1:2)] <- paste0("Protein", seq_len(n_col))
 
 indiv_clust_df <- data.frame(Subject_ID = subjects, cluster = clusters$Group2_clusterID)
 
@@ -81,7 +66,7 @@ ggplot(plot_data2, aes(x = Time, y = Protein1, group = Subject_ID)) +
   theme_minimal()
 
 # Produce heatmap - focused on group 2 and timepoint 1
-sim_dat_filt <- sim_dat %>% filter(abs(Time - 12) <= 4.5)
+sim_dat_filt <- sim_dat %>% filter(abs(Time - -1.26) <= 0.5)
 sim_mat <- as.matrix(sim_dat_filt %>% dplyr::select(-Subject_ID, -Time))
 annotationRow <- as.data.frame(clusters[["Group2_clusterID"]])
 names(annotationRow) <- "Clusters"
@@ -100,6 +85,26 @@ pheatmap::pheatmap(sim_mat[order(clusters[["Group2_clusterID"]]),
                    cluster_rows = F,
                    cluster_cols = F)
 
+# Produce heatmap - focused on group 1 and timepoint 4
+sim_dat_filt <- sim_dat %>% filter(abs(Time - 1.53) <= 0.5)
+sim_mat <- as.matrix(sim_dat_filt %>% dplyr::select(-Subject_ID, -Time))
+annotationRow <- as.data.frame(clusters[["Group1_clusterID"]])
+names(annotationRow) <- "Clusters"
+
+annotationCol <- as.data.frame(group)
+names(annotationCol) <- "ProteinClusters"
+rownames(annotationCol) <- colnames(sim_mat)
+
+rownames(sim_mat) <- rownames(annotationRow)
+annotationRow$Clusters <- as.factor(annotationRow$Clusters)
+annotationCol$ProteinClusters <- as.factor(annotationCol$ProteinClusters)
+pheatmap::pheatmap(sim_mat[order(clusters[["Group1_clusterID"]]),
+                           order(annotationCol$ProteinClusters)], 
+                   annotation_row = annotationRow,
+                   annotation_col = annotationCol[order(annotationCol$ProteinClusters), , drop = FALSE], 
+                   cluster_rows = F,
+                   cluster_cols = F)
+
 # ==== Simulating with Subjects ====
 # Generate subjects
 subj_data <- data.frame(SubjectID = rep(1:100, each = 4), 
@@ -110,8 +115,8 @@ subj_data <- data.frame(SubjectID = rep(1:100, each = 4),
                         GA = rep(c(12, 20, 28, 36), times = 4))
 
 # Generate data
-sim_data2 <- simulateLCMM(subject_data = subj_data, ID = NULL, timepoints = NULL, n_clust, n_groups, params, 
-                         100, n_col = N_col, 4881, cluster_labels = NULL, 
+sim_data2 <- simulateLCMM(subject_data = subj_data, ID = NULL, Time = NULL, timepoints = NULL, n_clust, n_groups, params, 
+                         100, n_col, 4881, cluster_labels = NULL, 
                          equal_clust = FALSE)
 
 # Gather the data
