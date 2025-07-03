@@ -615,65 +615,87 @@ simulateLCMM <- function(subject_data = NULL,                                   
       name <- names(group_list)[i]
       group_df <- group_list[[name]]
       clust_data <- data.frame(ID = unique(group_df[[ID]]),
-                               cluster = sample(indiv_clust))
+                               cluster = indiv_clust)
       colnames(clust_data)[1] <- ID
       group_df <- group_df %>%
         left_join(clust_data, by = ID)
       
+      group_permute <- list()
+      
       permute_group <- function(data, ID, TimeVar, subject_data, cluster) {
         
-        group_cols <- setdiff(names(subject_data), ID)
-        numeric_cols <- names(data[ , grep("^V", names(data))])
-        
-        n_tp <- data %>%
+        tp_count <- data %>%
           group_by(!!sym(ID)) %>%
-          summarise(n_timepoints = n_distinct(!!sym(TimeVar)), .groups = "drop")
+          summarise(n_obs = n(), .groups = "drop")
         
-        participants <- n_tp %>%
-          mutate(cluster = cluster) %>%
-          left_join(subject_data, by = ID)
+        metadata <- data %>%
+          dplyr::select(!!sym(ID), cluster) %>%
+          distinct() %>%
+          left_join(tp_count, by = ID)
         
-        tp_split <- cbind(data, participants$n_timepoints)
-        tp_split <- split(tp_split, tp_split$`participants$n_timepoints`)
+        subject_groups <- split(metadata, metadata$n_obs)
         
-        permuted_list <- lapply(tp_split, function(df_tp) {
+        permuted_subjects_list <- lapply(subject_groups, function(df) {
+          df$PermutedID <- sample(df[[ID]])
+          df
+        })
+        
+        permuted_subjects <- bind_rows(permuted_subjects_list)
+        
+        id_map <- setNames(permuted_subjects$PermutedID, permuted_subjects[[ID]])
+        
+        df_obs <- data %>%
+          left_join(tp_count, by= ID) %>%
+          dplyr::select(all_of(group_cols), cluster, everything())
+        
+        df_list <- split(df_obs, df_obs$n_obs)
+        
+        group_cols <- c(colnames(subject_data), "cluster", "n_obs")
+        data_cols <- setdiff(names(df_obs), group_cols)
+        
+        permute <- lapply(df_list, function(df) {
           
-          participant_info <- df_tp %>%
-            distinct(!!sym(ID), across(all_of(group_cols)), cluster)
+          ids <- unique(df[[ID]])
           
-          # participant_info_shuffled <- participant_info %>%
-          #   slice_sample(n = n())
+          subject_blocks <- split(df[, data_cols], df[[ID]])
           
-          # id_map <- tibble(orig_ID = participant_info[[ID]],
-          #                  new_ID = participant_info_shuffled[[ID]])
-          # 
-          # 
-          # cluster_map <- rticiap %>%
-          #   distinct(!!sym(ID), cluster)
-          # 
-          # new_clusters <- sample(cluster_map$cluster)
-          # 
-          # cluster_reassignment <- tibble(!!ID := shuffled_ids,
-          #                                permuted_cluster = new_clusters)
-          # 
-          # df_perm <- df_tp %>%
-          #   left_join(id_map, by = ID) %>%
-          #   dplyr::select(-!!sym(ID)) %>%
-          #   rename(!!ID := new_ID)
-          # 
-          # df_perm <- df_perm %>%
-          #   left_join(cluster_reassignment, by = ID) %>%
-          #   dplyr::select(all_of(c(ID, group_cols)), everything())
+          permuted_ids <- sample(names(subject_blocks))
+          names(subject_blocks) <- permuted_ids 
+          
+          result_list <- vector("list", length(ids))
+          names(result_list) <- as.character(ids)
+          
+          for (orig_id in ids){
+            
+            perm_id <- id_map[as.character(orig_id)]
+            
+            data_block <- subject_blocks[[as.character(perm_id)]]
+            
+            perm_cluster <- metadata %>%
+              filter(!!sym(ID) == perm_id) %>%
+              pull(cluster)
+            
+            meta_block <- subject_data %>%
+              filter(!!sym(ID) == orig_id) %>%
+              left_join(metadata %>% dplyr::select(!!sym(ID), cluster), by = ID) %>%
+              mutate(cluster = perm_cluster) %>%
+              dplyr::select(all_of(setdiff(group_cols, "n_obs")))
+            
+            meta_block[[ID]] <- orig_id
+            
+            result_list[[as.character(orig_id)]] <- cbind(meta_block, data_block)
+          }
+          
+          result_perm <- do.call(rbind, result_list)
+          result_perm <- result_perm %>%
+            arrange(across(all_of(setdiff(group_cols, c("n_obs",cluster)))))
           
         })
         
-        permute_df <- dplyr::bind_rows(permuted_list)
-        permute_df <- permute_df %>%
-          dplyr::select(-cluster) %>%
-          rename(cluster = permuted_cluster)
-        permute_df <- permute_df %>%
-          arrange(!!sym(ID), !!sym(TimeVar))
-        return(permute_df)
+        combined <- do.call(rbind, permute)
+        combined <- combined %>%
+          arrange(across(all_of(setdiff(group_cols, c("n_obs",cluster)))))
+        
       }
       
       group_permute[[name]] <- permute_group(group_df, ID, TimeVar, subject_data, indiv_clust)
