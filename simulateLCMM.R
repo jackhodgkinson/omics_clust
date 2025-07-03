@@ -26,7 +26,7 @@ simulateLCMM <- function(subject_data = NULL,                                   
   # ==== PACAKGES ==== 
   library(MASS)
   library(parallel)
-  source("numCores.R")
+  source("~/thesis/r functions/numCores.R")
   
   # ==== SET SEED FOR REPRODUCIBILITY ==== 
   RNGkind("L'Ecuyer-CMRG")
@@ -457,7 +457,7 @@ simulateLCMM <- function(subject_data = NULL,                                   
     }
     
     sim_cluster <- function(k, subject_data_local, params_local, ID_local, TimeVar_local, indiv_clust_local, n_col_local) {
-        
+      
       # Get parameters for the cluster and see how many fixed and random effects components 
       param <- params_local[[paste0("cluster", k)]]
       n_re <- nrow(param$random_cov)
@@ -494,7 +494,7 @@ simulateLCMM <- function(subject_data = NULL,                                   
           if (n_re >= 3) {
             re_contrib <- re_contrib + b_i[3] * time_vals^2  # quadratic term
           }
-        
+          
           if (n_fe >= 1) {
             fe_contrib <- param$fixed_params[[1]][col_idx]
           }
@@ -562,7 +562,7 @@ simulateLCMM <- function(subject_data = NULL,                                   
   # ==== RUN SIMULATION ====
   sim_data <- sim_longitud_data(cluster_params, data_hlme, ID, TimeVar,
                                 indiv_clust, n_col, parallel_proc = parallel_process)
-
+  
   # ==== GENERATE VIEWS ====
   # Initialise empty group vector
   group <- NULL
@@ -573,7 +573,7 @@ simulateLCMM <- function(subject_data = NULL,                                   
       group <- group_labels
     } else if (equal_groups == FALSE & !is.null(group)) {
       repeat {
-        p <- runif(n_groups)
+        p <- runif(n_groups) 
         p <- p / sum(p)
         group <- sample(seq_len(n_groups), n_col, replace = TRUE, prob = p)
         if (length(unique(group)) == n_groups) break
@@ -590,118 +590,131 @@ simulateLCMM <- function(subject_data = NULL,                                   
     unique_groups <- unique(group)
     for (g in unique_groups[-length(unique_groups)]) {  # Exclude last group
       view <- split_data[, group == g, drop = FALSE]
-      view <- cbind(sim_data[, c(ID, TimeVar), drop = FALSE], view)
+      view2 <- cbind(data_hlme, view)
       name <- paste0("Group", g)
-      group_list[[name]] <- view
+      group_list[[name]] <- view2
     }
     
-    # Empty list for the permuted groups
+    non_perm_view <- split_data[, group == unique_groups[length(unique_groups)]]
+    non_perm_view2 <- cbind(data_hlme, non_perm_view)
+    clust_non_perm <- data.frame(ID = unique(data_hlme[[ID]]),
+                                 cluster = indiv_clust)
+    colnames(clust_non_perm)[1] <- ID
+    non_perm_view3 <- non_perm_view2 %>%
+      left_join(clust_non_perm, by = ID)
+    name2 <- paste0("Group", unique_groups[length(unique_groups)])
+    non_perm_list <- list()
+    non_perm_list[[name2]] <- non_perm_view3
+    names(non_perm_list[[name2]])[names(non_perm_list[[name2]]) == "cluster"] <- paste0(name2, "_clusterID")
+    
+    # Initialise group permute list
     group_permute <- list()
     
     # Permute the columns per group
     for (i in seq_along(names(group_list))) {
       name <- names(group_list)[i]
       group_df <- group_list[[name]]
+      clust_data <- data.frame(ID = unique(group_df[[ID]]),
+                               cluster = sample(indiv_clust))
+      colnames(clust_data)[1] <- ID
+      group_df <- group_df %>%
+        left_join(clust_data, by = ID)
       
-      permute_col <- function(data, ID, TimeVar, cluster) {
-        clust_data <- as.data.frame(cbind(unique(data[[ID]]), cluster))
-        colnames(clust_data)[1] <- ID
-        data_clust <- data %>%
-          left_join(clust_data, by = ID)
+      permute_group <- function(data, ID, TimeVar, subject_data, cluster) {
         
-        subject_counts <- data_clust %>%
-          group_by(.data[[ID]]) %>%
-          summarise(n_timepoints = n())
+        group_cols <- setdiff(names(subject_data), ID)
+        numeric_cols <- names(data[ , grep("^V", names(data))])
         
-        data_clust_counts <- data_clust %>%
-          left_join(subject_counts, by = ID)
+        n_tp <- data %>%
+          group_by(!!sym(ID)) %>%
+          summarise(n_timepoints = n_distinct(!!sym(TimeVar)), .groups = "drop")
         
-        data_by_timepoint <- split(data_clust_counts, data_clust_counts$n_timepoints)
-        names(data_by_timepoint) <- paste(seq_along(data_by_timepoint),"Timepoint(s)")
-        data_by_timepoint <- lapply(data_by_timepoint, function(df) {df$n_timepoints <- NULL
-        return(df)
-        })
+        participants <- n_tp %>%
+          mutate(cluster = cluster) %>%
+          left_join(subject_data, by = ID)
         
-        data_by_timepoint <- lapply(data_by_timepoint, function(df) {
+        tp_split <- cbind(data, participants$n_timepoints)
+        tp_split <- split(tp_split, tp_split$`participants$n_timepoints`)
+        
+        permuted_list <- lapply(tp_split, function(df_tp) {
           
-          orig_ID <- df[[ID]]
-          orig_time <- df[[TimeVar]]
-          permute_ID <- sample(unique(df[[ID]]))
-          df <- df %>%
-            arrange(match(df[[ID]], permute_ID), TimeVar) %>%
-            mutate(!!ID := orig_ID,
-                   !!TimeVar := orig_time)
-          df
+          participant_info <- df_tp %>%
+            distinct(!!sym(ID), across(all_of(group_cols)), cluster)
+          
+          # participant_info_shuffled <- participant_info %>%
+          #   slice_sample(n = n())
+          
+          # id_map <- tibble(orig_ID = participant_info[[ID]],
+          #                  new_ID = participant_info_shuffled[[ID]])
+          # 
+          # 
+          # cluster_map <- rticiap %>%
+          #   distinct(!!sym(ID), cluster)
+          # 
+          # new_clusters <- sample(cluster_map$cluster)
+          # 
+          # cluster_reassignment <- tibble(!!ID := shuffled_ids,
+          #                                permuted_cluster = new_clusters)
+          # 
+          # df_perm <- df_tp %>%
+          #   left_join(id_map, by = ID) %>%
+          #   dplyr::select(-!!sym(ID)) %>%
+          #   rename(!!ID := new_ID)
+          # 
+          # df_perm <- df_perm %>%
+          #   left_join(cluster_reassignment, by = ID) %>%
+          #   dplyr::select(all_of(c(ID, group_cols)), everything())
+          
         })
         
-        data2 <- bind_rows(data_by_timepoint) %>%
-          arrange(ID, TimeVar)
-        
-        return(data2)
+        permute_df <- dplyr::bind_rows(permuted_list)
+        permute_df <- permute_df %>%
+          dplyr::select(-cluster) %>%
+          rename(cluster = permuted_cluster)
+        permute_df <- permute_df %>%
+          arrange(!!sym(ID), !!sym(TimeVar))
+        return(permute_df)
       }
-    
-      group_permute[[name]] <- permute_col(group_df, ID, TimeVar, indiv_clust)
+      
+      group_permute[[name]] <- permute_group(group_df, ID, TimeVar, subject_data, indiv_clust)
       names(group_permute[[name]])[names(group_permute[[name]]) == "cluster"] <- paste0(name, "_clusterID")
     }
     
-    # Obtain data for non-permuted group
-    non_permute_group_num <- unique_groups[length(unique_groups)]
-    non_permute_view <- split_data[, group == non_permute_group_num, drop = FALSE]
-    non_permute_group <- cbind(sim_data[, c(ID, TimeVar)], non_permute_view)
-    non_perm_clust_data <- data.frame(
-      cluster = indiv_clust
-    )
-    non_perm_clust_data[[ID]] <- unique(sim_data[[ID]])
-    non_perm_data_clust <- non_permute_group %>%
-      left_join(non_perm_clust_data, by = ID)
-    names(non_perm_data_clust)[names(non_perm_data_clust) == "cluster"] <- 
-      paste0("Group",non_permute_group_num, "_clusterID")
+    # Join together group_permute outputs 
+    shared_cols <- Reduce(intersect, lapply(group_permute, colnames))
+    permute <- group_permute[[1]] %>% dplyr::select(all_of(shared_cols))
+    for (i in 1:length(group_permute)) {
+      new_cols <- setdiff(colnames(group_permute[[i]]), shared_cols)
+      permute <- bind_cols(permute, group_permute[[i]] %>% dplyr::select(all_of(new_cols)))
+    }
     
-    # List of dataframes
-    name <- paste0("Group", non_permute_group_num)
-    named_non_perm <- setNames(list(non_perm_data_clust), name)
-    dfs <- c(named_non_perm, group_permute)
-    dfs <- lapply(dfs, function(df) {
-      df[order(df[[ID]], df[[TimeVar]]), ]
-    })
-    
-    # Join all dataframes avoiding duplication of ID and Time
-    final_df <- reduce(dfs, full_join, by = intersect(names(dfs[[1]]), names(dfs[[2]])))
+    # Join non-permuted data to permuted data 
+    permute_cols <- colnames(permute)
+    non_perm_cols_list <- lapply(non_perm_list, colnames)
+    common_non_perm_cols <- Reduce(intersect, non_perm_cols_list)
+    shared_cols2 <- intersect(permute_cols, common_non_perm_cols)
+    non_permute <- non_perm_list[[1]] %>% dplyr::select(all_of(shared_cols2))
+    new_cols2 <- setdiff(colnames(non_perm_list[[1]]), shared_cols2)
+    final_df <- bind_cols(permute, non_perm_list[[1]] %>% dplyr::select(all_of(new_cols2)))
     
     # Generate group_clusterID dataset
     group_clusterID <- final_df %>%
-      dplyr::select(all_of(ID), contains("cluster")) %>%
-      dplyr::select(all_of(
-        names(.)[order(as.numeric(stringr::str_extract(names(.), "(?<=Group)\\d+")))]
-      )) %>%
+      dplyr::select(ID, contains("cluster")) %>%
       dplyr::distinct() %>%
       dplyr::select(-all_of(ID))
     
     # Tidy final dataset by ordering and then removing cluster labels
     final_df <- final_df %>%
-      dplyr::select(-contains("cluster")) %>%
+      dplyr::select(-contains("cluster"), -contains("n_timepoints")) %>%
       dplyr::select(
         all_of(ID), TimeVar,  # fixed ID columns
         all_of(
           names(.) %>%
-            setdiff(c(ID, "Time")) %>%
+            setdiff(c(ID, TimeVar)) %>%
             .[order(as.numeric(str_extract(., "\\d+")))]  # sort numerically
         )
       )
     
-    # Add back any columns from subject_data that were lost
-    if (!is.null(subject_data)) {
-      extra_cols <- setdiff(colnames(subject_data), colnames(final_df))
-      if (length(extra_cols) > 0) {
-        final_df <- dplyr::left_join(final_df, subject_data[, c(ID, TimeVar, extra_cols)], by = c(ID, TimeVar))
-        final_df <- final_df %>%
-          dplyr::select(
-            which(!grepl("\\d", colnames(final_df))),
-            which(grepl("\\d", colnames(final_df)))
-          )
-        
-      }
-    }
     
     return(list(
       "Simulated Data" = final_df,
