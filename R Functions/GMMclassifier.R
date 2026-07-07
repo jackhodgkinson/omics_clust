@@ -1,13 +1,10 @@
 # GMMclassifier.R
-# Load numCores.R function
-source("numCores.R")
-
 # Function
 GMMclassifier <- function(data,
                           parallel_process = TRUE) {
   
   # Detect number of cores
-  n_cores <- numCores()
+  n_cores <- parallel::detectCores()-2
   
   # Cluster each column if single dataset
   if (class(data) != "list") {
@@ -27,11 +24,11 @@ GMMclassifier <- function(data,
       if (.Platform$OS.type == "windows"){
       
         # Set up parallel cluster
-        cl <- makeCluster(n_cores)
-        clusterExport(cl, ls(envir = environment()), envir = environment())
+        cl <- parallel::makeCluster(n_cores)
+        parallel::clusterExport(cl, ls(envir = environment()), envir = environment())
         
         # Fit Mclust to each protein to obtain classification
-        classification_results <- parLapply(cl, data2, function(i) {
+        classification_results <- parallel::parLapply(cl, data2, function(i) {
           colnames(i) <- NULL
           return(Mclust(i)$classification)
         })
@@ -40,12 +37,12 @@ GMMclassifier <- function(data,
         classification <- as.data.frame(do.call(cbind, classification_results))
       
         # End parallel cluster
-        stopCluster(cl) 
+        parallel::stopCluster(cl) 
         
     } else {
         
         # Fit Mclust to each protein to obtain classification
-        classification_results <- mclapply(data2, function(i) {
+        classification_results <- parallel::mclapply(data2, function(i) {
           colnames(i) <- NULL
           return(mclust::Mclust(i)$classification)
         },
@@ -83,8 +80,8 @@ GMMclassifier <- function(data,
       if (.Platform$OS.type == "windows"){
       
         # Set parallel cluster
-        clo <- makeCluster(n_cores)
-        clusterExport(clo, ls(envir = environment()), envir = environment())
+        clo <- parallel::makeCluster(n_cores)
+        parallel::clusterExport(clo, ls(envir = environment()), envir = environment())
         
         # Loop over each element in data list
         data_process <- function(data) {
@@ -98,19 +95,19 @@ GMMclassifier <- function(data,
           
           # Set up inner parallel cluster for columns
           set.seed(seed)
-          cli <- makeCluster(n_cores)
-          clusterExport(cli, ls(envir = environment()), envir = environment())
-          clusterEvalQ(cli, library(mclust))
+          cli <- parallel::makeCluster(n_cores)
+          parallel::clusterExport(cli, ls(envir = environment()), envir = environment())
+          parallel::clusterEvalQ(cli, library(mclust))
           
           # Fit Mclust to each protein to obtain classification 
-          class_res_in <- parLapply(cli, data2, function(i) {
+          class_res_in <- parallel::parLapply(cli, data2, function(i) {
             colnames(i) <- NULL
             mclust <- Mclust(i)
             return(mclust$classification)  # Store clustered data column-wise
           })
           
           # Stop the cluster
-          stopCluster(cli)
+          parallel::stopCluster(cli)
           
           # Combine classification results into a data frame
           classification <- as.data.frame(do.call(cbind, class_res_in))
@@ -118,12 +115,12 @@ GMMclassifier <- function(data,
         }
         
         # Parallelize the processing of each dataset in the 'data' list (outer parallelization)
-        classification_results <- parLapply(clo, data, function(dataset) {
+        classification_results <- parallel::parLapply(clo, data, function(dataset) {
           process_dataset(dataset)  # Process each dataset in parallel
         })
         
         # Stop the outer cluster after the work is done
-        stopCluster(clo)
+        parallel::stopCluster(clo)
         
         # Name the results for each dataset
         names(classification_results) <- paste0("Dataset", 1:length(data))
@@ -144,7 +141,7 @@ GMMclassifier <- function(data,
         set.seed(seed)
         
         # Fit Mclust to each protein to obtain classification 
-        class_res_in <- mclapply(data2, function(i) {
+        class_res_in <- parallel::mclapply(data2, function(i) {
           colnames(i) <- NULL
           mclust <- Mclust(i)
           return(mclust$classification)},
@@ -156,7 +153,7 @@ GMMclassifier <- function(data,
       }
       
       # Parallelize the processing of each dataset in the 'data' list (outer parallelization)
-      classification_results <- mclapply(data, function(dataset) {process_dataset(dataset)},
+      classification_results <- parallel::mclapply(data, function(dataset) {process_dataset(dataset)},
                                          mc.cores = n_cores)
       
       # Name the results for each dataset
