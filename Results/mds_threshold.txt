@@ -1,4 +1,38 @@
+
+> sink(log_con, type = "message")
+
+> # Code
+> mds_results <- read.csv("~/Documents/MPhil Population Health Sciences/Dissertation/omics_clust/Results/mds_results_combined.csv")
+
+> # Reorder data 
+> mds_results <- mds_results %>%
++   arrange(Parameter.ID, Columns, True.Number.of.Groups,RunTime)
+
+> # Remove duplicates
+> mds_results <- mds_results[!duplicated(mds_results), ]
+
+> # Count NA
+> sum(is.na(mds_results$RunTime))
+[1] 495
+
+> print(paste("Percentage of Failed Runs:", round(sum(is.na(mds_results$RunTime))/nrow(mds_results)*100, 2),"%"))
 [1] "Percentage of Failed Runs: 42.53 %"
+
+> # Remove NA 
+> mds_results <- na.omit(mds_results)
+
+> # Mclust success 
+> mclust_success <- mds_results %>%
++   filter(str_detect(Method, "m
+> close(log_con) 
+tate(Method =  str_replace(Method, "mclustB ..." ... [TRUNCATED] 
+
+> mclust_summary <- mclust_success %>%
++   mutate(Match = True.Number.of.Groups == Determined.Number.of.Groups) %>%
++   group_by(Method) %>%
++   summa .... [TRUNCATED] 
+
+> print(mclust_summary)
 # A tibble: 14 × 4
    Method Total Matches MatchRate
    <chr>  <int>   <int>     <dbl>
@@ -16,7 +50,23 @@
 12 VVE       27       0      0   
 13 VVI       25       2      8   
 14 VVV       29       1      3.45
-`summarise()` has grouped output by 'Parameter.Label'. You can override using the `.groups` argument.
+
+> # OTRIMLE Success 
+> otrimle_success <- mds_results %>%
++   filter(str_detect(Method, "OTRIMLE")) %>%
++   select(-Method)
+
+> otrimle_summary <- otrimle_success %>%
++   mutate(Match = True.Number.of.Groups == Determined.Number.of.Groups) %>%
++   group_by(Parameter.Label, Co .... [TRUNCATED] 
+`summarise()` has regrouped the output.
+ℹ Summaries were computed grouped by Parameter.Label and Columns.
+ℹ Output is grouped by Parameter.Label.
+ℹ Use `summarise(.groups = "drop_last")` to silence this message.
+ℹ Use `summarise(.by = c(Parameter.Label, Columns))` for per-operation grouping
+  (`?dplyr::dplyr_by`) instead.
+
+> print(otrimle_summary)
 # A tibble: 20 × 5
 # Groups:   Parameter.Label [5]
    Parameter.Label                             Columns Total Matches MatchRate
@@ -41,3 +91,7 @@
 18 Well-separated means, identity cov              100     4       1      25  
 19 Well-separated means, identity cov              500     4       2      50  
 20 Well-separated means, identity cov             1000     4       1      25  
+
+> sink(type = "message")
+
+> sink()

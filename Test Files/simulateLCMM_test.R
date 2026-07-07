@@ -1,5 +1,4 @@
 # simulateLCMM-test.R
-
 # Load libraries
 library(tidyverse)
 
@@ -34,7 +33,7 @@ params <- list(
 # ==== Simulating without Subjects ====
 # Generate data
 sim_data <- simulateLCMM(subject_data = NULL, ID = NULL, Time = NULL, timepoints, n_clust, n_groups, params, 
-                        n_indiv, n_col, 4881, timepoint_noise = TRUE, timepoint_sd = timepoints_sd, cluster_labels = NULL, 
+                        n_indiv, n_col, 4881, timepoint_sd = timepoints_sd, cluster_labels = NULL, 
                         equal_clust = FALSE)
 
 # Gather the data

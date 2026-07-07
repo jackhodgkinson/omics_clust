@@ -1,5 +1,4 @@
 ## simulateGMM.R
-# MASS needed
 simulateGMM <- function(n_clust,                                                 # Number of clusters
                         n_groups,                                                # Number of groups of data, 1 by default
                         cluster_params,                                          # List of distribution parameters per cluster
@@ -10,13 +9,8 @@ simulateGMM <- function(n_clust,                                                
                         group_labels = NULL,                                     # Input group labels, NA by default
                         equal_clust = TRUE,                                      # If generating cluster labels, ensure each cluster has approx equal individuals
                         equal_groups = TRUE,                                     # If n_groups > 1, ensure each group contains approx equal number of cols
-                        parallel_process = FALSE                                          # Use parallel processsing. Default is TRUE
+                        parallel_process = FALSE                                 # Use parallel processing. Default is TRUE
                         ){
-  
-  # Load relevant packages
-  library(MASS)
-  library(parallel)
-  source("numCores.R")
   
   # Ensure numeric inputs
   n_clust <- as.numeric(n_clust)
@@ -29,7 +23,7 @@ simulateGMM <- function(n_clust,                                                
   set.seed(random_seed)
   
   # Set number of cores
-  n_cores <- numCores()
+  n_cores <- parallel::detectCores()-2
   
   # Validate parameters
   if (length(cluster_params) != n_clust) {
@@ -72,21 +66,21 @@ simulateGMM <- function(n_clust,                                                
     param <- cluster_params[[paste0("cluster",k)]]
     mu <- param$mean
     Sigma <- if (!is.null(param$cov)) param$cov else diag(param$sd^2)
-    data <- mvrnorm(n = length(idx), mu = mu, Sigma = Sigma)
+    data <- MASS::mvrnorm(n = length(idx), mu = mu, Sigma = Sigma)
     list(index = idx, data = data)
   }
   
   # Generate data 
   if (parallel_process && n_indiv > 1000 && n_clust > 3) {
     if (.Platform$OS.type != "windows"){
-      cluster_results <- mclapply(seq_len(n_clust), sim_clust_data, 
+      cluster_results <- parallel::mclapply(seq_len(n_clust), sim_clust_data, 
                                   mc.cores = n_cores)
     }
     else {
-      cl <- makeCluster(n_cores)
-      clusterExport(cl, ls(envir = environment()), envir = environment())
-      cluster_results <- parLapply(cl, seq_len(n_clust), sim_clust_data)
-      stopCluster(cl)
+      cl <- parallel::makeCluster(n_cores)
+      parallel::clusterExport(cl, ls(envir = environment()), envir = environment())
+      parallel::cluster_results <- parLapply(cl, seq_len(n_clust), sim_clust_data)
+      parallel::stopCluster(cl)
     }
   } else { 
       cluster_results <- lapply(seq_len(n_clust), sim_clust_data)
@@ -120,7 +114,7 @@ simulateGMM <- function(n_clust,                                                
       # Run in parallel if needed
       if (parallel_process && n_indiv > 1000 && n_groups > 2) {
         if (.Platform$OS.type != "windows") {
-          permuted_list <- mclapply(seq_len(n_groups - 1), function(g) {
+          permuted_list <- parallel::mclapply(seq_len(n_groups - 1), function(g) {
             permute_cols <- which(group == g)
             order <- sample(n_indiv)
             sim_data[, permute_cols] <<- sim_data[order, permute_cols]
@@ -129,9 +123,9 @@ simulateGMM <- function(n_clust,                                                
             out
           }, mc.cores = n_cores)
         } else {
-          cl <- makeCluster(n_cores)
-          clusterExport(cl,  ls(envir = environment()), envir = environment())
-          permuted_list <- parLapply(cl, seq_len(n_groups - 1), function(g) {
+          cl <- parallel::makeCluster(n_cores)
+          parallel::clusterExport(cl,  ls(envir = environment()), envir = environment())
+          permuted_list <- parallel::parLapply(cl, seq_len(n_groups - 1), function(g) {
             permute_cols <- which(group == g)
             order <- sample(n_indiv)
             sim_data[, permute_cols] <<- sim_data[order, permute_cols]
@@ -139,7 +133,7 @@ simulateGMM <- function(n_clust,                                                
             names(out) <- paste0("group", g, "_clusterid")
             out
           })
-          stopCluster(cl)
+          parallel::stopCluster(cl)
         }
     } else {
       # Serial column permutations for groups

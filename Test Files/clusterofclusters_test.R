@@ -1,9 +1,9 @@
 ## COCA test area
-# ==== Setup ====
+# ==== Setup ====
 # Load functions
-source("simulateGMM.R")
-source("constructMOC.R")
-source("clusterofclusters.R")
+source("~/Documents/MPhil Population Health Sciences/Dissertation/omics_clust/R Functions/simulateGMM.R")
+source("~/Documents/MPhil Population Health Sciences/Dissertation/omics_clust/R Functions/constructMOC.R")
+source("~/Documents/MPhil Population Health Sciences/Dissertation/omics_clust/R Functions/clusterofclusters.R")
 
 # Load packages 
 library(mclust)
@@ -34,7 +34,7 @@ names(classification) <- NULL
 moc1 <- constructMOC(classification)
 
 # COCA 
-outputCOCA <- clusterofclusters(moc1, N = 10000, max.iter = 10000, parallel_process = TRUE)
+outputCOCA <- clusterofclusters(moc1, N = 100, max.iter = 100, parallel_process = TRUE)
 
 # ARI Assessment
 clusters1a <- outputCOCA$clusterLabels
@@ -66,7 +66,7 @@ names(classification2) <- NULL
 moc2 <- constructMOC(classification2)
 
 # COCA 
-outputCOCA2 <- clusterofclusters(moc2, N = 1000, max.iter = 1000, parallel_process = TRUE)
+outputCOCA2 <- clusterofclusters(moc2, N = 100, max.iter = 100, parallel_process = TRUE)
 
 # COCA manual
 N <- dim(moc2)[1]
@@ -74,7 +74,7 @@ maxK <- 10
 cm <- array(NA, c(N, N, maxK - 1))
 clLabels <- array(NA, c(maxK - 1, N))
 for (i in 2:maxK){
-  cm[, , i-1] <- coca::consensusCluster(data = moc2, K = i, B = 10000)
+  cm[, , i-1] <- coca::consensusCluster(data = moc2, K = i, B = 100)
   distances <- as.dist(1 - cm[, ,i-1])
   hclust <- hclust(distances, method = "complete")
   clLabels[i-1,] <- cutree(hclust, i)
@@ -116,7 +116,7 @@ names(classification3) <- NULL
 moc3 <- constructMOC(classification3)
 
 # COCA 
-outputCOCA3 <- clusterofclusters(moc3, N = 10000, max.iter = 10000, parallel_process = TRUE)
+outputCOCA3 <- clusterofclusters(moc3, N = 100, max.iter = 100, parallel_process = TRUE)
 
 # ARI Assessment
 clusters3a <- outputCOCA3$clusterLabels

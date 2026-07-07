@@ -5,7 +5,7 @@ library(mclust)
 library(pheatmap)
 
 ### Load function 
-source("simulateGMM.R")
+source("~/Documents/MPhil Population Health Sciences/Dissertation/omics_clust/R Functions/simulateGMM.R")
 
 # Switch graphics off
 graphics.off()

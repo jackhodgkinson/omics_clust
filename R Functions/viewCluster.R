@@ -1,7 +1,13 @@
 # viewCluster.R 
 viewCluster <- function(classification,
-                        parallel = TRUE 
+                        linkage = "ward.D2",
+                        index = "silhouette",
+                        parallel_process = TRUE,
+                        seed = 1
                         ) {
+  
+  # Calculate number of cores available
+  n_cores <- parallel::detectCores()-2
   
   # Construct empty similarity matrix 
   sim_matrix <- matrix(0, nrow = ncol(classification), ncol = ncol(classification),
@@ -13,21 +19,21 @@ viewCluster <- function(classification,
   if (parallel_process) {
     
     if (.Platform$OS.type == "windows") {
-      cl2 <- makeCluster(n_cores)
-      clusterExport(cl2, ls(envir = environment()), envir = environment())
+      cl2 <- parallel::makeCluster(n_cores)
+      parallel::clusterExport(cl2, ls(envir = environment()), envir = environment())
       
       # Parallelised computation of similarity matrix
-      sim_mat <- parLapply(cl2, 1:ncol(classification), function(i) {
+      sim_mat <- parallel::parLapply(cl2, 1:ncol(classification), function(i) {
         sapply(1:ncol(classification), function(j) {
           adjustedRandIndex(classification[[i]], classification[[j]])
         })
       })
       
       # Stop the parallel cluster after the work is done
-      stopCluster(cl2)
+      parallel::stopCluster(cl2)
       
     } else {
-      sim_mat <- mclapply(1:ncol(classification), function(i) {
+      sim_mat <- parallel::mclapply(1:ncol(classification), function(i) {
         sapply(1:ncol(classification), function(j) {
           adjustedRandIndex(classification[[i]], classification[[j]])
         })
@@ -56,9 +62,9 @@ viewCluster <- function(classification,
   mds <- mds_result$points
   mds_plot_data <- as.data.frame(mds)
   
-  mds_plot <- ggplot(mds_plot_data, aes(x = V1, y = V2)) + 
-    geom_point() + 
-    labs(
+  mds_plot <- ggplot2::ggplot(mds_plot_data, ggplot2::aes(x = V1, y = V2)) + 
+    ggplot2::geom_point() + 
+    ggplot2::labs(
       x = "MDS1",
       y = "MDS2",
       title = "Multi-dimensional Scaling (MDS) plot of the ARI dissimilarity matrix"
@@ -67,25 +73,34 @@ viewCluster <- function(classification,
   ## Hierarchcial Clustering on views
   # Hierarchical Clustering 
   hclust <- hclust(dist_mat, method = linkage)
-  opt <- NbClust(diss = dist_mat, distance = NULL, method = linkage, 
+  opt <- NbClust::NbClust(data = NULL, diss = dist_mat, distance = NULL, method = linkage, 
                  min.nc = 2, max.nc = floor(sqrt(ncol(classification))), index = index)
   
   ## Split data into different views from dendrogram
   # Choose optimal number of clusters
-  if linkage %in% c("mcclain","cindex") {
+  if (linkage %in% c("mcclain","cindex")) {
     if (is.vector(opt$Best.nc)) {
       opt_ng <- as.numeric(opt$Best.nc[1])
+      partition <- opt$Best.partition
     } else {
       opt_ng <- as.numeric(names(which.min(table(opt$Best.nc[1, ]))))
+      partition <- opt$Best.partition
+    }
+  } else {
+    if (is.vector(opt$Best.nc)) {
+      opt_ng <- as.numeric(opt$Best.nc[1])
+      partition <- opt$Best.partition
+    } else {
+      opt_ng <- as.numeric(names(which.max(table(opt$Best.nc[1, ]))))
+      partition <- opt$Best.partition
     }
   }
   
-  else {
-    if (is.vector(opt$Best.nc)) {
-      opt_ng <- as.numeric(opt$Best.nc[1])
-    } else {
-      opt_ng <- as.numeric(names(which.max(table(opt$Best.nc[1, ]))))
-    }
-  }
+  cat("Optimal number of views: ", opt_ng)
+  views <- lapply(1:opt_ng, function(v) {
+    classification[, partition == v, drop = FALSE]
+  })
+  
+  return(views)
   
 }

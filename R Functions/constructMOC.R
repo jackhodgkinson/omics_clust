@@ -8,9 +8,6 @@ constructMOC <- function(classification,           # Input as data frame or list
     # Load relevant libraries
     library(parallel)
   
-    # Load relevant source functions 
-    source("numCores.R")
-  
     # Check if input is a matrix when not a list
     if (!is.list(classification) && is.matrix(classification)) {
       stop("Input 'classification' must be a data frame, not a matrix. Use as.data.frame() before passing it.")
@@ -44,7 +41,7 @@ constructMOC <- function(classification,           # Input as data frame or list
       }
       
       # Generate number of cores 
-      n_cores <- numCores()
+      n_cores <- parallel::detectCores()-2
       
       # With parallel processing
       if (parallel_process) {
@@ -56,13 +53,13 @@ constructMOC <- function(classification,           # Input as data frame or list
         if (.Platform$OS.type == "windows"){
         
           # Create a cluster with available cores
-          cl <- makeCluster(n_cores)
+          cl <- parallel::makeCluster(n_cores)
           
           # Export necessary variables and functions
-          clusterExport(cl, c("data"))
+          parallel::clusterExport(cl, c("data"))
           
           # Create MOC for each group of data
-          moc <- parLapply(cl, 1:length(classification), function(i) {
+          moc <- parallel::parLapply(cl, 1:length(classification), function(i) {
             classification[[i]] <- as.data.frame(sapply(classification[[i]], as.factor))
             m <- do.call(cbind, lapply(classification[[i]], function(x) model.matrix(~ x - 1)))
             m <- as.matrix(m)
@@ -71,10 +68,10 @@ constructMOC <- function(classification,           # Input as data frame or list
           })
           
           # End the cluster
-          stopCluster(cl)
+          parallel::stopCluster(cl)
         
         } else {
-          moc <- mclapply(1:length(classification), function(i) {
+          moc <- parallel::mclapply(1:length(classification), function(i) {
             classification[[i]] <- as.data.frame(sapply(classification[[i]], as.factor))
             m <- do.call(cbind, lapply(classification[[i]], function(x) model.matrix(~ x - 1)))
             m <- as.matrix(m)
