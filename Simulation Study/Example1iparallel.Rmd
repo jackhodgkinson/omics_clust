@@ -1,0 +1,720 @@
+---
+title: "Simulation Study: Effect of Dimensionality on Clustering Structure Recovery"
+author: "Your Name"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, 
+                      fig.width = 12, fig.height = 8, cache = TRUE)
+```
+
+# Executive Summary
+
+This simulation study investigates how the **number of dimensions (p)** affects the ability to recover clustering structures. We maintain a design where half the dimensions contain one clustering structure and half contain another, but vary the total number of dimensions from 6 to 100.
+
+**Key Questions**:
+1. How does the curse of dimensionality affect structure recovery?
+2. Does the critical separation threshold depend on the number of dimensions?
+3. What is the relationship between sample size, dimensionality, and recovery performance?
+4. Does higher dimensionality help (more evidence) or hurt (more noise)?
+
+# 1. Methods
+
+## 1.1 Experimental Design
+
+We maintain the two-structure design, but vary the number of dimensions:
+- **Structure 1**: 3 clusters in the first p/2 dimensions
+- **Structure 2**: 4 clusters in the last p/2 dimensions
+
+### Experimental Grid:
+- **Dimensions (p)**: 6, 10, 20, 30, 50, 100
+- **Sample sizes**: 100, 250, 500, 1000, 2000
+- **Separation factors**: 3.0σ, 2.0σ, 1.5σ, 1.0σ
+- **Replications**: Easily adjustable (see parameter section)
+
+# 2. Implementation
+
+```{r libraries}
+# Load required libraries
+library(mvtnorm)      # For multivariate normal data generation
+library(cluster)      # For PAM clustering
+library(mclust)       # For model-based clustering
+library(ggplot2)      # For visualisation
+library(dplyr)        # For data manipulation
+library(tidyr)        # For data reshaping
+library(viridis)      # For colour scales
+library(gridExtra)    # For arranging plots
+library(scales)       # For formatting
+library(foreach)      # For parallel loops
+library(doParallel)   # For parallel backend
+library(iterators)    # For iteration support
+
+# Set seed for reproducibility
+set.seed(42)
+```
+
+```{r key_parameter}
+# Set to 1 for test run, 25 for full simulation
+n_replications <- 25
+
+# Set parallel processing preferences
+use_parallel <- TRUE  # Set to FALSE to run sequentially
+n_cores_to_use <- detectCores() - 2  # Leave 2 cores free for system
+
+cat("SIMULATION CONFIGURATION:\n")
+cat("Number of replications per condition:", n_replications, "\n")
+cat("Parallel processing:", ifelse(use_parallel, "ENABLED", "DISABLED"), "\n")
+if (use_parallel) {
+  cat("Cores available:", detectCores(), "\n")
+  cat("Cores to use:", n_cores_to_use, "\n")
+}
+
+if (n_replications == 1) {
+  cat("\n*** Running in TEST MODE with 1 replication per condition ***\n")
+  cat("*** Change n_replications to 25 for full simulation ***\n")
+} else {
+  cat("\nRunning full simulation with", n_replications, "replications per condition\n")
+}
+```
+
+```{r cache_setup}
+# Set up caching directory with replication info
+cache_base_dir <- "dimensionality_simulation_cache"
+cache_dir <- file.path(cache_base_dir, paste0("nrep_", n_replications))
+
+if (!dir.exists(cache_base_dir)) {
+  dir.create(cache_base_dir)
+}
+if (!dir.exists(cache_dir)) {
+  dir.create(cache_dir)
+  cat("\nCreated cache directory:", cache_dir, "\n")
+} else {
+  cat("\nUsing existing cache directory:", cache_dir, "\n")
+}
+
+# Function to generate cache filename for a specific condition
+get_cache_filename <- function(p_dims, n_samples, separation_factor) {
+  file.path(cache_dir, sprintf("results_p%d_n%d_sep%.1f.rds", p_dims, n_samples, separation_factor))
+}
+
+# Function to check if results exist for a specific condition
+check_condition_cache <- function(p_dims, n_samples, separation_factor) {
+  cache_file <- get_cache_filename(p_dims, n_samples, separation_factor)
+  if (file.exists(cache_file)) {
+    # Return TRUE only if file size > 0 bytes (not empty)
+    return(file.info(cache_file)$size > 0)
+  } else {
+    return(FALSE)
+  }
+}
+
+# Function to save results for a specific condition
+save_condition_results <- function(results, p_dims, n_samples, separation_factor) {
+  cache_file <- get_cache_filename(p_dims, n_samples, separation_factor)
+  saveRDS(results, cache_file)
+  cat("Saved results to cache:", cache_file, "\n")
+  return(results)
+}
+
+# Function to load results for a specific condition
+load_condition_results <- function(p_dims, n_samples, separation_factor) {
+  cache_file <- get_cache_filename(p_dims, n_samples, separation_factor)
+  if (file.exists(cache_file)) {
+    return(readRDS(cache_file))
+  } else {
+    return(NULL)
+  }
+}
+```
+
+```{r parameters}
+# Experimental grid
+p_values <- c(10, 20, 30, 50, 100)
+sample_sizes <- c(100, 250, 500, 1000, 2000)
+separation_factors <- c(3.0, 2.0, 1.0)
+
+# Fixed parameters
+cluster_variance <- 0.3
+
+# Calculate total number of conditions
+n_conditions <- length(p_values) * length(sample_sizes) * length(separation_factors)
+total_runs <- n_conditions * n_replications
+
+# Create condition grid
+condition_grid <- expand.grid(
+  p_dims = p_values,
+  n_samples = sample_sizes,
+  separation_factor = separation_factors,
+  stringsAsFactors = FALSE
+)
+
+# Check which conditions are already cached
+condition_grid$is_cached <- mapply(check_condition_cache,
+                                   condition_grid$p_dims,
+                                   condition_grid$n_samples,
+                                   condition_grid$separation_factor)
+
+n_cached <- sum(condition_grid$is_cached)
+n_to_compute <- sum(!condition_grid$is_cached)
+
+cat("\nExperimental design:\n")
+cat("- Dimensions (p):", paste(p_values, collapse=", "), "\n")
+cat("- Sample sizes:", paste(sample_sizes, collapse=", "), "\n")
+cat("- Separation factors:", paste(separation_factors, collapse=", "), "σ\n")
+cat("- Total conditions:", n_conditions, "\n")
+cat("- Conditions already cached:", n_cached, "\n")
+cat("- Conditions to compute:", n_to_compute, "\n")
+cat("- Replications per condition:", n_replications, "\n")
+cat("- Total simulation runs needed:", n_to_compute * n_replications, "\n")
+```
+
+```{r data_generation_functions}
+# Modified functions to handle variable p
+
+generate_cluster_means_p <- function(separation_factor, cluster_variance, p_dims) {
+  base_separation <- separation_factor * sqrt(cluster_variance)
+  
+  # Structure 1 (first half of dimensions) - 3 clusters
+  p_half <- as.integer(p_dims / 2)
+  p1 <- p_half
+  means_1 <- list(
+    cluster_1 = runif(p1, -1.5, -1) * base_separation,
+    cluster_2 = runif(p1, 1, 1.5) * base_separation,
+    cluster_3 = rep(0, p1)
+  )
+  
+  # Structure 2 (second half of dimensions) - 4 clusters 
+  p_half <- as.integer(p_dims / 2)
+  p2 <- p_half
+  base_vec <- runif(p2, -0.4, 0.4) * base_separation
+  means_2 <- list(
+    cluster_1 = runif(p2, -1.4, -1) * base_separation,
+    cluster_2 = runif(p2, 1, 1.4) * base_separation,
+    cluster_3 = base_vec,
+    cluster_4 = -base_vec
+  )
+
+  
+  return(list(means_1 = means_1, means_2 = means_2))
+}
+
+generate_dataset_p <- function(separation_factor, cluster_variance, n_samples, p_dims) {
+  
+  # Fixed cluster proportions
+  cluster_props_1 <- c(0.4, 0.35, 0.25)
+  cluster_props_2 <- c(0.3, 0.25, 0.25, 0.2)
+  
+  # Generate cluster assignments
+  cluster_1_assignments <- sample(1:3, n_samples, replace = TRUE, prob = cluster_props_1)
+  cluster_2_assignments <- sample(1:4, n_samples, replace = TRUE, prob = cluster_props_2)
+  
+  # Get cluster means
+  means_list <- generate_cluster_means_p(separation_factor, cluster_variance, p_dims)
+  means_1 <- means_list$means_1
+  means_2 <- means_list$means_2
+  
+  # Define covariance matrices
+  p_half <- as.integer(p_dims / 2)
+  p1 <- p_half
+  p2 <- p_half
+  
+  covs_1 <- list(
+    cluster_1 = diag(rep(cluster_variance, p1)),
+    cluster_2 = diag(rep(cluster_variance, p1)),
+    cluster_3 = diag(rep(cluster_variance, p1))
+  )
+  
+  covs_2 <- list(
+    cluster_1 = diag(rep(cluster_variance, p2)),
+    cluster_2 = diag(rep(cluster_variance, p2)),
+    cluster_3 = diag(rep(cluster_variance, p2)),
+    cluster_4 = diag(rep(cluster_variance, p2))
+  )
+  
+  # Initialise data matrix
+  data_matrix <- matrix(NA, nrow = n_samples, ncol = p_dims)
+  
+  # Generate data for Structure 1
+  for (i in 1:n_samples) {
+    cluster_id <- cluster_1_assignments[i]
+    data_matrix[i, 1:p1] <- rmvnorm(1, mean = means_1[[cluster_id]], 
+                                    sigma = covs_1[[cluster_id]])
+  }
+  
+  # Generate data for Structure 2
+  for (i in 1:n_samples) {
+    cluster_id <- cluster_2_assignments[i]
+    data_matrix[i, (p1+1):p_dims] <- rmvnorm(1, mean = means_2[[cluster_id]], 
+                                             sigma = covs_2[[cluster_id]])
+  }
+  
+  return(data_matrix)
+}
+```
+
+```{r analysis_functions}
+# Modified analysis function to handle variable p
+
+analyze_dataset_p <- function(data_matrix, p_dims) {
+  n_dims <- ncol(data_matrix)
+  
+  # Step 1: MCLUST on each dimension
+  mclust_results <- list()
+  cluster_assignments <- matrix(NA, nrow = nrow(data_matrix), ncol = n_dims)
+  
+  for(i in 1:n_dims) {
+    mclust_fit <- Mclust(data_matrix[, i], G = 1:9, verbose = FALSE)
+    mclust_results[[i]] <- mclust_fit
+    cluster_assignments[, i] <- mclust_fit$classification
+  }
+  
+  # Step 2: Compute ARI matrix
+  ari_matrix <- matrix(NA, nrow = n_dims, ncol = n_dims)
+  for(i in 1:n_dims) {
+    for(j in 1:n_dims) {
+      if(i == j) {
+        ari_matrix[i, j] <- 1.0
+      } else {
+        ari_matrix[i, j] <- adjustedRandIndex(cluster_assignments[, i], 
+                                              cluster_assignments[, j])
+      }
+    }
+  }
+  
+  # Step 3: Hierarchical clustering
+  dissim_matrix <- 1 - ari_matrix
+  diag(dissim_matrix) <- 0
+  dissim_dist <- as.dist(dissim_matrix)
+  
+  p_half <- as.integer(p_dims / 2)
+  max_k <- min(6, floor(p_half))
+
+  index <- "silhouette"
+  
+  k_values <- 2:6
+  index_values <- numeric(length(k_values))
+  hclust_results <- vector("list", length(k_values))
+  
+  for (i in seq_along(k_values)) {
+    k <- k_values[i]
+    hclust_fit <- hclust(dissim_dist, method = "single")
+    clusters <- cutree(hclust_fit, k = k)
+    hclust_results[[i]] <- clusters
+    sil <- silhouette(clusters, dist = dissim_dist)
+    index_values[i] <- mean(sil[, "sil_width"])
+    cat(sprintf("\nk = %d: Average silhouette width = %.3f", k, index_values[i]))
+  }
+  
+  optimal_idx <- which.max(index_values)
+  optimal_k <- k_values[optimal_idx]
+  optimal_hclust <- hclust_results[[optimal_idx]]
+  
+  cat("\nOptimal number of dimension groups (silhouette):", optimal_k, "\n")
+  
+  # Step 4: Calculate recovery ARI
+  # True structure labels
+  p_half <- as.integer(as.integer(p_dims / 2))
+  true_structure_labels <- c(rep(1, p_half), rep(2, p_half))
+  recovery_ari <- adjustedRandIndex(optimal_hclust, true_structure_labels)
+  
+  # Additional metrics
+  detected_clusters <- sapply(mclust_results, function(x) x$G)
+  
+  return(list(
+    recovery_ari = recovery_ari,
+    optimal_k = optimal_k,
+    index = index,
+    index_value = as.numeric(index_values[optimal_idx]),
+    detected_clusters = detected_clusters,
+    hierarchical_clustering = optimal_hclust,
+    dims1_correct = sum(detected_clusters[1:(p_half)] == 3),
+    dims2_correct = sum(detected_clusters[(p_half+1):p_dims] == 4)
+  ))
+}
+```
+
+```{r worker_function}
+# Function to run a single condition (for parallel processing)
+run_single_condition <- function(condition_row, n_replications, cluster_variance, cache_dir) {
+  
+  p_dims <- condition_row$p_dims
+  n_samples <- condition_row$n_samples
+  sep_factor <- condition_row$separation_factor
+  
+  # Check cache first
+  if (check_condition_cache(p_dims, n_samples, sep_factor)) {
+    return(NULL)  # Signal that this was cached
+  }
+  
+  # Run the simulation for this condition
+  condition_results <- data.frame()
+  
+  for (rep in 1:n_replications) {
+    # Generate and analyse dataset
+    data_matrix <- generate_dataset_p(sep_factor, cluster_variance, n_samples, p_dims)
+    analysis_result <- analyze_dataset_p(data_matrix, p_dims)
+    
+    p_half <- as.integer(p_dims / 2)
+    
+    # Store results
+    condition_results <- rbind(condition_results, data.frame(
+      p_dims = p_dims,
+      n_samples = n_samples,
+      separation_factor = sep_factor,
+      replication = rep,
+      recovery_ari = analysis_result$recovery_ari,
+      optimal_k = analysis_result$optimal_k,
+      index = analysis_result$index,
+      index_value = analysis_result$index_value,
+      dims1_correct = analysis_result$dims1_correct,
+      dims2_correct = analysis_result$dims2_correct,
+      prop_dims1_correct = analysis_result$dims1_correct / (p_half),
+      prop_dims2_correct = analysis_result$dims2_correct / (p_half)
+    ))
+  }
+  
+  cat(sprintf("Completed condition: p=%d, n=%d, sep=%.1f, reps=%d\n", p_dims, n_samples, sep_factor, n_replications))
+
+  
+  # Cache results
+  save_condition_results(condition_results, p_dims, n_samples, sep_factor)
+  
+  
+  return(condition_results)
+}
+```
+
+# 3. Run Simulation
+
+```{r run_simulation, cache=FALSE}
+# Main simulation execution with parallel support and caching
+library(foreach)
+library(doParallel)
+
+start_time <- Sys.time()
+cat("\nStarting dimensionality × sample size × separation simulation...\n")
+cat("Time started:", format(start_time, "%Y-%m-%d %H:%M:%S"), "\n\n")
+
+# Identify conditions not yet computed/cached
+conditions_to_compute <- condition_grid[!condition_grid$is_cached, ]
+
+all_results_file <- file.path(cache_dir, "all_results_d.rds")
+
+if (nrow(conditions_to_compute) == 0) {
+  cat("All conditions are already cached! Loading combined results...\n")
+  all_results <- readRDS(all_results_file)
+  
+} else if (!use_parallel || nrow(conditions_to_compute) < 4) {
+  # Sequential processing if parallel is disabled or few conditions to compute
+  cat("Running simulation in SEQUENTIAL mode...\n")
+  all_results <- data.frame()
+  
+  for (i in seq_len(nrow(conditions_to_compute))) {
+    cond <- conditions_to_compute[i, ]
+    cat(sprintf("Computing condition %d/%d: p=%d, n=%d, sep=%.1fσ\n",
+                i, nrow(conditions_to_compute), cond$p_dims, cond$n_samples, cond$separation_factor))
+    
+    res <- run_single_condition(cond, n_replications, cluster_variance, cache_dir)
+    if (!is.null(res)) {
+      all_results <- rbind(all_results, res)
+    }
+  }
+  
+} else {
+  # Parallel processing setup
+  cat(sprintf("Running simulation in PARALLEL mode with %d cores...\n", n_cores_to_use))
+  cat(sprintf("Processing %d conditions in parallel\n", nrow(conditions_to_compute)))
+  
+  cl <- parallel::makeCluster(n_cores_to_use)
+  doParallel::registerDoParallel(cl)
+  
+  # Export necessary objects and functions to workers
+  parallel_exports <- c(
+    "generate_cluster_means_p", "generate_dataset_p", "analyze_dataset_p",
+    "check_condition_cache", "save_condition_results", "get_cache_filename",
+    "cluster_variance", "n_replications", "cache_dir", "run_single_condition"
+  )
+  parallel::clusterExport(cl, parallel_exports, envir = environment())
+  
+  # Load required packages on workers
+  parallel::clusterEvalQ(cl, {
+    library(mvtnorm)
+    library(cluster)
+    library(mclust)
+    library(dplyr)
+    library(parallel)
+    library(foreach)
+    library(doParallel)
+  })
+  
+  # Progress bar setup
+  pb <- txtProgressBar(min = 0, max = nrow(conditions_to_compute), style = 3)
+  progress <- function(n) setTxtProgressBar(pb, n)
+  opts <- list(progress = progress)
+  
+  # Run simulation in parallel
+  parallel_results <- foreach(
+  i = seq_len(nrow(conditions_to_compute)),
+  .combine = 'rbind',
+  .options.snow = opts,
+  .errorhandling = 'pass'  # keep this for now
+) %do% {
+
+  cond <- conditions_to_compute[i, ]
+  tryCatch({
+    cat(sprintf(">>> Starting: p = %d, n = %d, sep = %.1f\n",
+                cond$p_dims, cond$n_samples, cond$separation_factor))
+    
+    result <- run_single_condition(cond, n_replications, cluster_variance, cache_dir)
+
+    cat(sprintf("✓ Finished: p = %d, n = %d, sep = %.1f\n",
+                cond$p_dims, cond$n_samples, cond$separation_factor))
+    
+    result
+  }, error = function(e) {
+    cat(sprintf("⚠️ Error in p = %d, n = %d, sep = %.1f: %s\n",
+                cond$p_dims, cond$n_samples, cond$separation_factor, e$message))
+    NULL
+  })
+}
+
+  
+  close(pb)
+  parallel::stopCluster(cl)
+  
+  # Combine results, filtering out NULLs from cached conditions
+  if (!is.null(parallel_results)) {
+    all_results <- do.call(rbind, parallel_results[!sapply(parallel_results, is.null)])
+  } else {
+    all_results <- data.frame()
+  }
+}
+
+# Load all cached results including new ones to ensure completeness
+cat("\nLoading all results from cache...\n")
+complete_results <- data.frame()
+
+for (i in seq_len(nrow(condition_grid))) {
+  cond <- condition_grid[i, ]
+  cached_data <- load_condition_results(cond$p_dims, cond$n_samples, cond$separation_factor)
+  
+  if (!is.null(cached_data)) {
+    complete_results <- rbind(complete_results, cached_data)
+  }
+}
+
+all_results <- complete_results
+
+end_time <- Sys.time()
+total_duration <- difftime(end_time, start_time, units = "mins")
+
+# Save combined results
+saveRDS(all_results, all_results_file)
+cat("Combined results saved to:", all_results_file, "\n")
+
+cat("\n=== SIMULATION COMPLETE ===\n")
+cat("Total time for this run:", sprintf("%.1f minutes\n", total_duration))
+cat("Total results in dataset:", nrow(all_results), "\n")
+cat("Results cached in:", cache_dir, "\n")
+
+# Final cache status report
+final_cached <- sum(condition_grid$is_cached)
+cat(sprintf("Cache status: %d/%d conditions cached\n", final_cached, nrow(condition_grid)))
+```
+
+# 4. Results
+
+## 4.1 Summary Statistics
+
+```{r join-results, echo=FALSE, message=FALSE, warning=FALSE}
+# Set the path to your folder
+folder_path <- "dimensionality_simulation_cache/nrep_25"
+
+# List all RDS files in the folder
+file_list <- list.files(path = folder_path, pattern = "^results.*\\.rds$", full.names = TRUE)
+
+# Read all RDS files and store them in a list
+data_list <- lapply(file_list, readRDS)
+
+# Assuming each RDS contains a data frame, combine them
+all_results_d <- do.call(rbind, data_list)
+
+# Save the combined results into the same folder
+file_path <- file.path(folder_path, "all_results_d.rds")
+saveRDS(all_results_d, file_path)
+```
+
+```{r summary_stats}
+library(tidyverse)
+# convert to all results
+all_results <- all_results_d
+
+# Calculate summary statistics
+summary_stats <- all_results %>%
+  group_by(p_dims, n_samples, separation_factor) %>%
+  summarise(
+    mean_ari = mean(recovery_ari),
+    sd_ari = sd(recovery_ari),
+    prop_perfect = mean(recovery_ari == 1),
+    prop_failed = mean(recovery_ari < 0.5),
+    mean_silhouette = mean(index_value),
+    mean_optimal_k = mean(optimal_k),
+    prop_k_correct = mean(optimal_k == 2),
+    .groups = 'drop'
+  ) %>%
+  mutate(n_p_ratio = n_samples / p_dims)
+
+# Create summary table for each p value
+for (p in p_values) {
+  cat(sprintf("\n### Recovery Performance for p = %d dimensions\n", p))
+  
+  p_summary <- summary_stats %>%
+    filter(p_dims == p) %>%
+    select(n_samples, separation_factor, mean_ari) %>%
+    pivot_wider(names_from = separation_factor, 
+                values_from = mean_ari,
+                names_prefix = "Sep_")
+  print(p_summary)
+  print(knitr::kable(p_summary, digits = 3,
+                     caption = sprintf("Mean Recovery ARI for p = %d", p),
+                     col.names = c("Sample Size", "3.0σ", "2.0σ", "1.0σ")))
+}
+```
+
+## 4.2 Main Visualisation: The p × n × separation Landscape
+
+```{r main_heatmap, fig.height=10}
+# Create faceted heatmap
+p_heatmap <- ggplot(summary_stats, aes(x = factor(n_samples), 
+                                       y = factor(separation_factor), 
+                                       fill = mean_ari)) +
+  geom_tile(colour = "white", size = 0.5) +
+  geom_text(aes(label = sprintf("%.3f", mean_ari)), 
+            colour = ifelse(summary_stats$mean_ari > 0.5, "white", "black"),
+            size = 3, family = "Times") +
+  facet_wrap(~ p_dims, ncol = 2, 
+             labeller = labeller(p_dims = function(x) paste("p =", x, "dimensions"))) +
+  scale_fill_viridis(name = "Mean\nRecovery\nARI", 
+                     limits = c(0, 1),
+                     option = "plasma") +
+  scale_y_discrete(labels = function(x) paste0(x, "σ")) +
+  scale_x_discrete(labels = function(x) format(as.numeric(x), big.mark = ",")) +
+  labs(title = "Structure Recovery Performance: The Curse of Dimensionality",
+       subtitle = paste("Based on", n_replications, 
+                       ifelse(n_replications == 1, "replication", "replications"), 
+                       "per condition"),
+       x = "Sample Size",
+       y = "Separation Factor") +
+  theme_minimal() +
+ theme(plot.title = element_text(hjust = 0.5, size = 12, face = "bold", family = "Times"),
+        plot.subtitle = element_text(hjust = 0.5, size = 10, family = "Times"),
+        axis.text = element_text(size = 10, family = "Times"),
+        axis.title = element_text(size = 12, face = "bold", family = "Times"),
+        legend.title = element_text(size = 12, face = "bold", family = "Times"),
+        legend.text = element_text(size = 10, family = "Times"),
+       strip.text = element_text(size = 12, family = "Times", face = "bold"),
+        panel.grid = element_blank(),
+        panel.spacing = unit(1, "lines"))
+
+ggsave(paste0("1i_meanARIheatmap.pdf"), plot = p_heatmap, device = cairo_pdf, width = 6, height = 8, units = "in")
+```
+
+## 4.3 The n/p Ratio Analysis
+
+```{r np_ratio_plot}
+# Analyse performance by n/p ratio
+p_ratio <- ggplot(summary_stats, aes(x = n_p_ratio, y = mean_ari, 
+                                     colour = factor(separation_factor))) +
+  geom_line(aes(group = interaction(p_dims, separation_factor)), 
+            alpha = 0.3, size = 0.8) +
+  geom_point(aes(shape = factor(p_dims)), size = 3, alpha = 0.8) +
+  scale_x_log10(breaks = c(1, 2, 5, 10, 20, 50, 100, 200),
+                labels = c(1, 2, 5, 10, 20, 50, 100, 200)) +
+  scale_colour_viridis_d(name = "Separation", 
+                        labels = function(x) paste0(x, "σ"),
+                        option = "plasma") +
+  scale_shape_manual(name = "Dimensions\n(p)", 
+                     values = c(16, 17, 15, 18, 8, 4)) +
+  geom_vline(xintercept = c(10, 20), linetype = "dashed", alpha = 0.5) +
+  geom_hline(yintercept = 0.8, linetype = "dashed", alpha = 0.5, colour = "darkgreen") +
+  labs(title = "Performance by Sample Size to Dimension Ratio (n/p)",
+       subtitle = "Vertical lines at n/p = 10 and 20; horizontal line at ARI = 0.8",
+       x = "n/p Ratio (log scale)",
+       y = "Mean Recovery ARI") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+        plot.subtitle = element_text(hjust = 0.5, size = 12),
+        legend.position = "right")
+
+print(p_ratio)
+```
+
+## 4.4 Dimensionality Effect at Fixed Sample Sizes
+
+```{r dim_effect_plot}
+# Show how performance changes with p at fixed n
+p_effect <- ggplot(summary_stats, aes(x = p_dims, y = mean_ari, 
+                                      colour = factor(n_samples))) +
+  geom_line(size = 1.2) +
+  geom_point(size = 3) +
+  facet_wrap(~ separation_factor, ncol = 2,
+             labeller = labeller(separation_factor = function(x) paste(x, "σ separation"))) +
+  scale_x_log10(breaks = p_values, labels = p_values) +
+  scale_colour_viridis_d(name = "Sample\nSize", option = "viridis") +
+  geom_hline(yintercept = 0.8, linetype = "dashed", alpha = 0.5) +
+  labs(title = "Effect of Dimensionality on Recovery Performance",
+       subtitle = "How does increasing p affect recovery at fixed sample sizes?",
+       x = "Number of Dimensions (p) - log scale",
+       y = "Mean Recovery ARI") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+        plot.subtitle = element_text(hjust = 0.5, size = 12),
+        strip.text = element_text(size = 11, face = "bold"),
+        legend.position = "right")
+
+print(p_effect)
+```
+
+## 4.5 Critical Thresholds Table
+
+```{r threshold_table}
+# Find critical n/p ratios for reliable recovery
+threshold_analysis <- summary_stats %>%
+  filter(mean_ari >= 0.8) %>%
+  group_by(p_dims) %>%
+  summarise(
+    min_n_for_sep3 = min(n_samples[separation_factor == 3.0], na.rm = TRUE),
+    min_n_for_sep2 = min(n_samples[separation_factor == 2.0], na.rm = TRUE),
+    min_n_for_sep1 = min(n_samples[separation_factor == 1.0], na.rm = TRUE),
+    .groups = 'drop'
+  ) %>%
+  mutate(
+    ratio_sep3 = ifelse(is.finite(min_n_for_sep3), min_n_for_sep3 / p_dims, NA),
+    ratio_sep2 = ifelse(is.finite(min_n_for_sep2), min_n_for_sep2 / p_dims, NA),
+    ratio_sep1 = ifelse(is.finite(min_n_for_sep1), min_n_for_sep1 / p_dims, NA)
+  )
+
+# Format for display
+threshold_display <- threshold_analysis %>%
+  mutate(across(starts_with("min_n"), ~ifelse(is.finite(.), as.character(.), ">2000"))) %>%
+  select(p_dims, min_n_for_sep3, min_n_for_sep2, min_n_for_sep1)
+
+knitr::kable(threshold_display,
+             caption = "Minimum Sample Size Required for 80% Recovery Success",
+             col.names = c("Dimensions (p)", "At 3.0σ", "At 2.0σ", "At 1.σ"))
+
+# n/p ratio table
+ratio_display <- threshold_analysis %>%
+  select(p_dims, ratio_sep3, ratio_sep2, ratio_sep1) %>%
+  mutate(across(starts_with("ratio"), ~ifelse(is.na(.), "-", sprintf("%.3f", .))))
+
+knitr::kable(ratio_display,
+             caption = "Minimum n/p Ratio Required for 80% Recovery Success",
+             col.names = c("Dimensions (p)", "At 3.0σ", "At 2.0σ", "At 1.0σ"))
+```

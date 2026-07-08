@@ -1,0 +1,12 @@
+mvtnorm
+cluster
+mclust
+ggplot2
+dplyr
+tidyr
+viridisLite
+viridis
+gridExtra
+foreach
+iterators
+doParallel

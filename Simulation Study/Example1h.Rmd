@@ -1,0 +1,689 @@
+---
+title: "Simulation Study: Effect of Sample Size on Clustering Structure Recovery"
+author: "Your Name"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, 
+                      fig.width = 12, fig.height = 8, cache = TRUE)
+```
+
+# Executive Summary
+
+This simulation study extends our previous analysis by investigating how **sample size** affects the ability to recover known clustering structures. We examine the interaction between sample size and cluster separation to understand when additional data can compensate for poor cluster separation.
+
+**Key Questions**:
+1. Does the critical separation threshold depend on sample size?
+2. Can larger samples recover structure at lower separations?
+3. Is there a minimum sample size below which even well-separated structures cannot be recovered?
+4. How does sample size affect the bimodal behaviour observed at intermediate separations?
+
+# 1. Methods
+
+## 1.1 Experimental Design
+
+We use the same two-structure data generation process as before:
+- **Structure 1**: 3 clusters in dimensions 1-5
+- **Structure 2**: 4 clusters in dimensions 6-10
+
+### Experimental Grid:
+- **Sample sizes**: 50, 100, 250, 500, 1000, 2000
+- **Separation factors**: 3.0σ, 2.0σ, 1.5σ, 1.0σ
+- **Replications**: 25 per condition
+- **Total simulations**: 600 (6 × 4 × 25)
+
+This focused grid captures the critical transition region whilst remaining computationally tractable.
+
+# 2. Implementation
+
+```{r libraries}
+# Load required libraries
+library(mvtnorm)      # For multivariate normal data generation
+library(cluster)      # For PAM clustering
+library(mclust)       # For model-based clustering
+library(ggplot2)      # For visualisation
+library(dplyr)        # For data manipulation
+library(tidyr)        # For data reshaping
+library(viridis)      # For colour scales
+library(gridExtra)    # For arranging plots
+
+# Set seed for reproducibility
+set.seed(42)
+```
+
+```{r cache_setup}
+# Set up caching directory
+cache_dir <- "sample_size_simulation_cache"
+if (!dir.exists(cache_dir)) {
+  dir.create(cache_dir)
+  cat("Created cache directory:", cache_dir, "\n")
+}
+
+# Function to generate cache filename for a specific condition
+get_cache_filename <- function(n_samples, separation_factor) {
+  filename <- sprintf("results_n%d_sep%.1f.rds", n_samples, separation_factor)
+  file.path(cache_dir, filename)
+}
+
+# Function to check if results exist for a specific condition
+check_condition_cache <- function(n_samples, separation_factor) {
+  cache_file <- get_cache_filename(n_samples, separation_factor)
+  file.exists(cache_file)
+}
+
+# Function to save results for a specific condition
+save_condition_results <- function(results, n_samples, separation_factor) {
+  cache_file <- get_cache_filename(n_samples, separation_factor)
+  saveRDS(results, cache_file)
+}
+
+# Function to load results for a specific condition
+load_condition_results <- function(n_samples, separation_factor) {
+  cache_file <- get_cache_filename(n_samples, separation_factor)
+  if (file.exists(cache_file)) {
+    return(readRDS(cache_file))
+  } else {
+    return(NULL)
+  }
+}
+```
+
+```{r parameters}
+# Experimental grid
+sample_sizes <- c(50, 100, 250, 500, 1000, 2000)
+separation_factors <- c(3.0, 2.0, 1.0)
+n_replications <- 25
+
+# Clustering structures (same as before)
+n_clusters_1 <- 3
+n_clusters_2 <- 4
+cluster_props_1 <- c(0.4, 0.35, 0.25)
+cluster_props_2 <- c(0.3, 0.25, 0.25, 0.2)
+cluster_variance <- 0.3
+
+# Ground truth structure labels for dimensions
+true_structure_labels <- c(rep(1, 5), rep(2, 5))
+
+# Calculate total number of conditions
+n_conditions <- length(sample_sizes) * length(separation_factors)
+cat("Experimental design:\n")
+cat("- Sample sizes:", paste(sample_sizes, collapse=", "), "\n")
+cat("- Separation factors:", paste(separation_factors, collapse=", "), "σ\n")
+cat("- Total conditions:", n_conditions, "\n")
+cat("- Replications per condition:", n_replications, "\n")
+cat("- Total simulation runs:", n_conditions * n_replications, "\n")
+```
+
+```{r data_generation_functions}
+# Reuse data generation functions from previous analysis
+generate_cluster_means <- function(separation_factor, cluster_variance) {
+  base_separation <- separation_factor * sqrt(cluster_variance)
+  
+  means_1 <- list(
+    cluster_1 = c(-1, -1.3, -1.2, -1.5, -1.1) * base_separation,
+    cluster_2 = c(1, 1.3, 1.2, 1.5, 1.1) * base_separation,
+    cluster_3 = c(0, 0, 0, 0, 0)
+  )
+  
+  means_2 <- list(
+    cluster_1 = c(-1.3, -1, -1.25, -1.4, -1.2) * base_separation,
+    cluster_2 = c(1.3, 1, 1.25, 1.4, 1.2) * base_separation,
+    cluster_3 = c(-0.3, 0.3, -0.4, 0.4, -0.25) * base_separation,
+    cluster_4 = c(0.3, -0.3, 0.4, -0.4, 0.25) * base_separation
+  )
+  
+  return(list(means_1 = means_1, means_2 = means_2))
+}
+
+generate_dataset <- function(separation_factor, cluster_variance, n_samples, 
+                           cluster_props_1, cluster_props_2) {
+  
+  cluster_1_assignments <- sample(1:n_clusters_1, n_samples, 
+                                 replace = TRUE, prob = cluster_props_1)
+  cluster_2_assignments <- sample(1:n_clusters_2, n_samples, 
+                                 replace = TRUE, prob = cluster_props_2)
+  
+  means_list <- generate_cluster_means(separation_factor, cluster_variance)
+  means_1 <- means_list$means_1
+  means_2 <- means_list$means_2
+  
+  covs_1 <- list(
+    cluster_1 = diag(rep(cluster_variance, 5)),
+    cluster_2 = diag(rep(cluster_variance, 5)),
+    cluster_3 = diag(rep(cluster_variance, 5))
+  )
+  
+  covs_2 <- list(
+    cluster_1 = diag(rep(cluster_variance, 5)),
+    cluster_2 = diag(rep(cluster_variance, 5)),
+    cluster_3 = diag(rep(cluster_variance, 5)),
+    cluster_4 = diag(rep(cluster_variance, 5))
+  )
+  
+  data_matrix <- matrix(NA, nrow = n_samples, ncol = 10)
+  
+  for (i in 1:n_samples) {
+    cluster_id <- cluster_1_assignments[i]
+    data_matrix[i, 1:5] <- mvtnorm::rmvnorm(1, 
+                                  mean = means_1[[cluster_id]], 
+                                  sigma = covs_1[[cluster_id]])
+  }
+  
+  for (i in 1:n_samples) {
+    cluster_id <- cluster_2_assignments[i]
+    data_matrix[i, 6:10] <- mvtnorm::rmvnorm(1, 
+                                   mean = means_2[[cluster_id]], 
+                                   sigma = covs_2[[cluster_id]])
+  }
+  
+  return(data_matrix)
+}
+```
+
+```{r analysis_functions}
+# Analysis function (same as before)
+analyze_dataset <- function(data_matrix, true_structure_labels) {
+  library(mclust)
+  library(NbClust)
+  library(cluster)  # for silhouette
+  
+  n_dims <- ncol(data_matrix)
+  
+  # Step 1: MCLUST on each dimension
+  mclust_results <- vector("list", n_dims)
+  cluster_assignments <- matrix(NA, nrow = nrow(data_matrix), ncol = n_dims)
+  
+  for (i in seq_len(n_dims)) {
+    mclust_fit <- Mclust(data_matrix[, i], G = 1:9, verbose = FALSE)
+    mclust_results[[i]] <- mclust_fit
+    cluster_assignments[, i] <- mclust_fit$classification
+  }
+  
+  # Step 2: Compute ARI matrix between dimension clusterings
+  ari_matrix <- matrix(NA, nrow = n_dims, ncol = n_dims)
+  for (i in seq_len(n_dims)) {
+    for (j in seq_len(n_dims)) {
+      if (i == j) {
+        ari_matrix[i, j] <- 1.0
+      } else {
+        ari_matrix[i, j] <- adjustedRandIndex(cluster_assignments[, i], cluster_assignments[, j])
+      }
+    }
+  }
+  
+  # Step 3: Hierarchical clustering on dissimilarity matrix
+  dissim_matrix <- 1 - ari_matrix
+  diag(dissim_matrix) <- 0
+  dissim_dist <- as.dist(dissim_matrix)
+  
+  # Try Dunn index first
+  opt <- tryCatch(
+    NbClust::NbClust(diss = dissim_dist, distance = NULL,
+                     min.nc = 2, max.nc = 6, method = "ward.D2",
+                     index = "dunn"),
+    error = function(e) NULL
+  )
+  
+  # Initialize return variables
+  index <- NA_character_
+  optimal_k <- NA_integer_
+  optimal_hclust <- NULL
+  index_values <- NULL
+  optimal_idx <- NA_integer_
+  
+  # Check if NbClust with Dunn index worked
+  if (!is.null(opt) && !is.null(opt$Best.nc)) {
+    best_k <- suppressWarnings(as.numeric(opt$Best.nc[1]))
+    dunn_val <- suppressWarnings(as.numeric(opt$Best.nc[2]))
+    
+    if (!is.na(best_k) && best_k > 1 && !is.nan(dunn_val) && !is.infinite(dunn_val) && dunn_val > 0) {
+      # Dunn index valid
+      index <- "dunn"
+      optimal_k <- best_k
+      
+      # Handle Best.partition (cluster assignment vector or matrix)
+      if (is.matrix(opt$Best.partition)) {
+        # Assume second row is actual partition (based on your previous logic)
+        optimal_hclust <- as.vector(opt$Best.partition[2, ])
+      } else {
+        optimal_hclust <- as.vector(opt$Best.partition)
+      }
+      
+      # Get Dunn index values for all tested cluster numbers
+      index_values <- as.numeric(opt$All.index)
+      all_index_names <- names(opt$All.index)
+      optimal_idx <- which(all_index_names == as.character(best_k))
+      if (length(optimal_idx) == 0) {
+        optimal_idx <- 1
+      }
+      
+    } else {
+      # Dunn index invalid → fallback to silhouette
+      index <- "silhouette"
+      
+      k_values <- 2:6
+      index_values <- numeric(length(k_values))
+      hclust_results <- vector("list", length(k_values))
+      
+      for (i in seq_along(k_values)) {
+        k <- k_values[i]
+        hclust_fit <- hclust(dissim_dist, method = "ward.D2")
+        clusters <- cutree(hclust_fit, k = k)
+        hclust_results[[i]] <- clusters
+        sil <- silhouette(clusters, dist = dissim_dist)
+        index_values[i] <- mean(sil[, "sil_width"])
+        cat(sprintf("\nk = %d: Average silhouette width = %.3f", k, index_values[i]))
+      }
+      
+      optimal_idx <- which.max(index_values)
+      optimal_k <- k_values[optimal_idx]
+      optimal_hclust <- hclust_results[[optimal_idx]]
+      
+      cat("\nOptimal number of dimension groups (silhouette):", optimal_k, "\n")
+    }
+    
+  } else {
+    # NbClust failed (e.g., error or null), fallback to silhouette
+    index <- "silhouette"
+    
+    k_values <- 2:6
+    index_values <- numeric(length(k_values))
+    hclust_results <- vector("list", length(k_values))
+    
+    for (i in seq_along(k_values)) {
+      k <- k_values[i]
+      hclust_fit <- hclust(dissim_dist, method = "ward.D2")
+      clusters <- cutree(hclust_fit, k = k)
+      hclust_results[[i]] <- clusters
+      sil <- silhouette(clusters, dist = dissim_dist)
+      index_values[i] <- mean(sil[, "sil_width"])
+      cat(sprintf("\nk = %d: Average silhouette width = %.3f", k, index_values[i]))
+    }
+    
+    optimal_idx <- which.max(index_values)
+    optimal_k <- k_values[optimal_idx]
+    optimal_hclust <- hclust_results[[optimal_idx]]
+    
+    cat("\nOptimal number of dimension groups (silhouette):", optimal_k, "\n")
+  }
+  
+  # Step 4: Calculate recovery ARI vs. true structure labels
+  p_half <- n_dims/2
+  true_structure_labels <- c(rep(1, p_half), rep(2, p_half))
+  recovery_ari <- adjustedRandIndex(optimal_hclust, true_structure_labels)
+  
+  # Extract number of clusters detected per dimension from mclust results
+  detected_clusters <- sapply(mclust_results, function(x) x$G)
+  
+  # Return results as a list with scalar values
+  return(list(
+    recovery_ari = recovery_ari,
+    optimal_k = as.integer(optimal_k),
+    index = index,
+    index_value = as.numeric(index_values[optimal_idx]),
+    detected_clusters = detected_clusters,
+    hierarchical_clustering = optimal_hclust
+  ))
+}
+```
+
+# 3. Run Simulation
+
+```{r run_simulation, cache=FALSE}
+# Initialise overall results storage
+all_results <- data.frame()
+condition_counter <- 0
+
+cat("Starting sample size × separation factor simulation...\n\n")
+
+# Loop through experimental conditions
+for (n_samples in sample_sizes) {
+  for (sep_factor in separation_factors) {
+    condition_counter <- condition_counter + 1
+    
+    cat(sprintf("Condition %d/%d: n=%d, separation=%.1fσ\n", 
+                condition_counter, n_conditions, n_samples, sep_factor))
+    
+    condition_results <- data.frame()
+    
+    for (rep in 1:n_replications) {
+      
+      # Define filename for cached dataset (per condition + replication)
+      dataset_cache_file <- file.path(cache_dir, 
+                                sprintf("data_n%d_sep%.1f_rep%d.rds", n_samples, sep_factor, rep))
+      
+      if (file.exists(dataset_cache_file)) {
+        # Load generated data matrix from cache
+        data_matrix <- readRDS(dataset_cache_file)
+        cat(sprintf("  Loaded dataset for rep %d from cache\n", rep))
+      } else {
+        # Generate dataset and save to cache
+        data_matrix <- generate_dataset(sep_factor, cluster_variance, n_samples, 
+                                        cluster_props_1, cluster_props_2)
+        saveRDS(data_matrix, dataset_cache_file)
+        cat(sprintf("  Generated and cached dataset for rep %d\n", rep))
+      }
+      
+      # Always run analysis fresh on loaded/generated data
+      analysis_result <- analyze_dataset(data_matrix)
+      
+      # Store results
+      condition_results <- rbind(condition_results, data.frame(
+        n_samples = n_samples,
+        separation_factor = sep_factor,
+        replication = rep,
+        recovery_ari = analysis_result$recovery_ari,
+        optimal_k = analysis_result$optimal_k,
+        index = analysis_result$index,
+        index_value = analysis_result$index_value,
+        dims1_5_correct = sum(analysis_result$detected_clusters[1:5] == 3),
+        dims6_10_correct = sum(analysis_result$detected_clusters[6:10] == 4)
+      ))
+    }
+    
+    saveRDS(condition_results, file.path(cache_dir, sprintf("results_n%d_sep%.1f.rds", n_samples, sep_factor)))
+    
+    # Append to overall results
+    all_results <- rbind(all_results, condition_results)
+    cat("\n")
+    
+  }
+}
+
+cat("Simulation complete!\n")
+cat("Total results collected:", nrow(all_results), "\n")
+```
+
+# 4. Results
+
+## 4.1 Summary Statistics
+
+```{r join-results, echo=FALSE, message=FALSE, warning=FALSE}
+# Set the path to your folder
+folder_path <- "sample_size_simulation_cache"
+
+# List all RDS files in the folder
+file_list <- list.files(path = folder_path, pattern = "^results.*\\.rds$", full.names = TRUE)
+
+# Read all RDS files and store them in a list
+data_list <- lapply(file_list, readRDS)
+
+# Assuming each RDS contains a data frame, combine them
+all_results_ss <- do.call(rbind, data_list)
+
+# Save the combined results into the same folder
+file_path <- file.path(folder_path, "all_results_ss.rds")
+saveRDS(all_results_ss, file_path)
+```
+
+```{r summary_stats}
+# Rename all_results_ss to all_results
+all_results <- all_results_ss
+
+# Calculate summary statistics by condition
+summary_stats <- all_results %>%
+  group_by(n_samples, separation_factor) %>%
+  summarise(
+    mean_ari = mean(recovery_ari),
+    sd_ari = sd(recovery_ari),
+    prop_perfect = mean(recovery_ari == 1),
+    prop_failed = mean(recovery_ari < 0.5),
+    index = index,
+    mean_value = mean(index_value),
+    .groups = 'drop'
+  ) %>%
+  arrange(separation_factor, n_samples)
+
+# Create a wide-format table for mean ARI
+ari_table <- summary_stats %>%
+  select(n_samples, separation_factor, mean_ari) %>%
+  pivot_wider(names_from = separation_factor, 
+              values_from = mean_ari,
+              names_prefix = "Sep_")
+
+knitr::kable(ari_table, digits = 3,
+             caption = "Mean Recovery ARI by Sample Size and Separation Factor",
+             col.names = c("Sample Size", "3.0σ", "2.0σ", "1.0σ"))
+
+# Create a wide-format table for proportion perfect recovery
+perfect_table <- summary_stats %>%
+  select(n_samples, separation_factor, prop_perfect) %>%
+  pivot_wider(names_from = separation_factor, 
+              values_from = prop_perfect,
+              names_prefix = "Sep_")
+
+knitr::kable(perfect_table, digits = 3,
+             caption = "Proportion of Perfect Recovery by Sample Size and Separation Factor",
+             col.names = c("Sample Size", "3.0σ", "2.0σ", "1.0σ"))
+```
+
+## 4.2 Main Visualisation: Recovery Performance Heatmap
+
+```{r heatmap}
+# Create heatmap of mean recovery ARI
+p_heatmap <- ggplot(summary_stats, aes(x = factor(separation_factor), 
+                                       y = factor(n_samples), 
+                                       fill = mean_ari)) +
+  geom_tile(colour = "white", size = 1) +
+  geom_text(aes(label = sprintf("%.3f", mean_ari)), 
+            colour = ifelse(summary_stats$mean_ari > 0.5, "white", "black"),
+            size = 3.5,
+            family = "Times") +
+  scale_fill_viridis(name = "Mean\nRecovery\nARI", 
+                     limits = c(0, 1),
+                     option = "plasma") +
+  scale_x_discrete(labels = function(x) paste0(x, "σ")) +
+  scale_y_discrete(labels = function(x) format(as.numeric(x), big.mark = ",")) +
+  labs(title = "Structure Recovery Performance by Sample Size and Separation",
+       subtitle = "Adjusted Rand Index between discovered and true dimension groupings",
+       x = "Separation Factor",
+       y = "Sample Size") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, size = 12, face = "bold", family = "Times"),
+        plot.subtitle = element_text(hjust = 0.5, size = 10, family = "Times"),
+        axis.text = element_text(size = 10, family = "Times"),
+        axis.title = element_text(size = 12, face = "bold", family = "Times"),
+        legend.title = element_text(size = 12, face = "bold", family = "Times"),
+        legend.text = element_text(size = 10, family = "Times"),
+        panel.grid = element_blank())
+
+print(p_heatmap)
+
+ggsave(paste0("1h_meanARIheatmap.png"), plot = p_heatmap, width = 6, height = 4, units = "in")
+```
+
+## 4.3 Distribution of Recovery Performance
+
+```{r distributions, fig.height=10}
+# Create violin plots showing distribution at each condition
+p_violin <- ggplot(all_results, aes(x = factor(n_samples), y = recovery_ari)) +
+  geom_violin(aes(fill = factor(separation_factor)), 
+              position = position_dodge(width = 0.9),
+              alpha = 0.7) +
+  geom_boxplot(aes(group = interaction(n_samples, separation_factor)),
+               position = position_dodge(width = 0.9),
+               width = 0.1,
+               outlier.size = 1) +
+  scale_fill_viridis_d(name = "Separation\nFactor", 
+                       labels = function(x) paste0(x, "σ"),
+                       option = "plasma") +
+  scale_x_discrete(labels = function(x) format(as.numeric(x), big.mark = ",")) +
+  labs(title = "Distribution of Recovery Performance by Sample Size",
+       subtitle = "Violin plots show the full distribution across 25 replications",
+       x = "Sample Size",
+       y = "Recovery ARI") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+        plot.subtitle = element_text(hjust = 0.5, size = 12),
+        legend.position = "right") +
+  geom_hline(yintercept = 0.8, linetype = "dashed", alpha = 0.5, colour = "green") +
+  geom_hline(yintercept = 0.5, linetype = "dashed", alpha = 0.5, colour = "orange")
+
+print(p_violin)
+```
+
+## 4.4 Sample Size Effect at Each Separation Level
+
+```{r sample_size_curves}
+# Create line plots showing sample size effect
+p_lines <- ggplot(summary_stats, aes(x = n_samples, y = mean_ari, 
+                                     colour = factor(separation_factor))) +
+  geom_line(size = 1.2) +
+  geom_point(size = 3) +
+  geom_ribbon(aes(ymin = mean_ari - sd_ari, 
+                  ymax = mean_ari + sd_ari,
+                  fill = factor(separation_factor)),
+              alpha = 0.2) +
+  scale_x_log10(breaks = sample_sizes,
+                labels = format(sample_sizes, big.mark = ",")) +
+  scale_colour_viridis_d(name = "Separation", 
+                        labels = function(x) paste0(x, "σ"),
+                        option = "plasma") +
+  scale_fill_viridis_d(name = "Separation", 
+                      labels = function(x) paste0(x, "σ"),
+                      option = "plasma") +
+  labs(title = "Effect of Sample Size on Recovery Performance",
+       subtitle = "Log scale emphasises relative changes; ribbons show ±1 SD",
+       x = "Sample Size (log scale)",
+       y = "Mean Recovery ARI") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, size = 12, face = "bold", family = "Times"),
+        plot.subtitle = element_text(hjust = 0.5, size = 10, family = "Times"),
+        axis.text = element_text(size = 10, family = "Times"),
+        axis.title = element_text(size = 12, face = "bold", family = "Times"),
+        legend.title = element_text(size = 12, face = "bold", family = "Times"),
+        legend.text = element_text(size = 10, family = "Times")) +
+  geom_hline(yintercept = 0.8, linetype = "dashed", alpha = 0.5) +
+  annotate("text", x = 63, y = 0.83, label = "Good Recovery", size = 3.5, family = "Times")
+
+print(p_lines)
+
+ggsave(paste0("1h_meanARIplot.pdf"), plot = p_lines, device = cairo_pdf, width = 6, height = 4, units = "in")
+```
+
+## 4.5 Bimodal Behaviour Analysis
+
+```{r bimodal_analysis}
+# Focus on the bimodal region (1.0σ)
+bimodal_data <- all_results %>%
+  filter(separation_factor == 1.0)
+
+# Calculate bimodality metric (proportion not perfect or failed range)
+bimodality_stats <- bimodal_data %>%
+  group_by(n_samples) %>%
+  summarise(
+    prop_perfect = mean(recovery_ari > 0.9),
+    prop_failed = mean(recovery_ari <= 0.1),
+    prop_middle = mean(recovery_ari > 0.1 & recovery_ari <= 0.9),
+    n_modes = ifelse(
+      prop_middle < 0.2 & 
+      prop_perfect > 0.1 & 
+      prop_failed > 0.1, 
+      2, 
+      1
+    ),
+    .groups = 'drop'
+  )
+
+
+# Create stacked bar plot
+bimodal_long <- bimodality_stats %>%
+  select(n_samples, prop_perfect, prop_failed, prop_middle) %>%
+  pivot_longer(cols = starts_with("prop_"), 
+               names_to = "outcome", 
+               values_to = "proportion") %>%
+  mutate(outcome = factor(outcome, 
+                         levels = c("prop_failed", "prop_middle","prop_perfect"),
+                         labels = c("Failed\n(ARI ≤ 0.1)", 
+                                    "Intermediate",
+                                   "Perfect\n(ARI > 0.9)")))
+
+p_bimodal <- ggplot(bimodal_long, aes(x = factor(n_samples), y = proportion, 
+                                      fill = outcome)) +
+  geom_bar(stat = "identity", width = 0.7) +
+scale_fill_manual(
+  values = c(
+    "Failed\n(ARI ≤ 0.1)"     = viridis_colors[10],
+    "Intermediate"            = viridis_colors[50],
+    "Perfect\n(ARI > 0.9)"    = viridis_colors[80]
+  ),
+  name = "Recovery\nOutcome"
+) +
+scale_x_discrete(labels = function(x) format(as.numeric(x), big.mark = ",")) +
+  scale_x_discrete(labels = function(x) format(as.numeric(x), big.mark = ",")) +
+  labs(title = "Bimodal Behaviour at Critical Separation (1.0σ)",
+       subtitle = "Distribution of outcomes shows transition from bimodal to unimodal failure",
+       x = "Sample Size",
+       y = "Proportion of Runs") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, size = 12, face = "bold", family = "Times"),
+        plot.subtitle = element_text(hjust = 0.5, size = 10, family = "Times"),
+        axis.text = element_text(size = 10, family = "Times"),
+        axis.title = element_text(size = 12, face = "bold", family = "Times"),
+        legend.title = element_text(size = 12, face = "bold", family = "Times"),
+        legend.text = element_text(size = 10, family = "Times"),
+        legend.spacing = unit(1.5, "cm"))
+
+print(p_bimodal)
+
+ggsave(paste0("1h_bimodal.pdf"), plot = p_bimodal, device = cairo_pdf, width = 6, height = 4, units = "in")
+
+
+
+# Print bimodality summary
+cat("\nBimodality Analysis at 1.0σ Separation:\n")
+print(bimodality_stats)
+```
+
+## 4.6 Critical Thresholds by Sample Size
+
+```{r threshold_analysis}
+# Find critical thresholds for each sample size
+threshold_analysis <- all_results %>%
+  group_by(n_samples, separation_factor) %>%
+  summarise(mean_ari = mean(recovery_ari), .groups = 'drop') %>%
+  group_by(n_samples) %>%
+  summarise(
+    threshold_80 = if (any(mean_ari < 0.8)) max(separation_factor[mean_ari < 0.8]) else NA_real_,
+    threshold_50 = if (any(mean_ari < 0.5)) max(separation_factor[mean_ari < 0.5]) else NA_real_,
+    .groups = 'drop'
+  )
+
+# Handle cases where threshold is not found
+threshold_analysis <- threshold_analysis %>%
+  mutate(
+    threshold_80 = ifelse(is.finite(threshold_80), threshold_80, NA),
+    threshold_50 = ifelse(is.finite(threshold_50), threshold_50, NA)
+  )
+
+knitr::kable(threshold_analysis, digits = 1,
+             caption = "Minimum Separation Required for Reliable Recovery",
+             col.names = c("Sample Size", 
+                          "For 80% Recovery (σ)", 
+                          "For 50% Recovery (σ)"))
+```
+
+# 5. Key Findings
+
+```{r key_findings}
+# Extract specific findings for summary
+n50_sep3 <- summary_stats %>% 
+  filter(n_samples == 50, separation_factor == 3.0) %>% 
+  pull(mean_ari)
+
+n2000_sep1 <- summary_stats %>% 
+  filter(n_samples == 2000, separation_factor == 1.0) %>% 
+  pull(mean_ari)
+
+bimodal_transition <- bimodality_stats %>%
+  filter(n_modes == 1) %>%
+  summarise(min_n = min(n_samples)) %>%
+  pull(min_n)
+```
+

@@ -1,0 +1,935 @@
+---
+title: 'Simulation Study: MDS Thresholding for the Presence of Views'
+output: html_document
+date: "`r Sys.Date()`"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, error = TRUE, message = TRUE, warning = TRUE)
+```
+
+# Executive Summary
+
+This simulation study extends our analysis to investigate how bootstrapped model-based clustering of the low-dimensional representation of the dissimilarity matrix, from Multi-dimensional Scaling, performs in determining the presence of multiple views. We test whether the approach is accurate for 1 structure (our baseline). 2, 3, 4, and 5 independent structures, all embedded in 100-dimensional data.
+
+**Key Questions:** 1. How does the thresholding method work with differing numbers of independent structures? 2. Is there a minimum number of structures that can reliably assess the presence of views? 
+
+# Implementation 
+
+## 1. Methods
+
+### 1.1 Experimental Design
+
+We use data divided equally among k structures:
+**p=10**
+- **k=2**: 5 dimensions per structure (baseline)
+- **k=3**: 3-4 dimensions per structure
+- **k=4**: 2-3 dimensions per structure  
+- **k=5**: 2 dimensions per structure
+**p=100**
+- **k=2**: 50 dimensions per structure (baseline)
+- **k=3**: 33-34 dimensions per structure
+- **k=4**: 25 dimensions per structure  
+- **k=5**: 20 dimensions per structure
+**p=500**
+- **k=2**: 250 dimensions per structure (baseline)
+- **k=3**: 166-167 dimensions per structure
+- **k=4**: 125 dimensions per structure  
+- **k=5**: 100 dimensions per structure
+
+Each structure has a different number of clusters (3, 4, 5, 6, or 7) to ensure distinguishability.
+
+### Experimental Grid:
+- **Number of structures**: 1, 2, 3, 4, 5
+- **Dimensions**: 10, 100, 500
+- **Sample sizes**: 250, 500, 1000
+- **Separation factors**: 2.5σ
+- **Replications**: 25
+- **Parallel cores**: 8
+
+Total: 45 conditions × 25 replications = 1124 runs
+
+## 2. Implementation
+
+```{r libraries}
+# Load required libraries
+library(mvtnorm)      # For multivariate normal data generation
+library(cluster)      # For PAM clustering
+library(mclust)       # For model-based clustering
+library(otrimle)      # For otrimle
+library(ggplot2)      # For visualisation
+library(dplyr)        # For data manipulation
+library(tidyr)        # For data reshaping
+library(viridis)      # For colour scales
+library(gridExtra)    # For arranging plots
+library(foreach)      # For parallel loops
+library(doParallel)   # For parallel backend
+library(parallel)     # For makeCluster and stopCluster
+library(R.utils)      # For mclust timeout
+
+# Set seed for reproducibility
+set.seed(42)
+```
+
+```{r parallel_setup}
+# Note: Parallel cluster will be created within the simulation chunk
+# to ensure proper scoping in R Markdown environment
+
+cat("Parallel processing configuration:\n")
+cat("- Total cores available:", detectCores(), "\n")
+cat("- Cores to be used:", detectCores() - 2, "\n")
+cat("- Cores kept free for system:", 2, "\n\n")
+```
+
+```{r cache_setup}
+# Set up caching directory
+cache_dir <- "~/Documents/MPhil Population Health Sciences/Dissertation/GMM Simulation Study/mds_threshold_cache"
+if (!dir.exists(cache_dir)) {
+  dir.create(cache_dir)
+  cat("Created cache directory:", cache_dir, "\n")
+} else {
+  cat("Using existing cache directory:", cache_dir, "\n")
+}
+
+# Cache functions
+get_cache_filename <- function(n_structures, p_dims, n_samples, separation_factor) {
+  filename <- sprintf("results_k%d_d%d_n%d_sep%.1f.rds", n_structures, p_dims, n_samples, separation_factor)
+  file.path(cache_dir, filename)
+}
+
+check_condition_cache <- function(n_structures, p_dims, n_samples, separation_factor) {
+  cache_file <- get_cache_filename(n_structures, p_dims, n_samples, separation_factor)
+  file.exists(cache_file)
+}
+
+save_condition_results <- function(results, n_structures, p_dims, n_samples, separation_factor) {
+  cache_file <- get_cache_filename(n_structures, p_dims, n_samples, separation_factor)
+  saveRDS(results, cache_file)
+}
+
+load_condition_results <- function(n_structures, p_dims, n_samples, separation_factor) {
+  cache_file <- get_cache_filename(n_structures, p_dims, n_samples, separation_factor)
+  if (file.exists(cache_file)) {
+    return(readRDS(cache_file))
+  } else {
+    return(NULL)
+  }
+}
+
+get_all_results_cache_filename <- function() {
+  file.path(cache_dir, "all_results_full.rds")
+}
+```
+
+```{r parameters}
+# Experimental parameters
+n_structures_values <- c(1, 2, 3, 4, 5)
+p_dims <- c(10, 100, 500)  
+sample_sizes <- c(250, 500, 1000)
+separation_factors <- c(2.5)
+n_replications <- 25
+
+# Fixed parameters
+cluster_variance <- 0.3
+
+# Clusters per structure (different for each to ensure distinguishability)
+clusters_per_structure <- c(3, 4, 5, 6, 7)  # Will use first k of these
+
+# Total conditions
+n_conditions <- length(p_dims) * length(n_structures_values) * length(sample_sizes) * length(separation_factors)
+
+cat("\nExperimental design:\n")
+cat("- Number of structures (k):", paste(n_structures_values, collapse=", "), "\n")
+cat("- Total dimensions:", paste(p_dims, collapse=", "), "\n")
+cat("- Sample sizes:", paste(sample_sizes, collapse=", "), "\n")
+cat("- Separation factors: ", paste(separation_factors, "σ", sep="", collapse=", "), "\n")
+cat("- Total conditions:", n_conditions, "\n")
+cat("- Replications per condition:", n_replications, "\n")
+cat("- Total simulation runs:", n_conditions * n_replications, "\n")
+```
+
+```{r data_generation_functions}
+# Generate cluster means for k structures
+generate_cluster_means_k <- function(separation_factor, cluster_variance, n_structures, dims_list) {
+  base_separation <- separation_factor * sqrt(cluster_variance)
+  
+  all_means <- list()
+  
+  for (k in 1:n_structures) {
+    n_clusters <- clusters_per_structure[k]
+    n_dims <- dims_list[k]
+    
+    # Generate means for this structure
+    structure_means <- list()
+    for (c in 1:n_clusters) {
+      # Create distinct patterns for each cluster
+      if (c <= 2) {
+        # First two clusters: opposite sides
+        multiplier <- ifelse(c == 1, -1, 1)
+        means <- runif(n_dims, 0.8, 1.5) * multiplier * base_separation
+      } else {
+        # Additional clusters: random positions
+        means <- runif(n_dims, -0.7, 0.7) * base_separation
+        # Add some structure to avoid complete overlap
+        means <- means + (c - 2.5) * 0.3 * base_separation
+      }
+      structure_means[[paste0("cluster_", c)]] <- means
+    }
+    
+    all_means[[paste0("structure_", k)]] <- structure_means
+  }
+  
+  return(all_means)
+}
+
+# Generate dataset with k structures
+generate_dataset_k <- function(p_dim, separation_factor, cluster_variance, n_samples, n_structures, dims_list) {
+  
+  # Generate cluster assignments for each structure
+  cluster_assignments <- list()
+  for (k in 1:n_structures) {
+    n_clusters <- clusters_per_structure[k]
+    # Use different proportions for each structure
+    props <- diff(c(0, sort(runif(n_clusters-1)), 1))
+    cluster_assignments[[k]] <- sample(1:n_clusters, n_samples, replace = TRUE, prob = props)
+  }
+  
+  # Get cluster means
+  all_means <- generate_cluster_means_k(separation_factor, cluster_variance, n_structures, dims_list)
+  
+  # Initialize data matrix
+  data_matrix <- matrix(NA, nrow = n_samples, ncol = p_dim)
+  
+  # Generate data for each structure
+  col_start <- 1
+  for (k in 1:n_structures) {
+    n_dims <- dims_list[k]
+    col_end <- col_start + n_dims - 1
+    
+    structure_means <- all_means[[paste0("structure_", k)]]
+    
+    # Generate data for this structure
+    for (i in 1:n_samples) {
+      cluster_id <- cluster_assignments[[k]][i]
+      cluster_mean <- structure_means[[paste0("cluster_", cluster_id)]]
+      cluster_cov <- diag(rep(cluster_variance, n_dims))
+      
+      data_matrix[i, col_start:col_end] <- mvtnorm::rmvnorm(1, mean = cluster_mean, sigma = cluster_cov)
+    }
+    
+    col_start <- col_end + 1
+  }
+  
+  return(list(
+    data = data_matrix,
+    true_assignments = cluster_assignments,
+    dims_list = dims_list
+  ))
+}
+```
+```{r analysis_functions}
+# Analyze dataset with k structures
+analyze_dataset_k <- function(data_matrix, n_structures, separation_factor, n_samples, dims_list) {
+  n_dims <- ncol(data_matrix)
+
+  # Step 1: MCLUST on each dimension
+  cluster_assignments <- matrix(NA, nrow = nrow(data_matrix), ncol = n_dims)
+  detected_clusters <- numeric(n_dims)
+
+  for (i in 1:n_dims) {
+    mclust_fit <- mclust::Mclust(data_matrix[, i], G = 1:9, verbose = FALSE)
+    cluster_assignments[, i] <- mclust_fit$classification
+    detected_clusters[i] <- mclust_fit$G
+  }
+
+  # Step 2: Compute ARI matrix
+  ari_matrix <- matrix(1, nrow = n_dims, ncol = n_dims)
+  for (i in 1:(n_dims - 1)) {
+    for (j in (i + 1):n_dims) {
+      ari_val <- mclust::adjustedRandIndex(cluster_assignments[, i], cluster_assignments[, j])
+      ari_matrix[i, j] <- ari_val
+      ari_matrix[j, i] <- ari_val
+    }
+  }
+
+  # Step 3: Compute dissimilarity matrix with small noise
+  dis_mat <- (1 - ari_matrix) + abs(matrix(rnorm(n_dims * n_dims, 0, 0.001), n_dims, n_dims))
+  dist_mat <- as.dist(dis_mat)
+
+  # Step 4: MDS
+  mds_result <- cmdscale(dist_mat, k = 2, eig = TRUE)
+  mds <- as.data.frame(mds_result$points)
+
+  # Step 5: Model loop
+  models <- c("EEE", "EEI", "EEV", "EII", "EVE", "EVI", "EVV", "OTRIMLE")
+  results <- data.frame()
+
+  for (model in models) {
+    # Default values for all cases
+    start_time <- Sys.time()
+    rt <- NA
+    stat <- "ERROR"
+    dns <- "NA"
+    method_label <- if (model == "OTRIMLE") "OTRIMLE" else paste("mclustBootstrapLRT:", model)
+
+    if (model != "OTRIMLE") {
+      # Try MCLUST model
+      test <- tryCatch({
+        R.utils::withTimeout({
+          mclust::mclustBootstrapLRT(mds, modelName = model, nboot = 1000, level = 0.95, maxG = 1)
+        }, timeout = 10800, onTimeout = "error")
+      }, error = function(e) {
+        message(sprintf("❌ MCLUST model %s failed: %s", model, e$message))
+        NULL
+      })
+
+      end_time <- Sys.time()
+
+      if (!is.null(test) && is.list(test) && "p.value" %in% names(test)) {
+        p <- round(test$p.value, 4)
+        dns <- ifelse(!is.na(p) && p < 0.05, ">1", "1")
+        stat <- paste("p-value:", p)
+        rt <- as.numeric(difftime(end_time, start_time, units = "secs"))
+      } else {
+        stat <- "p-value: NA"
+      }
+
+    } else {
+      # Try OTRIMLE
+      model_otrimle <- tryCatch({
+        R.utils::withTimeout({
+          otrimle::otrimleg(mds, G = 1:2)
+        }, timeout = 10800, onTimeout = "error")
+      }, error = function(e) {
+        message(sprintf("❌ OTRIMLE failed: %s", e$message))
+        NULL
+      })
+
+      end_time <- Sys.time()
+
+      if (!is.null(model_otrimle) && is.list(model_otrimle) && "desncrit" %in% names(model_otrimle)) {
+        min_denscrit <- min(model_otrimle$denscrit, na.rm = TRUE)
+        best_G <- which.min(model_otrimle$denscript)
+        dns <- ifelse(best_G == 2, ">1", "1")
+        stat <- paste("min(Q):", round(min_denscrit, 4))
+        rt <- as.numeric(difftime(end_time, start_time, units = "secs"))
+      } else {
+        stat <- "min(BIC): NA"
+      }
+    }
+
+    # Add result row
+    cat_val <- ifelse(n_structures == 1, "1", ">1")
+    results <- rbind(results, data.frame(
+      tns = n_structures,
+      cat = cat_val,
+      p_dim = n_dims,
+      sep_fact = separation_factor,
+      n_samples = n_samples,
+      method = method_label,
+      stat = stat,
+      dns = dns,
+      correct = (dns == cat_val),
+      rt = rt,
+      stringsAsFactors = FALSE
+    ))
+  }
+
+  cat("✅ Number of rows in results:", nrow(results), "\n")
+  return(results)
+}
+
+
+# Wrapper function for parallel execution
+run_single_replication <- function(p_dim, rep, n_structures, separation_factor, n_samples, dims_list) {
+  # Generate dataset
+  dataset <- generate_dataset_k(p_dim, separation_factor, cluster_variance, n_samples, n_structures, dims_list)
+  
+  # Analyze dataset
+  analysis_result <- analyze_dataset_k(dataset$data, n_structures, separation_factor, n_samples, dims_list)
+  
+  # Add metadata to result
+  analysis_result$replication <- rep
+  
+  print(paste("Replication", rep, "- nrow(analysis_result):", nrow(analysis_result)))
+  cat("In run_single_replication, rows in analysis_result:", nrow(analysis_result), "\n")
+  
+  return(analysis_result)
+}
+
+# Safe wrapper function
+safe_run_single_replication <- function(p_dim, rep, n_structures, separation_factor, n_samples, dims_list, max_time_sec = 10800) {
+    result <- NULL
+    tryCatch({
+        result <- withTimeout({
+            run_single_replication(
+                p_dim = p_dim,
+                rep = rep,
+                n_structures = n_structures,
+                separation_factor = separation_factor,
+                n_samples = n_samples,
+                dims_list = dims_list
+            )
+        }, timeout = max_time_sec, onTimeout = "error")
+        
+        # DEBUG: Print class and structure of the result immediately after running
+        cat(sprintf("Replication %d returned an object of class: %s\n", rep, class(result)))
+        if (!is.list(result)) {
+            cat("Warning: Result is not a list! Here's a snapshot:\n")
+            print(str(result))
+        }
+        
+    }, error = function(e) {
+        warning(sprintf("Replication %d failed or timed out: %s", rep, e$message))
+        result <<- NULL
+    })
+    return(result)
+}
+
+safe_run_single_model <- function(p_dim, rep, n_structures, separation_factor, n_samples, dims_list, model) {
+  result <- NULL
+  tryCatch({
+    # Generate data (same across models for this rep)
+    dataset <- generate_dataset_k(p_dim, separation_factor, cluster_variance, n_samples, n_structures, dims_list)
+    data_matrix <- dataset$data
+
+    # Run adjusted Rand Index clustering steps (used for dissimilarity matrix)
+    cluster_assignments <- matrix(NA, nrow = nrow(data_matrix), ncol = ncol(data_matrix))
+    detected_clusters <- numeric(ncol(data_matrix))
+    
+    for (i in 1:ncol(data_matrix)) {
+      mclust_fit <- mclust::Mclust(data_matrix[, i], G = 1:9, verbose = FALSE)
+      cluster_assignments[, i] <- mclust_fit$classification
+      detected_clusters[i] <- mclust_fit$G
+    }
+
+    ari_matrix <- matrix(1, ncol(data_matrix), ncol(data_matrix))
+    for (i in 1:(ncol(data_matrix)-1)) {
+      for (j in (i+1):ncol(data_matrix)) {
+        ari_val <- mclust::adjustedRandIndex(cluster_assignments[, i], cluster_assignments[, j])
+        ari_matrix[i, j] <- ari_val
+        ari_matrix[j, i] <- ari_val
+      }
+    }
+
+    dis_mat <- (1 - ari_matrix) + abs(matrix(rnorm(ncol(data_matrix)^2, 0, 0.001), ncol(data_matrix)))
+    dist_mat <- as.dist(dis_mat)
+    mds_result <- cmdscale(dist_mat, k = 2, eig = TRUE)
+    mds <- as.data.frame(mds_result$points)
+
+    # Run the selected model on the MDS-reduced data
+    result <- analyze_single_model(model, mds, n_structures, separation_factor, p_dim, n_samples)
+
+  }, error = function(e) {
+    warning(sprintf("Model %s failed for replication %d: %s", model, rep, e$message))
+  })
+
+  # Add metadata
+  result$p_dims <- p_dim
+  result$n_structures <- n_structures
+  result$n_samples <- n_samples
+  result$replication <- rep
+  
+  return(result)
+}
+
+analyze_single_model <- function(model, mds, n_structures, separation_factor, p_dim, n_samples) {
+  start_time <- Sys.time()
+  end_time <- NA
+  rt <- NA
+  stat <- "ERROR"
+  dns <- "NA"
+  method_label <- if (toupper(model) == "OTRIMLE") "OTRIMLE" else paste("mclustBootstrapLRT:", model)
+
+  if (toupper(model) != "OTRIMLE") {
+    tryCatch({
+      test <- R.utils::withTimeout({
+        mclust::mclustBootstrapLRT(
+          mds,
+          modelName = model,
+          nboot = 1000,
+          level = 0.95,
+          maxG = 1
+        )
+      }, timeout = 10800, onTimeout = "error")
+
+      end_time <- Sys.time()
+
+      pval <- if (!is.null(test$p.value)) round(test$p.value, 4) else NA
+      dns <- ifelse(!is.na(pval) && pval < 0.05, ">1", "1")
+      stat <- paste("p-value:", pval)
+    }, error = function(e) {
+      end_time <<- Sys.time()
+      stat <<- paste("ERROR:", e$message)
+      dns <<- "NA"
+    })
+  } else {
+    tryCatch({
+      model_otrimle <- R.utils::withTimeout({
+        otrimle::otrimleg(mds, G = 1:2)
+      }, timeout = 10800, onTimeout = "error")
+
+      end_time <- Sys.time()
+
+      if (!is.list(model_otrimle) || !"denscrit" %in% names(model_otrimle)) {
+        stop("OTRIMLE result is malformed")
+      }
+
+      best_G <- which.min(model_otrimle$denscrit)
+      min_denscrit <- min(model_otrimle$denscrit, na.rm = TRUE)
+
+      dns <- ifelse(best_G == 2, ">1", "1")
+      stat <- paste("min(Q):", round(min_denscrit, 4))
+    }, error = function(e) {
+      end_time <<- Sys.time()
+      stat <<- paste("ERROR:", e$message)
+      dns <<- "NA"
+    })
+  }
+
+  # Finalize runtime computation
+  if (!is.na(end_time)) {
+    rt <- as.numeric(difftime(end_time, start_time, units = "secs"))
+  }
+
+  # Correct label
+  cat_val <- ifelse(n_structures == 1, "1", ">1")
+
+  # Return as a consistent data frame
+  return(data.frame(
+    tns = n_structures,
+    cat = cat_val,
+    method = method_label,
+    stat = stat,
+    dns = dns,
+    correct = (dns == cat_val),
+    rt = rt,
+    sep_fact = separation_factor,
+    p_dims = p_dim,
+    n_samples = n_samples,
+    stringsAsFactors = FALSE
+  ))
+}
+```
+
+# 3. Simulation
+
+```{r run_simulation, cache=TRUE}
+library(foreach)
+library(doParallel)
+library(dplyr)
+
+cat("Starting simulation chunk\n")
+
+# Number of cores for parallel (leave 2 free)
+n_cores <- max(1, parallel::detectCores() - 2)
+
+# Initialize cluster
+cl <- makeCluster(n_cores)
+registerDoParallel(cl)
+
+models <- c(
+      "mclustBootstrapLRT: EEE", "mclustBootstrapLRT: EEI", "mclustBootstrapLRT: EEV",
+      "mclustBootstrapLRT: EII", "mclustBootstrapLRT: EVE", "mclustBootstrapLRT: EVI",
+      "mclustBootstrapLRT: EVV", "OTRIMLE"
+    )
+
+# Build full grid of conditions
+conditions_grid <- expand.grid(
+  n_structures = n_structures_values,
+  p_dim = p_dims,
+  n_samples = sample_sizes,
+  separation_factor = separation_factors
+)
+
+# Check which conditions already have cached results
+conditions_grid$cached <- mapply(
+  check_condition_cache,
+  conditions_grid$n_structures,
+  conditions_grid$p_dim,
+  conditions_grid$n_samples,
+  conditions_grid$separation_factor
+)
+
+# Select only uncached conditions to run
+to_run <- subset(conditions_grid, cached == FALSE)
+
+if (nrow(to_run) == 0) {
+  message("✅ All simulation results are already cached.")
+} else {
+  message("🚀 Running uncached simulation conditions.")
+
+  foreach(i = 1:nrow(to_run),
+          .packages = c("mvtnorm", "cluster", "mclust", "NbClust", "otrimle", "dplyr", "R.utils","foreach"),
+          .errorhandling = "pass",
+          .verbose = TRUE) %dopar% {
+
+    cond <- to_run[i, ]
+
+    # Dynamically compute dims_list correctly
+    dims_list <- rep(floor(cond$p_dim / cond$n_structures), cond$n_structures)
+    remainder <- cond$p_dim %% cond$n_structures
+    if (remainder > 0) {
+      dims_list[1:remainder] <- dims_list[1:remainder] + 1
+    }
+
+    # Models to run per your original list
+    models <- c(
+      "mclustBootstrapLRT: EEE", "mclustBootstrapLRT: EEI", "mclustBootstrapLRT: EEV",
+      "mclustBootstrapLRT: EII", "mclustBootstrapLRT: EVE", "mclustBootstrapLRT: EVI",
+      "mclustBootstrapLRT: EVV", "OTRIMLE"
+    )
+
+    # Load cached results if any (in case partial)
+    existing_results <- NULL
+    if (check_condition_cache(cond$n_structures, cond$p_dim, cond$n_samples, cond$separation_factor)) {
+      existing_results <- load_condition_results(cond$n_structures, cond$p_dim, cond$n_samples, cond$separation_factor)
+    }
+
+    all_results <- if (!is.null(existing_results)) existing_results else data.frame()
+
+    rep_results <- lapply(1:n_replications, function(rep) {
+      existing_methods <- if (nrow(all_results) > 0) {
+        subset(all_results, replication == rep & !is.na(dns))$method
+      } else {
+        character(0)
+      }
+    
+      missing_models <- setdiff(models, existing_methods)
+      print(paste("Replication", rep, "- missing models:", paste(missing_models, collapse = ", ")))
+    
+      if (length(missing_models) > 0) {
+        partial_results <- foreach(
+          model = missing_models,
+          .combine = rbind,
+          .packages = c("mvtnorm", "mclust", "cluster", "otrimle", "R.utils")
+        ) %do% {
+          safe_run_single_model(
+            p_dim = cond$p_dim,
+            rep = rep,
+            n_structures = cond$n_structures,
+            separation_factor = cond$separation_factor,
+            n_samples = cond$n_samples,
+            dims_list = dims_list,
+            model = model
+          )
+        }
+        partial_results
+      } else {
+        NULL
+      }
+    })
+
+
+    rep_results <- Filter(Negate(is.null), rep_results)
+    combined_results <- rbind(all_results, do.call(rbind, rep_results))
+    
+    save_condition_results(combined_results,
+                           cond$n_structures,
+                           cond$p_dim,
+                           cond$n_samples,
+                           cond$separation_factor)
+
+  }
+}
+
+# Stop cluster
+stopCluster(cl)
+
+# Optionally: load and flatten all cached results as in first script
+all_results_files <- list.files(cache_dir, pattern = "results_k.*\\.rds$", full.names = TRUE)
+
+all_conditions_results <- lapply(all_results_files, function(file) {
+  result_df <- tryCatch(readRDS(file), error = function(e) NULL)
+  if (!is.null(result_df) && is.data.frame(result_df)) {
+    result_df
+  } else if (is.list(result_df)) {
+    do.call(rbind, result_df)
+  } else {
+    NULL
+  }
+})
+
+all_conditions_results <- Filter(Negate(is.null), all_conditions_results)
+all_results_df <- do.call(rbind, all_conditions_results)
+
+message("✅ Simulation complete. Total rows: ", nrow(all_results_df))
+```
+
+# 4. Results
+
+```{r load-all-results, echo=FALSE, message=FALSE, warning=FALSE}
+all_results <- readRDS("~/Documents/MPhil Population Health Sciences/Dissertation/GMM Simulation Study/mds_threshold_cache/all_results.rds")
+```
+
+```{r full-results, cache=FALSE, echo=FALSE, message=FALSE, warning=FALSE}
+library(dplyr)
+library(tidyr)
+library(knitr)
+library(ggplot2)
+library(stringr)
+
+results_clean <- all_results %>% 
+  mutate(dns = ifelse(dns == "NA", NA, dns),
+         correct = ifelse(is.na(dns), NA, correct), 
+                                        runtime = rt) %>%
+  select(-rt)
+
+results_clean$method <- stringr::str_remove(results_clean$method, "mclustBootstrapLRT: ")
+
+results_clean <- results_clean %>%
+  mutate(
+    truth_binary = case_when(
+      is.na(cat) ~ NA_integer_,
+      cat == "1"  ~ 0L,
+      cat == ">1" ~ 1L,
+      TRUE ~ NA_integer_  
+    ),
+    detected_binary = case_when(
+      is.na(dns) ~ NA_integer_,
+      dns == "1"  ~ 0L,
+      dns == ">1" ~ 1L,
+      TRUE ~ NA_integer_
+    ),
+    
+    TP = if_else(is.na(truth_binary) | is.na(detected_binary), NA,
+                 truth_binary == 1 & detected_binary == 1),
+    TN = if_else(is.na(truth_binary) | is.na(detected_binary), NA,
+                 truth_binary == 0 & detected_binary == 0),
+    FP = if_else(is.na(truth_binary) | is.na(detected_binary), NA,
+                 truth_binary == 0 & detected_binary == 1),
+    FN = if_else(is.na(truth_binary) | is.na(detected_binary), NA,
+                 truth_binary == 1 & detected_binary == 0)
+  )
+
+
+# === Overall summary per method (Exact Clustering Performance) ===
+overall_summary <- results_clean %>%
+  group_by(method) %>%
+  summarise(
+    Exact_Correct_Rate = mean(correct, na.rm = TRUE),
+    Mean_Runtime_sec = mean(runtime, na.rm = TRUE),
+    NA_Count = sum(is.na(runtime)),
+    Total_Runs = n()
+  ) %>%
+  arrange(desc(Exact_Correct_Rate))
+
+# === Confusion matrix metrics per method (Binary Classification) ===
+confusion_summary <- results_clean %>%
+  group_by(method) %>%
+  summarise(
+    TP_Total = sum(TP, na.rm = TRUE),
+    TN_Total = sum(TN, na.rm = TRUE),
+    FP_Total = sum(FP, na.rm = TRUE),
+    FN_Total = sum(FN, na.rm = TRUE),
+    NA_count = sum(is.na(TP) | is.na(TN) | is.na(FP) | is.na(FN)),
+    Accuracy = (TP_Total + TN_Total) / (TP_Total + TN_Total + FP_Total + FN_Total),
+    Sensitivity_TPR = TP_Total / (TP_Total + FN_Total),
+    Specificity_TNR = TN_Total / (TN_Total + FP_Total),
+    FPR = FP_Total / (FP_Total + TN_Total),
+    FNR = FN_Total / (FN_Total + TP_Total)
+  ) %>%
+  arrange(desc(Accuracy))
+
+# === Confusion matrix metrics per method and sample size (Binary Classification) ===
+confusion_summary_s <- results_clean %>%
+  group_by(method, n_samples) %>%
+  summarise(
+    TP_Total = sum(TP, na.rm = TRUE),
+    TN_Total = sum(TN, na.rm = TRUE),
+    FP_Total = sum(FP, na.rm = TRUE),
+    FN_Total = sum(FN, na.rm = TRUE),
+    NA_count = sum(is.na(TP) | is.na(TN) | is.na(FP) | is.na(FN)),
+    Accuracy = (TP_Total + TN_Total) / (TP_Total + TN_Total + FP_Total + FN_Total),
+    Sensitivity_TPR = TP_Total / (TP_Total + FN_Total),
+    Specificity_TNR = TN_Total / (TN_Total + FP_Total),
+    FPR = FP_Total / (FP_Total + TN_Total),
+    FNR = FN_Total / (FN_Total + TP_Total)
+  ) %>%
+  arrange(desc(Accuracy))
+
+# === Confusion matrix metrics per method and structures (Binary Classification) ===
+confusion_summary_st <- results_clean %>%
+  group_by(method, n_structures) %>%
+  summarise(
+    TP_Total = sum(TP, na.rm = TRUE),
+    TN_Total = sum(TN, na.rm = TRUE),
+    FP_Total = sum(FP, na.rm = TRUE),
+    FN_Total = sum(FN, na.rm = TRUE),
+    NA_count = sum(is.na(TP) | is.na(TN) | is.na(FP) | is.na(FN)),
+    Accuracy = (TP_Total + TN_Total) / (TP_Total + TN_Total + FP_Total + FN_Total),
+    Sensitivity_TPR = TP_Total / (TP_Total + FN_Total),
+    Specificity_TNR = TN_Total / (TN_Total + FP_Total),
+    FPR = FP_Total / (FP_Total + TN_Total),
+    FNR = FN_Total / (FN_Total + TP_Total)
+  ) %>%
+  arrange(desc(Accuracy))
+
+# === Breakdown by true number of structures (Exact Clustering Performance) ===
+breakdown_structures <- results_clean %>%
+  group_by(method, n_structures) %>%
+  summarise(
+    Exact_Correct_Rate = mean(correct, na.rm = TRUE),
+    Mean_Runtime_sec = mean(runtime, na.rm = TRUE),
+        NA_Count = sum(is.na(runtime)),
+    Total_Runs = n()
+  ) %>%
+  ungroup() %>% 
+  arrange(n_structures, desc(Exact_Correct_Rate))
+
+# === Breakdown by sample size (Exact Clustering Performance) ===
+breakdown_samples <- results_clean %>%
+  group_by(method, n_samples) %>%
+  summarise(
+    Exact_Correct_Rate = mean(correct, na.rm = TRUE),
+    Mean_Runtime_sec = mean(runtime, na.rm = TRUE),
+    NA_Count = sum(is.na(runtime)),
+    Total_Runs = n()
+  ) %>%
+  ungroup()
+
+# === Missing data analysis 
+missing_by_method <- results_clean %>%
+  group_by(method) %>%
+  summarise(
+    Missing_Count = sum(is.na(runtime)),
+    Total = n(),
+    Missing_Rate = Missing_Count / Total
+  ) %>%
+  arrange(desc(Missing_Rate))
+
+missing_by_structures <- results_clean %>%
+  group_by(method, n_structures) %>%
+  summarise(
+    Missing_Count = sum(is.na(runtime)),
+    Total = n(),
+    Missing_Rate = Missing_Count / Total
+  ) %>%
+  ungroup()
+
+missing_by_samples <- results_clean %>%
+  group_by(method, n_samples) %>%
+  summarise(
+    Missing_Count = sum(is.na(runtime)),
+    Total = n(),
+    Missing_Rate = Missing_Count / Total
+  ) %>%
+  ungroup()
+
+
+
+# === Print overall summaries ===
+cat("## Overall Exact Clustering Performance Summary\n")
+kable(overall_summary, digits = 3, caption = "Exact Correctness, Runtime (sec), and NA Counts by Method")
+
+cat("\n\n## Binary Classification Metrics by Method\n")
+kable(confusion_summary, digits = 3, caption = "Binary Classification Metrics by Method")
+
+cat("\n\n## Binary Classification Metrics by Method and Number of Structures \n")
+kable(confusion_summary_st, digits = 3, caption = "Binary Classification Metrics by Method and Number of Structures")
+
+cat("\n\n## Binary Classification Metrics by Method and Sample Size\n")
+kable(confusion_summary_s, digits = 3, caption = "Binary Classification Metrics by Method and Sample Size")
+
+cat("\n\n## Exact Clustering Correctness Rate by True Number of Structures\n")
+kable(breakdown_structures, digits = 3, caption = "Exact Correctness and Runtime by True Number of Structures")
+
+cat("\n\n## Exact Clustering Correctness Rate by Sample Size\n")
+kable(breakdown_samples, digits = 3, caption = "Exact Correctness and Runtime by Sample Size")
+
+cat("\n\n## Missing Data Summary by Method\n")
+kable(missing_by_method, digits = 3, caption = "Missing Data by Method")
+
+cat("\n\n## Missing Data Summary by Number of Structures\n")
+kable(missing_by_structures, digits = 3, caption = "Missing Data by Number of Structures")
+
+cat("\n\n## Missing Data Summary by Sample Size\n")
+kable(missing_by_samples, digits = 3, caption = "Missing Data by Sample Size")
+
+
+
+# === Plots ===
+
+p1 <- ggplot(breakdown_structures, 
+             aes(x = factor(n_structures), 
+                 y = Exact_Correct_Rate, 
+                 color = method,
+                 shape = NA_Count > 0)) +  # Map shape based on condition
+  geom_point(size = 3, alpha = 1) + 
+  geom_line(aes(group = method)) +
+  labs(
+    title = "Accuracy of Detecting Multiple Views by True Number of Structures, \nAccounting for Missing Data",
+    x = "True Number of Structures",
+    y = "Accuracy"
+  ) +
+  theme_minimal() + 
+  scale_color_viridis_d(name = "Covariance Structure", option = "viridis") +
+  scale_shape_manual(
+    name = "Missing Data",  # Optional legend title
+    values = c(`FALSE` = 16, `TRUE` = 17)  # 16 = solid circle, 17 = triangle
+  ) +
+  theme(
+    plot.title = element_text(size = 12, face = "bold", family = "Times"),
+    plot.subtitle = element_text(size = 12, family = "Times"),
+    plot.caption = element_text(size = 12, family = "Times"),
+    axis.title = element_text(size = 12, face = "bold", family = "Times"),
+    axis.text = element_text(size = 10, family = "Times"),
+    legend.title = element_text(size = 12, face = "bold", family = "Times"),
+    legend.text = element_text(size = 10, family = "Times"),
+    strip.text = element_text(size = 12, family = "Times")
+  )
+
+print(p1)
+ggsave("1l_correctness.pdf", plot = p1, width = 6, height = 4, units = "in")
+
+p4 <- ggplot(breakdown_samples,
+             aes(x = factor(n_samples),
+                 y = Exact_Correct_Rate,
+                 color = method,
+                 group = method)) +  # connect points by method
+  geom_point(size = 3, alpha = 1) +
+  geom_line() +
+  labs(
+    title = "Accuracy of Detecting Multiple Views by Sample Size",
+    x = "Sample Size",
+    y = "Accuracy"
+  ) +
+  theme_minimal() +
+  scale_color_viridis_d(name = "Covariance Structure", option = "viridis") +
+  theme(
+    plot.title = element_text(size = 12, face = "bold", family = "Times"),
+    axis.title = element_text(size = 12, face = "bold", family = "Times"),
+    axis.text = element_text(size = 10, family = "Times"),
+    legend.title = element_text(size = 12, face = "bold", family = "Times"),
+    legend.text = element_text(size = 10, family = "Times")
+  )
+
+print(p4)
+ggsave("1l_accuracy_by_sample_size.pdf", plot = p4, width = 6, height = 4, units = "in")
+
+
+
+confusion_long <- confusion_summary %>%
+  select(method, Sensitivity_TPR, Specificity_TNR) %>%
+  pivot_longer(cols = c(Sensitivity_TPR, Specificity_TNR), names_to = "Metric", values_to = "Value")
+
+p2 <- ggplot(confusion_long, aes(x = method, y = Value, fill = Metric)) +
+  geom_col(position = "dodge") +
+  labs(title = "Sensitivity (TPR) and Specificity (TNR) by Method", y = "Value", x = "Method") +
+  theme_minimal() +
+  coord_flip()
+
+print(p2)
+
+fn_fp_long <- confusion_summary %>%
+  select(method, FPR, FNR) %>%
+  pivot_longer(cols = c(FPR, FNR), names_to = "Metric", values_to = "Value")
+
+p3 <- ggplot(fn_fp_long, aes(x = method, y = Value, fill = Metric)) +
+  geom_col(position = "dodge") +
+  labs(title = "False Positive Rate and False Negative Rate by Method", y = "Value", x = "Method") +
+  theme_minimal() +
+  coord_flip()
+
+print(p3)
+```

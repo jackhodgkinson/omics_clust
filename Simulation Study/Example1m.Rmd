@@ -1,0 +1,699 @@
+---
+title: 'Simulation Study: Analysing the performance of Hierarchical Clustering for Detecting the Number of Views'
+output: html_document
+date: "`r Sys.Date()`"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, error = TRUE, message = TRUE, warning = TRUE)
+```
+
+# Executive Summary
+
+This simulation study extends our analysis to investigate how accurately hierarchical clustering performs in determining the number of  views. We test whether the approach is accurate for 2 structures (our baseline). 3, 4, and 5 independent structures, all embedded in 10-,100-, and 500-dimensional data. We systematically vary the separation factor to examine how differing levels of cluster distinctness affect performance.
+
+**Key Questions:** 1. How accurately does hierarchical clustering detect the number of distinct clustering structures embedded in high-dimensional data? 2. How does performance change as the number of independent structures increases? 3. What level of cluster separation is required to reliably identify multiple views? 4. Is there a threshold beyond which hierarchical clustering consistently under- or over-estimates the true number of structures?
+
+# Implementation 
+
+## 1. Methods
+
+### 1.1 Experimental Design
+
+We use data divided equally among k structures:
+**p=10**
+- **k=2**: 5 dimensions per structure (baseline)
+- **k=3**: 3-4 dimensions per structure
+- **k=4**: 2-3 dimensions per structure  
+- **k=5**: 2 dimensions per structure
+**p=100**
+- **k=2**: 50 dimensions per structure (baseline)
+- **k=3**: 33-34 dimensions per structure
+- **k=4**: 25 dimensions per structure  
+- **k=5**: 20 dimensions per structure
+**p=500**
+- **k=2**: 250 dimensions per structure (baseline)
+- **k=3**: 166-167 dimensions per structure
+- **k=4**: 125 dimensions per structure  
+- **k=5**: 100 dimensions per structure
+
+Each structure has a different number of clusters (3, 4, 5, 6, or 7) to ensure distinguishability.
+
+### Experimental Grid:
+- **Number of structures**: 2, 3, 4, 5
+- **Dimensions**: 10, 100, 500
+- **Sample sizes**: 250, 500, 1000
+- **Separation factors**: 6.0σ, 3.0σ, 1.5σ
+- **Replications**: 25
+- **Parallel cores**: 8
+
+Total: 108 conditions × 25 replications = 2700 runs
+
+## 2. Implementation
+
+```{r libraries}
+# Load required libraries
+library(mvtnorm)      # For multivariate normal data generation
+library(cluster)      # For PAM clustering
+library(mclust)       # For model-based clustering
+library(NbClust)      # For choosing optimal number of clusters
+library(otrimle)      # For otrimle
+library(ggplot2)      # For visualisation
+library(dplyr)        # For data manipulation
+library(tidyr)        # For data reshaping
+library(viridis)      # For colour scales
+library(gridExtra)    # For arranging plots
+library(foreach)      # For parallel loops
+library(doParallel)   # For parallel backend
+library(parallel)     # For makeCluster and stopCluster
+library(R.utils)      # For mclust timeout
+
+# Set seed for reproducibility
+set.seed(42)
+```
+
+```{r parallel_setup}
+# Note: Parallel cluster will be created within the simulation chunk
+# to ensure proper scoping in R Markdown environment
+
+cat("Parallel processing configuration:\n")
+cat("- Total cores available:", detectCores(), "\n")
+cat("- Cores to be used:", detectCores() - 2, "\n")
+cat("- Cores kept free for system:", 2, "\n\n")
+```
+
+```{r cache_setup}
+# Set up caching directory
+cache_dir <- "~/Documents/MPhil Population Health Sciences/Dissertation/GMM Simulation Study/hclust_cache"
+if (!dir.exists(cache_dir)) {
+  dir.create(cache_dir)
+  cat("Created cache directory:", cache_dir, "\n")
+} else {
+  cat("Using existing cache directory:", cache_dir, "\n")
+}
+
+# Cache functions
+get_cache_filename <- function(n_structures, p_dims, n_samples, separation_factor) {
+  filename <- sprintf("results_k%d_d%d_n%d_sep%.1f.rds", n_structures, p_dims, n_samples, separation_factor)
+  file.path(cache_dir, filename)
+}
+
+check_condition_cache <- function(n_structures, p_dims, n_samples, separation_factor) {
+  cache_file <- get_cache_filename(n_structures, p_dims, n_samples, separation_factor)
+  file.exists(cache_file)
+}
+
+save_condition_results <- function(results, n_structures, p_dims, n_samples, separation_factor) {
+  cache_file <- get_cache_filename(n_structures, p_dims, n_samples, separation_factor)
+  cat("Attempting to save results to:", cache_file, "\n")
+  saveRDS(results, cache_file)
+  cat("Successfully saved results to:", cache_file, "\n")
+}
+
+load_condition_results <- function(n_structures, p_dims, n_samples, separation_factor) {
+  cache_file <- get_cache_filename(n_structures, p_dims, n_samples, separation_factor)
+  if (file.exists(cache_file)) {
+    return(readRDS(cache_file))
+  } else {
+    return(NULL)
+  }
+}
+
+get_all_results_cache_filename <- function() {
+  file.path(cache_dir, "all_results_full.rds")
+}
+```
+
+```{r parameters}
+# Experimental parameters
+n_structures_values <- c(2, 3, 4, 5)
+p_dims <- c(10, 100, 500)  
+sample_sizes <- c(250, 500, 1000)
+separation_factors <- c(6.0, 3.0, 1.5)
+n_replications <- 25
+
+# Fixed parameters
+cluster_variance <- 0.3
+
+# Clusters per structure (different for each to ensure distinguishability)
+clusters_per_structure <- c(3, 4, 5, 6, 7)  # Will use first k of these
+
+# Total conditions
+n_conditions <- length(p_dims) * length(n_structures_values) * length(sample_sizes) * length(separation_factors)
+
+cat("\nExperimental design:\n")
+cat("- Number of structures (k):", paste(n_structures_values, collapse=", "), "\n")
+cat("- Total dimensions:", paste(p_dims, collapse=", "), "\n")
+cat("- Sample sizes:", paste(sample_sizes, collapse=", "), "\n")
+cat("- Separation factors: ", paste(separation_factors, "σ", sep="", collapse=", "), "\n")
+cat("- Total conditions:", n_conditions, "\n")
+cat("- Replications per condition:", n_replications, "\n")
+cat("- Total simulation runs:", n_conditions * n_replications, "\n")
+```
+
+```{r data_generation_functions}
+# Generate cluster means for k structures
+generate_cluster_means_k <- function(separation_factor, cluster_variance, n_structures, dims_list) {
+  base_separation <- separation_factor * sqrt(cluster_variance)
+  
+  all_means <- list()
+  
+  for (k in 1:n_structures) {
+    n_clusters <- clusters_per_structure[k]
+    n_dims <- dims_list[k]
+    
+    # Generate means for this structure
+    structure_means <- list()
+    for (c in 1:n_clusters) {
+      # Create distinct patterns for each cluster
+      if (c <= 2) {
+        # First two clusters: opposite sides
+        multiplier <- ifelse(c == 1, -1, 1)
+        means <- runif(n_dims, 0.8, 1.5) * multiplier * base_separation
+      } else {
+        # Additional clusters: random positions
+        means <- runif(n_dims, -0.7, 0.7) * base_separation
+        # Add some structure to avoid complete overlap
+        means <- means + (c - 2.5) * 0.3 * base_separation
+      }
+      structure_means[[paste0("cluster_", c)]] <- means
+    }
+    
+    all_means[[paste0("structure_", k)]] <- structure_means
+  }
+  
+  return(all_means)
+}
+
+# Generate dataset with k structures
+generate_dataset_k <- function(p_dim, separation_factor, cluster_variance, n_samples, n_structures, dims_list) {
+  
+  # Generate cluster assignments for each structure
+  cluster_assignments <- list()
+  for (k in 1:n_structures) {
+    n_clusters <- clusters_per_structure[k]
+    # Use different proportions for each structure
+    props <- diff(c(0, sort(runif(n_clusters-1)), 1))
+    cluster_assignments[[k]] <- sample(1:n_clusters, n_samples, replace = TRUE, prob = props)
+  }
+  
+  # Get cluster means
+  all_means <- generate_cluster_means_k(separation_factor, cluster_variance, n_structures, dims_list)
+  
+  # Initialize data matrix
+  data_matrix <- matrix(NA, nrow = n_samples, ncol = sum(dims_list))
+  
+  # Generate data for each structure
+  col_start <- 1
+  for (k in 1:n_structures) {
+    n_dims <- dims_list[k]
+    col_end <- col_start + n_dims - 1
+    
+    structure_means <- all_means[[paste0("structure_", k)]]
+    
+    # Generate data for this structure
+    for (i in 1:n_samples) {
+      cluster_id <- cluster_assignments[[k]][i]
+      cluster_mean <- structure_means[[paste0("cluster_", cluster_id)]]
+      cluster_cov <- diag(rep(cluster_variance, n_dims))
+      
+      data_matrix[i, col_start:col_end] <- mvtnorm::rmvnorm(1, mean = cluster_mean, sigma = cluster_cov)
+    }
+    
+    col_start <- col_end + 1
+  }
+  
+  return(list(
+    data = data_matrix,
+    true_assignments = cluster_assignments,
+    dims_list = dims_list
+  ))
+}
+```
+```{r analysis_functions}
+# Analyze dataset with k structures
+analyze_dataset_k <- function(data_matrix, n_structures, separation_factor, dims_list) {
+  n_dims <- ncol(data_matrix)
+  
+  # Step 1: Mclust clustering for each dimension
+  cluster_assignments <- matrix(NA, nrow = nrow(data_matrix), ncol = n_dims)
+  for(i in 1:n_dims) {
+    mclust_fit <- Mclust(data_matrix[, i], G = 1:9, verbose = FALSE)
+    cluster_assignments[, i] <- mclust_fit$classification
+  }
+
+  # Step 2: Compute dissimilarity matrix based on ARI
+  ari_matrix <- matrix(1, n_dims, n_dims)
+  for(i in 1:(n_dims - 1)) {
+    for(j in (i + 1):n_dims) {
+      ari_val <- adjustedRandIndex(cluster_assignments[, i], cluster_assignments[, j])
+      ari_matrix[i, j] <- ari_val
+      ari_matrix[j, i] <- ari_val
+    }
+  }
+  dis_mat <- 1 - ari_matrix
+  dist_mat <- as.dist(dis_mat)
+
+  # Step 3: Try various linkage + index combinations
+  linkage_methods <- c("average", "complete", "ward.D", "ward.D2", "single", "mcquitty", "median", "centroid")
+  nbclust_indices <- c("silhouette", "dunn", "cindex", "mcclain")
+
+  results <- list()
+
+  for (linkage in linkage_methods) {
+    hc <- hclust(dist_mat, method = linkage)
+
+    for (index in nbclust_indices) {
+      res <- tryCatch({
+        nb <- NbClust(data = NULL,
+                      diss = dist_mat,
+                      distance = NULL,
+                      method = linkage,
+                      min.nc = 2,
+                      max.nc = 5,
+                      index = index)
+
+        best_k <- if (!is.null(nb$Best.nc)) as.numeric(nb$Best.nc[1]) else NA
+
+        data.frame(
+          tns = n_structures,
+          sep_fact = separation_factor, 
+          method = linkage,
+          index = index,
+          optimal_k = best_k,
+          correct = (n_structures == best_k),
+          stringsAsFactors = FALSE
+        )
+      }, error = function(e) {
+        data.frame(
+          tns = n_structures,
+          sep_fact = separation_factor, 
+          method = linkage,
+          index = index,
+          optimal_k = NA,
+          correct = NA,
+          stringsAsFactors = FALSE
+        )
+      })
+
+      results[[length(results) + 1]] <- res
+    }
+  }
+
+  # Combine all results
+  df <- do.call(rbind, results)
+  return(df)
+}
+
+# Wrapper function for parallel execution
+run_single_replication <- function(p_dim, rep, n_structures, separation_factor, n_samples, dims_list) {
+  # Generate dataset
+  dataset <- generate_dataset_k(p_dim, separation_factor, cluster_variance, n_samples, n_structures, dims_list)
+  
+  # Analyze dataset
+  analysis_result <- analyze_dataset_k(dataset$data, n_structures, separation_factor, dims_list)
+  
+  # Add metadata to result
+  analysis_result$p_dims <- p_dim
+  analysis_result$n_samples <- n_samples
+  analysis_result$replication <- rep
+  return(analysis_result)
+}
+```
+
+# 3. Simulation
+
+```{r run_simulations, message=FALSE, warning=FALSE}
+library(foreach)
+library(doParallel)
+library(dplyr)
+
+cat("Starting simulation chunk\n")
+
+# Number of cores for parallel (leave 2 free)
+n_cores <- max(1, parallel::detectCores() - 2)
+
+# Initialize cluster
+cl <- makeCluster(n_cores)
+registerDoParallel(cl)
+
+# Build full grid of conditions
+conditions_grid <- expand.grid(
+  n_structures = n_structures_values,
+  p_dim = p_dims,
+  n_samples = sample_sizes,
+  separation_factor = separation_factors
+)
+
+# Check which conditions already have cached results
+conditions_grid$cached <- mapply(
+  check_condition_cache,
+  conditions_grid$n_structures,
+  conditions_grid$p_dim,
+  conditions_grid$n_samples,
+  conditions_grid$separation_factor
+)
+
+# Select only those conditions that are not cached
+to_run <- subset(conditions_grid, cached == FALSE)
+
+if (nrow(to_run) == 0) {
+  message("✅ All simulation results are already cached.")
+} else {
+  message("🚀 Running uncached simulation conditions.")
+
+  foreach(i = 1:nrow(to_run),
+          .packages = c("mvtnorm", "cluster", "mclust", "NbClust", "otrimle", "dplyr"),
+          .errorhandling = 'pass',
+          .verbose = TRUE) %dopar% {
+
+    cond <- to_run[i, ]
+    # Dynamically compute dims per structure based on total p
+    dims_list <- rep(floor(cond$p_dim / cond$n_structures), cond$n_structures)
+    remainder <- cond$p_dim %% cond$n_structures
+    if (remainder > 0) {
+      dims_list[1:remainder] <- dims_list[1:remainder] + 1
+    }
+    
+    # ✅ Print dims_list for verification
+    cat(sprintf("dims_list for p = %d and k = %d: [%s]\n", 
+                cond$p_dim, cond$n_structures, 
+                paste(dims_list, collapse = ", ")))
+
+    
+
+
+    rep_results <- lapply(1:n_replications, function(rep) {
+      run_single_replication(
+        p_dim = cond$p_dim,
+        rep = rep,
+        n_structures = cond$n_structures,
+        separation_factor = cond$separation_factor,
+        n_samples = cond$n_samples,
+        dims_list = dims_list
+      )
+    })
+
+    rep_results <- Filter(Negate(is.null), rep_results)
+
+    # ✅ Flatten to a single data frame for the condition
+    combined_results <- do.call(rbind, rep_results)
+
+    # ✅ Save the flat data frame (not the list) to RDS
+    save_condition_results(combined_results,
+                           cond$n_structures,
+                           cond$p_dim,
+                           cond$n_samples,
+                           cond$separation_factor)
+  }
+}
+
+stopCluster(cl)
+
+# ✅ Load and flatten all cached results
+all_results_files <- list.files(cache_dir, pattern = "results_k.*\\.rds$", full.names = TRUE)
+
+all_conditions_results <- lapply(all_results_files, function(file) {
+  result_df <- tryCatch(readRDS(file), error = function(e) NULL)
+  if (!is.null(result_df) && is.data.frame(result_df)) {
+    result_df
+  } else if (is.list(result_df)) {
+    do.call(rbind, result_df)
+  } else {
+    NULL
+  }
+})
+
+# ✅ Remove any failed reads or empty items
+all_conditions_results <- Filter(Negate(is.null), all_conditions_results)
+
+# ✅ Combine all into a master data frame
+all_results_df <- do.call(rbind, all_conditions_results)
+
+message("✅ Simulation complete. Total rows: ", nrow(all_results_df))
+```
+
+# 4. Results
+
+```{r join-results, echo=FALSE, message=FALSE, warning=FALSE}
+# Set the path to your folder
+folder_path <- "hclust_cache"
+combined_file_path <- file.path(folder_path, "all_results_hclust.rds")
+
+# Check if the combined file already exists
+if (file.exists(combined_file_path)) {
+  # Load the cached combined results
+  all_results_hclust <- readRDS(combined_file_path)
+} else {
+  # List all RDS files except the combined file itself
+  file_list <- list.files(
+    path = folder_path,
+    pattern = "\\.rds$",
+    full.names = TRUE
+  )
+  file_list <- file_list[basename(file_list) != "all_results_hclust.rds"]
+  
+  # Read and combine
+  data_list <- lapply(file_list, readRDS)
+  all_results_hclust <- do.call(rbind, data_list)
+  
+  # Save the combined result for future use
+  saveRDS(all_results_hclust, combined_file_path)
+}
+```
+```{r results, echo=FALSE, message=FALSE, warning=FALSE}
+library(dplyr)
+library(ggplot2)
+library(viridis)
+library(tidyr)
+library(purrr)
+library(broom)
+
+# Rename columns and filter incomplete results
+all_results <- all_results_hclust %>%
+  rename(
+    n_structures = tns,
+    separation_factor = sep_fact
+  ) %>%
+  filter(!is.na(correct),
+         method != "ward.D")
+
+exceptions <- c("mcclain" = "McClain",
+                "mcquitty" = "McQuitty",
+                "cindex" = "C-Index",
+                "ward.D2" = "Ward's minimum variance")
+
+title_case_except <- function(x, exceptions) {
+  sapply(x, function(txt) {
+    if (txt %in% names(exceptions)) {
+      exceptions[[txt]]
+    } else {
+      tools::toTitleCase(txt)
+    }
+  })
+}
+
+# Change linkage and index appearance
+all_results <- all_results %>%
+  mutate(method = title_case_except(method, exceptions),
+         index = title_case_except(index, exceptions))
+  
+# Summarize accuracy by all key factors
+summary_perf <- all_results %>%
+  group_by(n_structures, p_dims, n_samples, separation_factor, method, index) %>%
+  summarise(
+    mean_accuracy = mean(correct, na.rm = TRUE),
+    sd_accuracy = sd(correct, na.rm = TRUE),
+    n = n(),
+    .groups = "drop"
+  )
+
+# Save cleaned results
+saveRDS(all_results, file.path(folder_path, "all_results_clean.rds"))
+```
+
+```{r simulation-full-summary-plots, echo=TRUE, message=FALSE, warning=FALSE}
+library(dplyr)
+library(ggplot2)
+library(viridis)
+library(tidyr)
+library(tools)
+
+# ---- Base Summaries ----
+linkage_summary <- summary_perf %>%
+  group_by(method) %>%
+  summarise(mean_accuracy = mean(mean_accuracy, na.rm = TRUE),
+            sd_accuracy = sd(mean_accuracy, na.rm = TRUE),
+            n = n(),
+            .groups = "drop") %>%
+  arrange(desc(mean_accuracy))
+cat("### Accuracy Summary by Linkage Method\n")
+print(linkage_summary, n = Inf)
+cat("\n\n")
+
+index_summary <- summary_perf %>%
+  group_by(index) %>%
+  summarise(mean_accuracy = mean(mean_accuracy, na.rm = TRUE),
+            sd_accuracy = sd(mean_accuracy, na.rm = TRUE),
+            n = n(),
+            .groups = "drop") %>%
+  arrange(desc(mean_accuracy))
+cat("### Accuracy Summary by Index\n")
+print(index_summary, n = Inf)
+cat("\n\n")
+
+combo_summary <- summary_perf %>%
+  group_by(method, index) %>%
+  summarise(mean_accuracy = mean(mean_accuracy, na.rm = TRUE),
+            sd_accuracy = sd(mean_accuracy, na.rm = TRUE),
+            n = n(),
+            .groups = "drop") %>%
+  arrange(desc(mean_accuracy))
+cat("### Accuracy Summary by Linkage-Index Combination\n")
+print(combo_summary, n = Inf)
+cat("\n\n")
+
+library(ggplot2)
+
+sf_summary <- summary_perf %>% 
+  group_by(method, index, separation_factor) %>% 
+    summarise(mean_accuracy = mean(mean_accuracy, na.rm = TRUE),
+            sd_accuracy = sd(mean_accuracy, na.rm = TRUE),
+            n = n(),
+            .groups = "drop") %>%
+  arrange(desc(mean_accuracy))
+
+p1 <- ggplot(sf_summary, aes(
+  x = separation_factor,
+  y = mean_accuracy,
+  color = index,
+  linetype = method,
+  group = interaction(index, method)
+)) +
+  scale_x_reverse() + 
+  geom_point() +
+  geom_line() +
+  labs(
+    title = "Comparing Mean Accuracy Scores Across Different Separation\nFactors (σ) by Linkage Methods and Cluster Validity Indices",
+    x = "Separation Factor (σ)",
+    y = "Mean Accuracy Score"
+  ) +
+  scale_color_viridis_d(
+    name = "Cluster Validity Index",
+    option = "viridis",
+    labels = function(x) str_wrap(x, width = 10)
+  ) +
+  scale_linetype_discrete(
+    name = "Linkage Method",
+    labels = function(x) str_wrap(x, width = 15)
+  ) +
+  theme_minimal() +
+  theme(
+    legend.box.margin = margin(t = 20),
+    axis.text.x = element_text(family = "Times", size = 10),
+    axis.text.y = element_text(family = "Times", size = 10),
+    axis.title = element_text(face = "bold", family = "Times", size = 12),
+    plot.title = element_text(hjust = 0.5, face = "bold", family = "Times", size = 12),
+    legend.title = element_text(face = "bold", family = "Times", size = 12),
+    legend.text = element_text(family = "Times", size = 10)
+  )
+
+ggsave("1m_index_linkage_sf_accuracy.pdf", plot = p1, device = cairo_pdf, width = 6, height = 4, units = "in")
+
+# ---- Loop: By Dimension ----
+for (d in sort(unique(summary_perf$p_dims))) {
+  cat(paste0("### Accuracy Summary for Dimension p = ", d, "\n"))
+  dim_d_summary <- summary_perf %>%
+    filter(p_dims == d) %>%
+    group_by(method, index) %>%
+    summarise(mean_accuracy = mean(mean_accuracy, na.rm = TRUE),
+              sd_accuracy = sd(mean_accuracy, na.rm = TRUE),
+              n = n(),
+              .groups = "drop") %>%
+    arrange(desc(mean_accuracy))
+  print(dim_d_summary, n = Inf)
+  cat("\n\n")
+}
+
+# ---- Loop: By Sample Size ----
+for (n_s in sort(unique(summary_perf$n_samples))) {
+  cat(paste0("### Accuracy Summary for Sample Size = ", n_s, "\n"))
+  sample_n_summary <- summary_perf %>%
+    filter(n_samples == n_s) %>%
+    group_by(method, index) %>%
+    summarise(mean_accuracy = mean(mean_accuracy, na.rm = TRUE),
+              sd_accuracy = sd(mean_accuracy, na.rm = TRUE),
+              n = n(),
+              .groups = "drop") %>%
+    arrange(desc(mean_accuracy))
+  print(sample_n_summary, n = Inf)
+  cat("\n\n")
+}
+
+# ---- Loop: By Separation Factor ----
+for (sep in sort(unique(summary_perf$separation_factor))) {
+  cat(paste0("### Accuracy Summary for Separation Factor = ", sep, "\n"))
+  sep_summary <- summary_perf %>%
+    filter(separation_factor == sep) %>%
+    group_by(method, index) %>%
+    summarise(mean_accuracy = mean(mean_accuracy, na.rm = TRUE),
+              sd_accuracy = sd(mean_accuracy, na.rm = TRUE),
+              n = n(),
+              .groups = "drop") %>%
+    arrange(desc(mean_accuracy))
+  print(sep_summary, n = Inf)
+  cat("\n\n")
+}
+
+# ---- Loop: By Number of Structures ----
+for (num in sort(unique(summary_perf$n_structures))) {
+  cat(paste0("### Accuracy Summary for K = ", num, " Structures\n"))
+  n_summary <- summary_perf %>%
+    filter(n_structures == num) %>%
+    group_by(method, index) %>%
+    summarise(mean_accuracy = mean(mean_accuracy, na.rm = TRUE),
+              sd_accuracy = sd(mean_accuracy, na.rm = TRUE),
+              n = n(),
+              .groups = "drop") %>%
+    arrange(desc(mean_accuracy))
+  print(n_summary, n = Inf)
+  cat("\n\n")
+}
+
+best_method_per_index <- summary_perf %>%
+  filter(index != "McClain" & index != "C-Index") %>%
+  filter(method != "Centroid" & method != "Median") %>%
+  group_by(n_samples, p_dims, method, index) %>%
+  summarise(mean_accuracy = mean(mean_accuracy, na.rm = TRUE), .groups = "drop") %>%
+  group_by(n_samples, p_dims, index) %>%
+  ungroup()
+
+print(best_method_per_index, n = Inf)
+
+# Plot 1: Bar charts by index — Mean Accuracy per Linkage Method
+unique_indices <- combo_summary %>% 
+  distinct(index, .keep_all = TRUE) %>%  # keep one row per unique index
+  filter(index != "mcclain", index != "cindex") %>%           # filter rows where mcclain and cindex are FALSE or 0
+  pull(index)                            # get the index column as a vector
+combo_summary <- combo_summary %>%
+  filter(method != "median" & method != "centroid")
+for (idx in unique_indices) {
+  
+  p <- combo_summary %>%
+    filter(index == idx) %>%
+    ggplot(aes(x = reorder(method, mean_accuracy), y = mean_accuracy, fill = method)) +
+    geom_col() +
+    coord_flip() +
+    labs(title = paste("Mean Accuracy by Linkage Method for", tools::toTitleCase(idx)),
+         x = "Linkage Method", y = "Mean Accuracy") +
+    theme_minimal() +
+    theme(legend.position = "none",
+          plot.title = element_text(size = 12, face = "bold", family = "Times"),
+          axis.title = element_text(size = 12, face = "bold", family = "Times"),
+          axis.text = element_text(size = 10, family = "Times"))
+  
+print(p)
+  
+ggsave(paste0("1m_accuracy_", idx, ".pdf"), plot = p, width = 6, height = 4, units = "in")
+}
+```

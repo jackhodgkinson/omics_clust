@@ -1,0 +1,696 @@
+---
+title: "Simulation Study: Recovery Performance with Multiple Clustering Structures"
+author: "Your Name"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, 
+                      fig.width = 12, fig.height = 8, cache = TRUE)
+```
+
+# Executive Summary
+
+This simulation study extends our analysis to investigate how the number of independent clustering structures affects recovery performance. We test whether the approach scales from 2 structures (our baseline) to 3, 4, and 5 independent structures, all embedded in 100-dimensional data.
+
+**Key Questions**:
+1. How does recovery performance degrade as the number of structures increases?
+2. Is there a maximum number of structures that can be reliably recovered?
+3. How do sample size requirements change with more structures?
+4. Does the critical separation threshold shift with the number of structures?
+
+# 1. Methods
+
+## 1.1 Experimental Design
+
+We use high-dimensional data (p=100) divided equally among k structures:
+- **k=2**: 50 dimensions per structure (baseline)
+- **k=3**: 33-34 dimensions per structure
+- **k=4**: 25 dimensions per structure  
+- **k=5**: 20 dimensions per structure
+
+Each structure has a different number of clusters (3, 4, 5, 6, or 7) to ensure distinguishability.
+
+### Experimental Grid:
+- **Number of structures**: 2, 3, 4, 5
+- **Dimensions**: Fixed at p=100
+- **Sample sizes**: 250, 500, 1000
+- **Separation factors**: 6.0σ, 3.0σ, 1.5σ, 0.5σ
+- **Replications**: 25
+- **Parallel cores**: 8
+
+Total: 48 conditions × 25 replications = 900 runs
+
+# 2. Implementation
+
+```{r libraries}
+# Load required libraries
+library(mvtnorm)      # For multivariate normal data generation
+library(cluster)      # For PAM clustering
+library(mclust)       # For model-based clustering
+library(ggplot2)      # For visualisation
+library(dplyr)        # For data manipulation
+library(tidyr)        # For data reshaping
+library(viridis)      # For colour scales
+library(gridExtra)    # For arranging plots
+library(foreach)      # For parallel loops
+library(doParallel)   # For parallel backend
+library(parallel)     # For makeCluster and stopCluster
+
+# Set seed for reproducibility
+set.seed(42)
+```
+
+```{r parallel_setup}
+# Note: Parallel cluster will be created within the simulation chunk
+# to ensure proper scoping in R Markdown environment
+
+cat("Parallel processing configuration:\n")
+cat("- Total cores available:", detectCores(), "\n")
+cat("- Cores to be used:", detectCores() - 2, "\n")
+cat("- Cores kept free for system:", 2, "\n\n")
+```
+
+```{r cache_setup}
+# Set up caching directory
+cache_dir <- "multiple_structures_cache"
+if (!dir.exists(cache_dir)) {
+  dir.create(cache_dir)
+  cat("Created cache directory:", cache_dir, "\n")
+} else {
+  cat("Using existing cache directory:", cache_dir, "\n")
+}
+
+# Cache functions
+get_cache_filename <- function(n_structures, n_samples, separation_factor) {
+  filename <- sprintf("results_k%d_n%d_sep%.1f.rds", n_structures, n_samples, separation_factor)
+  file.path(cache_dir, filename)
+}
+
+check_condition_cache <- function(n_structures, n_samples, separation_factor) {
+  cache_file <- get_cache_filename(n_structures, n_samples, separation_factor)
+  file.exists(cache_file)
+}
+
+save_condition_results <- function(results, n_structures, n_samples, separation_factor) {
+  cache_file <- get_cache_filename(n_structures, n_samples, separation_factor)
+  saveRDS(results, cache_file)
+}
+
+load_condition_results <- function(n_structures, n_samples, separation_factor) {
+  cache_file <- get_cache_filename(n_structures, n_samples, separation_factor)
+  if (file.exists(cache_file)) {
+    return(readRDS(cache_file))
+  } else {
+    return(NULL)
+  }
+}
+```
+
+```{r parameters}
+# Experimental parameters
+n_structures_values <- c(2, 3, 4, 5)
+p_dims <- 100  # Fixed
+sample_sizes <- c(250, 500, 1000)
+separation_factors <- c(6, 3, 1.5)
+n_replications <- 25
+
+# Fixed parameters
+cluster_variance <- 0.3
+
+# Clusters per structure (different for each to ensure distinguishability)
+clusters_per_structure <- c(3, 4, 5, 6, 7)  # Will use first k of these
+
+# Calculate dimensions per structure for each k
+dims_per_structure <- list(
+  "2" = c(50, 50),
+  "3" = c(34, 33, 33),
+  "4" = c(25, 25, 25, 25),
+  "5" = c(20, 20, 20, 20, 20)
+)
+
+# Total conditions
+n_conditions <- length(n_structures_values) * length(sample_sizes) * length(separation_factors)
+
+cat("\nExperimental design:\n")
+cat("- Number of structures (k):", paste(n_structures_values, collapse=", "), "\n")
+cat("- Total dimensions:", p_dims, "\n")
+cat("- Sample sizes:", paste(sample_sizes, collapse=", "), "\n")
+cat("- Separation factors:", paste(separation_factors, collapse=", "), "σ\n")
+cat("- Total conditions:", n_conditions, "\n")
+cat("- Replications per condition:", n_replications, "\n")
+cat("- Total simulation runs:", n_conditions * n_replications, "\n")
+```
+
+```{r data_generation_functions}
+# Generate cluster means for k structures
+generate_cluster_means_k <- function(separation_factor, cluster_variance, n_structures, dims_list) {
+  base_separation <- separation_factor * sqrt(cluster_variance)
+  
+  all_means <- list()
+  
+  for (k in 1:n_structures) {
+    n_clusters <- clusters_per_structure[k]
+    n_dims <- dims_list[k]
+    
+    # Generate means for this structure
+    structure_means <- list()
+    for (c in 1:n_clusters) {
+      # Create distinct patterns for each cluster
+      if (c <= 2) {
+        # First two clusters: opposite sides
+        multiplier <- ifelse(c == 1, -1, 1)
+        means <- runif(n_dims, 0.8, 1.5) * multiplier * base_separation
+      } else {
+        # Additional clusters: random positions
+        means <- runif(n_dims, -0.7, 0.7) * base_separation
+        # Add some structure to avoid complete overlap
+        means <- means + (c - 2.5) * 0.3 * base_separation
+      }
+      structure_means[[paste0("cluster_", c)]] <- means
+    }
+    
+    all_means[[paste0("structure_", k)]] <- structure_means
+  }
+  
+  return(all_means)
+}
+
+# Generate dataset with k structures
+generate_dataset_k <- function(separation_factor, cluster_variance, n_samples, n_structures) {
+  dims_list <- dims_per_structure[[as.character(n_structures)]]
+  
+  # Generate cluster assignments for each structure
+  cluster_assignments <- list()
+  for (k in 1:n_structures) {
+    n_clusters <- clusters_per_structure[k]
+    # Use different proportions for each structure
+    props <- diff(c(0, sort(runif(n_clusters-1)), 1))
+    cluster_assignments[[k]] <- sample(1:n_clusters, n_samples, replace = TRUE, prob = props)
+  }
+  
+  # Get cluster means
+  all_means <- generate_cluster_means_k(separation_factor, cluster_variance, n_structures, dims_list)
+  
+  # Initialize data matrix
+  data_matrix <- matrix(NA, nrow = n_samples, ncol = p_dims)
+  
+  # Generate data for each structure
+  col_start <- 1
+  for (k in 1:n_structures) {
+    n_dims <- dims_list[k]
+    col_end <- col_start + n_dims - 1
+    
+    structure_means <- all_means[[paste0("structure_", k)]]
+    
+    # Generate data for this structure
+    for (i in 1:n_samples) {
+      cluster_id <- cluster_assignments[[k]][i]
+      cluster_mean <- structure_means[[paste0("cluster_", cluster_id)]]
+      cluster_cov <- diag(rep(cluster_variance, n_dims))
+      
+      data_matrix[i, col_start:col_end] <- rmvnorm(1, mean = cluster_mean, sigma = cluster_cov)
+    }
+    
+    col_start <- col_end + 1
+  }
+  
+  return(list(
+    data = data_matrix,
+    true_assignments = cluster_assignments,
+    dims_list = dims_list
+  ))
+}
+```
+
+```{r analysis_functions}
+# Analyze dataset with k structures
+analyze_dataset_k <- function(data_matrix, n_structures, dims_list) {
+  n_dims <- ncol(data_matrix)
+  
+  # Step 1: MCLUST on each dimension
+  cluster_assignments <- matrix(NA, nrow = nrow(data_matrix), ncol = n_dims)
+  detected_clusters <- numeric(n_dims)
+  
+  for(i in 1:n_dims) {
+    mclust_fit <- Mclust(data_matrix[, i], G = 1:9, verbose = FALSE)
+    cluster_assignments[, i] <- mclust_fit$classification
+    detected_clusters[i] <- mclust_fit$G
+  }
+  
+  # Step 2: Compute ARI matrix
+  ari_matrix <- matrix(1, nrow = n_dims, ncol = n_dims)
+  for(i in 1:(n_dims-1)) {
+    for(j in (i+1):n_dims) {
+      ari_val <- adjustedRandIndex(cluster_assignments[, i], cluster_assignments[, j])
+      ari_matrix[i, j] <- ari_val
+      ari_matrix[j, i] <- ari_val
+    }
+  }
+  
+  # Step 3: HCLust clustering
+  dissim_matrix <- 1 - ari_matrix
+  diag(dissim_matrix) <- 0
+  dissim_dist <- as.dist(dissim_matrix)
+  
+  # Try k values around true number of structures
+  min_k <- max(2, n_structures-1)
+  max_k <- min(n_structures+2, 8)
+  k_values <- min_k:max_k
+  
+    # Try Dunn index first
+  opt <- tryCatch(
+    NbClust::NbClust(diss = dissim_dist, distance = NULL,
+                     min.nc = min_k, max.nc = max_k, method = "ward.D2",
+                     index = "dunn"),
+    error = function(e) NULL
+  )
+  
+  # Initialize return variables
+  index <- NA_character_
+  optimal_k <- NA_integer_
+  optimal_hclust <- NULL
+  index_values <- NULL
+  optimal_idx <- NA_integer_
+  
+  # Check if NbClust with Dunn index worked
+  if (!is.null(opt) && !is.null(opt$Best.nc)) {
+    best_k <- suppressWarnings(as.numeric(opt$Best.nc[1]))
+    dunn_val <- suppressWarnings(as.numeric(opt$Best.nc[2]))
+    
+    if (!is.na(best_k) && best_k > 1 && !is.nan(dunn_val) && !is.infinite(dunn_val) && dunn_val > 0) {
+      # Dunn index valid
+      index <- "dunn"
+      optimal_k <- best_k
+      
+      # Handle Best.partition (cluster assignment vector or matrix)
+      if (is.matrix(opt$Best.partition)) {
+        # Assume second row is actual partition (based on your previous logic)
+        optimal_hclust <- as.vector(opt$Best.partition[2, ])
+      } else {
+        optimal_hclust <- as.vector(opt$Best.partition)
+      }
+      
+      # Get Dunn index values for all tested cluster numbers
+      index_values <- as.numeric(opt$All.index)
+      all_index_names <- names(opt$All.index)
+      optimal_idx <- which(all_index_names == as.character(best_k))
+      if (length(optimal_idx) == 0) {
+        optimal_idx <- 1
+      }
+      
+    } else {
+      # Dunn index invalid → fallback to silhouette
+      index <- "silhouette"
+      
+      k_values <- min_k:max_k
+      index_values <- numeric(length(k_values))
+      hclust_results <- vector("list", length(k_values))
+      
+      for (i in seq_along(k_values)) {
+        k <- k_values[i]
+        hclust_fit <- hclust(dissim_dist, method = "ward.D2")
+        clusters <- cutree(hclust_fit, k = k)
+        hclust_results[[i]] <- clusters
+        sil <- silhouette(clusters, dist = dissim_dist)
+        index_values[i] <- mean(sil[, "sil_width"])
+        cat(sprintf("\nk = %d: Average silhouette width = %.3f", k, index_values[i]))
+      }
+      
+      optimal_idx <- which.max(index_values)
+      optimal_k <- k_values[optimal_idx]
+      optimal_hclust <- hclust_results[[optimal_idx]]
+      
+      cat("\nOptimal number of dimension groups (silhouette):", optimal_k, "\n")
+    }
+    
+  } else {
+    # NbClust failed (e.g., error or null), fallback to silhouette
+    index <- "silhouette"
+    
+    k_values <- min_k:max_k
+    index_values <- numeric(length(k_values))
+    hclust_results <- vector("list", length(k_values))
+    
+    for (i in seq_along(k_values)) {
+      k <- k_values[i]
+      hclust_fit <- hclust(dissim_dist, method = "ward.D2")
+      clusters <- cutree(hclust_fit, k = k)
+      hclust_results[[i]] <- clusters
+      sil <- silhouette(clusters, dist = dissim_dist)
+      index_values[i] <- mean(sil[, "sil_width"])
+      cat(sprintf("\nk = %d: Average silhouette width = %.3f", k, index_values[i]))
+    }
+    
+    optimal_idx <- which.max(index_values)
+    optimal_k <- k_values[optimal_idx]
+    optimal_hclust <- hclust_results[[optimal_idx]]
+    
+    cat("\nOptimal number of dimension groups (silhouette):", optimal_k, "\n")
+  }
+  
+  # Step 4: Calculate recovery metrics
+  # Create true structure labels
+  true_labels <- rep(NA, n_dims)
+  col_start <- 1
+  for (k in 1:n_structures) {
+    col_end <- col_start + dims_list[k] - 1
+    true_labels[col_start:col_end] <- k
+    col_start <- col_end + 1
+  }
+  
+  recovery_ari <- adjustedRandIndex(optimal_hclust, true_labels)
+  
+  # Check detection accuracy for each structure
+  structure_detection <- numeric(n_structures)
+  col_start <- 1
+  for (k in 1:n_structures) {
+    col_end <- col_start + dims_list[k] - 1
+    expected_clusters <- clusters_per_structure[k]
+    structure_detection[k] <- sum(detected_clusters[col_start:col_end] == expected_clusters) / dims_list[k]
+    col_start <- col_end + 1
+  }
+  
+  return(list(
+    recovery_ari = recovery_ari,
+    optimal_k = optimal_k,
+    found_correct_k = (optimal_k == n_structures),
+    index = index,
+    index_value = as.numeric(index_values[optimal_idx]),
+    structure_detection = structure_detection,
+    mean_detection = mean(structure_detection)
+  ))
+}
+
+# Wrapper function for parallel execution
+run_single_replication <- function(rep, n_structures, separation_factor, n_samples, dims_list) {
+  # Generate dataset
+  dataset <- generate_dataset_k(separation_factor, cluster_variance, n_samples, n_structures)
+  
+  # Analyze dataset
+  analysis_result <- analyze_dataset_k(dataset$data, n_structures, dims_list)
+  
+  # Return row of results
+  data.frame(
+    n_structures = n_structures,
+    n_samples = n_samples,
+    separation_factor = separation_factor,
+    replication = rep,
+    recovery_ari = analysis_result$recovery_ari,
+    optimal_k = analysis_result$optimal_k,
+    found_correct_k = analysis_result$found_correct_k,
+    index = analysis_result$index,
+    index_value = analysis_result$index_value,
+    mean_detection = analysis_result$mean_detection,
+    stringsAsFactors = FALSE
+  )
+}
+```
+
+# 3. Run Simulation
+
+```{r run_simulation, cache=FALSE}
+# Set up parallel processing within this chunk
+n_cores <- parallel::detectCores() - 2  # Leave 2 cores free for system
+cl <- parallel::makeCluster(n_cores)
+doParallel::registerDoParallel(cl)
+
+# Initialize results storage
+all_results <- data.frame()
+condition_counter <- 0
+start_time <- Sys.time()
+
+cat("\nStarting parallel simulation with multiple structures...\n")
+cat("Using", n_cores, "parallel cores (out of", parallel::detectCores(), "available)\n")
+cat("Time started:", format(start_time, "%Y-%m-%d %H:%M:%S"), "\n\n")
+
+# Loop through experimental conditions
+for (n_structures in n_structures_values) {
+  cat(sprintf("\n=== Processing k = %d structures ===\n", n_structures))
+  structure_start_time <- Sys.time()
+  
+  dims_list <- dims_per_structure[[as.character(n_structures)]]
+  
+  for (n_samples in sample_sizes) {
+    for (sep_factor in separation_factors) {
+      condition_counter <- condition_counter + 1
+      
+      cat(sprintf("Condition %d/%d: k=%d, n=%d, sep=%.1fσ", 
+                  condition_counter, n_conditions, n_structures, n_samples, sep_factor))
+      
+      # Check cache
+      if (check_condition_cache(n_structures, n_samples, sep_factor)) {
+        cat(" [Cached]\n")
+        condition_results <- load_condition_results(n_structures, n_samples, sep_factor)
+        
+      } else {
+        cat(" [Computing in parallel...]\n")
+        
+        # Run replications in parallel
+        condition_results <- foreach(
+          rep = 1:n_replications,
+          .combine = rbind,
+          .packages = c("mvtnorm", "mclust", "cluster", "otrimle"),
+          .export = c("run_single_replication", "generate_dataset_k", "analyze_dataset_k",  
+                      "generate_cluster_means_k", "dims_per_structure", "clusters_per_structure",  
+                      "cluster_variance", "p_dims")
+        ) %dopar% {
+          run_single_replication(rep, n_structures, separation_factor = sep_factor, n_samples, dims_list)
+        }
+
+        
+        # Cache results
+        save_condition_results(condition_results, n_structures, n_samples, sep_factor)
+      }
+      
+      # Add to overall results
+      all_results <- rbind(all_results, condition_results)
+    }
+  }
+  
+  structure_end_time <- Sys.time()
+  structure_duration <- difftime(structure_end_time, structure_start_time, units = "mins")
+  cat(sprintf("Completed k=%d in %.1f minutes\n", n_structures, structure_duration))
+}
+
+end_time <- Sys.time()
+total_duration <- difftime(end_time, start_time, units = "mins")
+
+cat("\n=== SIMULATION COMPLETE ===\n")
+cat("Total time:", sprintf("%.1f minutes (%.2f hours)\n", total_duration, total_duration/60))
+cat("Total results collected:", nrow(all_results), "\n")
+
+# Clean up parallel cluster with error handling
+tryCatch({
+  parallel::stopCluster(cl)
+  cat("Parallel cluster stopped\n")
+}, error = function(e) {
+  cat("Note: Parallel cluster already stopped or disconnected\n")
+})
+```
+
+# 4. Results
+
+```{r join-results, echo=FALSE, message=FALSE, warning=FALSE}
+# Set the path to your folder
+folder_path <- "multiple_structures_cache"
+
+# List all RDS files in the folder
+file_list <- list.files(path = folder_path, pattern = "^results.*\\.rds$", full.names = TRUE)
+
+# Read all RDS files and store them in a list
+data_list <- lapply(file_list, readRDS)
+
+# Assuming each RDS contains a data frame, combine them
+all_results_ms <- do.call(rbind, data_list)
+
+# Save the combined results into the same folder
+file_path <- file.path(folder_path, "all_results_ms.rds")
+saveRDS(all_results_ms, file_path)
+```
+
+## 4.1 Summary Statistics
+
+```{r rename, echo=FALSE, message=FALSE, warning=FALSE}
+# Set the path to your folder
+all_results <- all_results_ms
+```
+```{r summary_stats}
+# Calculate summary statistics
+summary_stats <- all_results %>%
+  group_by(n_structures, n_samples, separation_factor) %>%
+  summarise(
+    mean_ari = mean(recovery_ari),
+    sd_ari = sd(recovery_ari),
+    prop_perfect = mean(recovery_ari > 0.95),
+    prop_failed = mean(recovery_ari < 0.5),
+    prop_found_k = mean(found_correct_k),
+    mean_k = mean(optimal_k),
+    mean_index = mean(index_value),
+    mean_detection = mean(mean_detection),
+    .groups = 'drop'
+  )
+
+# Create summary table by number of structures
+for (k in n_structures_values) {
+  cat(sprintf("\n### Recovery Performance for k = %d structures\n", k))
+  
+  k_summary <- summary_stats %>%
+    filter(n_structures == k) %>%
+    select(n_samples, separation_factor, mean_ari, prop_found_k) %>%
+    pivot_wider(names_from = separation_factor, 
+                values_from = c(mean_ari, prop_found_k),
+                names_sep = "_")
+  
+  # Format for display
+display_table <- k_summary %>%
+  mutate(
+    `6.0σ`  = sprintf("%.3f (%.0f%%)", unlist(mean_ari_6),  unlist(prop_found_k_6) * 100),
+    `3.0σ`  = sprintf("%.3f (%.0f%%)", unlist(mean_ari_3),  unlist(prop_found_k_3) * 100),
+    `1.5σ`  = sprintf("%.3f (%.0f%%)", unlist(mean_ari_1.5), unlist(prop_found_k_1.5) * 100)
+  ) %>%
+  select(n_samples, `6.0σ`, `3.0σ`, `1.5σ`)
+
+  
+  print(knitr::kable(display_table,
+                     caption = sprintf("Mean ARI (Proportion finding correct k) for k=%d", k),
+                     col.names = c("Sample Size", "6.0σ", "3.0σ", "1.5σ")))
+}
+```
+
+## 4.2 Main Visualisation: Effect of Number of Structures
+
+```{r main_plot, fig.height=10}
+summary_stats2 <- summary_stats %>% 
+  mutate(n_samples_f = factor(n_samples))
+
+# Create faceted plot by separation
+p_main <- ggplot(summary_stats2, aes(x = n_structures, y = mean_ari, 
+                                   colour = n_samples_f, 
+                                   group = n_samples)) +
+  geom_line(size = 1.2) +
+  geom_point(size = 3) +
+  geom_errorbar(aes(ymin = mean_ari - sd_ari, ymax = mean_ari + sd_ari), 
+                width = 0.1, alpha = 0.5) +
+  facet_wrap(~ separation_factor, ncol = 2,
+             labeller = labeller(separation_factor = function(x) paste(x, "σ separation"))) +
+  scale_colour_viridis_d(name = "Sample\nSize", option = "viridis") +
+  scale_x_continuous(breaks = n_structures_values) +
+  scale_y_continuous(limits = c(0, 1.1), breaks = seq(0, 1, 0.2)) +
+  geom_hline(yintercept = 0.8, linetype = "dashed", alpha = 0.5) +
+  labs(title = "Recovery Performance vs Number of Structures",
+       subtitle = "How does performance degrade as we add more independent clustering structures?",
+       x = "Number of Structures (k)",
+       y = "Mean Recovery ARI (± SD)") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, size = 12, face = "bold", family = "Times"),
+        plot.subtitle = element_text(hjust = 0.5, size = 10, family = "Times"),
+        axis.text = element_text(size = 10, family = "Times"),
+        axis.title = element_text(size = 12, face = "bold", family = "Times"),
+        legend.title = element_text(size = 12, face = "bold", family = "Times"),
+        legend.text = element_text(size = 10, family = "Times"),
+       strip.text = element_text(size = 12, family = "Times", face = "bold"),
+        panel.spacing = unit(1, "lines"))
+
+print(p_main)
+
+ggsave(paste0("1j_NSrecovery.pdf"), plot = p_main, device = cairo_pdf, width = 6, height = 5, units = "in")
+```
+
+## 4.3 Heatmap Visualisation
+
+```{r heatmap}
+# Create heatmap
+p_heatmap <- ggplot(summary_stats, aes(x = factor(n_samples), 
+                                       y = factor(n_structures), 
+                                       fill = mean_ari)) +
+  geom_tile(colour = "white", size = 1) +
+  geom_text(aes(label = sprintf("%.2f", mean_ari)), 
+            colour = ifelse(summary_stats$mean_ari > 0.5, "white", "black"),
+            size = 4) +
+  facet_wrap(~ separation_factor, ncol = 3,
+             labeller = labeller(separation_factor = function(x) paste(x, "σ separation"))) +
+  scale_fill_viridis(name = "Mean\nRecovery\nARI", 
+                     limits = c(0, 1),
+                     option = "plasma") +
+  scale_x_discrete(labels = format) +
+  scale_y_discrete(labels = function(x) paste(x, "structures")) +
+  labs(title = "Recovery Performance Heatmap",
+       subtitle = "Mean ARI across different conditions",
+       x = "Sample Size",
+       y = "Number of Structures") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+        plot.subtitle = element_text(hjust = 0.5, size = 12),
+        strip.text = element_text(size = 12, face = "bold"),
+        panel.spacing = unit(1, "lines"))
+
+print(p_heatmap)
+```
+
+## 4.4 Finding the Correct Number of Structures
+
+```{r k_detection}
+# Plot proportion finding correct k
+p_k_detection <- ggplot(summary_stats, aes(x = n_structures, y = prop_found_k, 
+                                          colour = factor(n_samples),
+                                          group = n_samples)) +
+  geom_line(size = 1.2) +
+  geom_point(size = 3) +
+  facet_wrap(~ separation_factor, ncol = 3,
+             labeller = labeller(separation_factor = function(x) paste(x, "σ separation"))) +
+  scale_colour_viridis_d(name = "Sample\nSize", option = "viridis") +
+  scale_x_continuous(breaks = n_structures_values) +
+  scale_y_continuous(limits = c(0, 1.05), breaks = seq(0, 1, 0.2)) +
+  labs(title = "Accuracy in Detecting the Correct Number of Structures",
+       subtitle = "Proportion of runs where HClust found k structures",
+       x = "True Number of Structures (k)",
+       y = "Proportion Finding Correct k") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+        plot.subtitle = element_text(hjust = 0.5, size = 12),
+        strip.text = element_text(size = 12, face = "bold"),
+        legend.position = "right")
+
+print(p_k_detection)
+```
+
+## 4.5 Dimensions per Structure Analysis
+
+```{r dims_analysis}
+# Add dimensions per structure info
+summary_with_dims <- summary_stats %>%
+  mutate(dims_per_structure = p_dims / n_structures,
+         samples_per_dim_per_struct = n_samples / dims_per_structure)
+
+# Plot by dimensions per structure
+p_dims <- ggplot(summary_with_dims, aes(x = dims_per_structure, y = mean_ari,
+                                        colour = factor(separation_factor))) +
+  geom_line(aes(group = interaction(n_samples, separation_factor)),
+            alpha = 0.3) +
+  geom_point(aes(shape = factor(n_samples)), size = 3) +
+  scale_x_continuous(trans = "log10", 
+                     breaks = c(20, 25, 33, 50),
+                     labels = c(20, 25, 33, 50)) +
+  scale_colour_viridis_d(name = "Separation", 
+                        labels = function(x) paste0(x, "σ"),
+                        option = "plasma") +
+  scale_shape_manual(name = "Sample\nSize",
+                     values = c(16, 17, 18)) +
+  geom_hline(yintercept = 0.8, linetype = "dashed", alpha = 0.5) +
+  labs(title = "Effect of Dimensions per Structure",
+       subtitle = "Performance vs dimensions allocated to each structure (p=100 total)",
+       x = "Dimensions per Structure (log scale)",
+       y = "Mean Recovery ARI") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+        plot.subtitle = element_text(hjust = 0.5, size = 12))
+
+print(p_dims)
+```
+

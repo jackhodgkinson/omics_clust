@@ -1,0 +1,16 @@
+mvtnorm
+cluster
+mclust
+otrimle
+ggplot2
+dplyr
+tidyr
+viridisLite
+viridis
+gridExtra
+foreach
+iterators
+doParallel
+R.methodsS3
+R.oo
+R.utils
